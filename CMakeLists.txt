@@ -121,6 +121,8 @@ set(COMMON_SOURCES
     common/PerlinNoise.cpp
     common/AABB.h
     common/AABB.cpp
+        common/Skeleton.cpp
+		common/BVH.cpp
 )
 
 # Examples scenes source files

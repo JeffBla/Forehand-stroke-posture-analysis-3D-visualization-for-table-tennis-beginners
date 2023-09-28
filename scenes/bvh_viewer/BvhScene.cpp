@@ -141,25 +141,39 @@ void BvhScene::createRagdolls() {
 
             const float ragdollDistX = 17;
             const float ragdollDistZ = 16;
-            const float ragdollHeight = 31;
+            const float ragdollHeight = 15;
 
             rp3d::Vector3 ragdollPosition((-(NB_RAGDOLLS_ROWS - 1) / 2.0 + i) * ragdollDistX, ragdollHeight, -6 + (-(NB_RAGDOLLS_COLS - 1) / 2.0 + j) * ragdollDistZ);
 
-            // --------------- Create the head box --------------- //
-            mHeadPos[ragdollIndex] = ragdollPosition;
-            mHeadBox[ragdollIndex] = new Sphere(true, 0.75f, mPhysicsCommon, mPhysicsWorld, mMeshFolderPath);
-            mHeadBox[ragdollIndex]->setTransform(rp3d::Transform(mHeadPos[ragdollIndex], rp3d::Quaternion::identity()));
-            mHeadBox[ragdollIndex]->setColor(mObjectColorDemo);
-            mHeadBox[ragdollIndex]->setSleepingColor(mSleepingColorDemo);
-            mHeadBox[ragdollIndex]->getCollider()->getMaterial().setMassDensity(7);
-            mHeadBox[ragdollIndex]->getCollider()->getMaterial().setFrictionCoefficient(frictionCoeff);
-            mHeadBox[ragdollIndex]->getRigidBody()->updateMassPropertiesFromColliders();
-            mHeadBox[ragdollIndex]->getRigidBody()->setLinearDamping(linearDamping);
-            mHeadBox[ragdollIndex]->getRigidBody()->setAngularDamping(angularDamping);
-            mPhysicsObjects.push_back(mHeadBox[ragdollIndex]);
+            // --------------- Create the hips capsule --------------- //
+            mHipPos[ragdollIndex] = ragdollPosition;
+            mHipCapsule[ragdollIndex] = new Capsule(true, 1, 1, mPhysicsCommon, mPhysicsWorld, mMeshFolderPath);
+            mHipCapsule[ragdollIndex]->setTransform(rp3d::Transform(mHipPos[ragdollIndex], rp3d::Quaternion::fromEulerAngles(0, 0, rp3d::PI_RP3D / 2.0)));
+            mHipCapsule[ragdollIndex]->setColor(mObjectColorDemo);
+            mHipCapsule[ragdollIndex]->setSleepingColor(mSleepingColorDemo);
+            mHipCapsule[ragdollIndex]->getCollider()->getMaterial().setMassDensity(9);
+            mHipCapsule[ragdollIndex]->getCollider()->getMaterial().setFrictionCoefficient(frictionCoeff);
+            mHipCapsule[ragdollIndex]->getRigidBody()->updateMassPropertiesFromColliders();
+            mHipCapsule[ragdollIndex]->getRigidBody()->setLinearDamping(linearDamping);
+            mHipCapsule[ragdollIndex]->getRigidBody()->setAngularDamping(angularDamping);
+            mPhysicsObjects.push_back(mHipCapsule[ragdollIndex]);
+
+            // --------------- Create the waist capsule --------------- //
+            mWaistPos[ragdollIndex] = mHipPos[ragdollIndex] + rp3d::Vector3(0, 2, 0);
+            mWaistCapsule[ragdollIndex] = new Capsule(true, 1, 1.5, mPhysicsCommon, mPhysicsWorld, mMeshFolderPath);
+            mWaistCapsule[ragdollIndex]->setTransform(rp3d::Transform(mWaistPos[ragdollIndex], rp3d::Quaternion::identity()));
+            mWaistCapsule[ragdollIndex]->setColor(mObjectColorDemo);
+            mWaistCapsule[ragdollIndex]->setSleepingColor(mSleepingColorDemo);
+            mWaistCapsule[ragdollIndex]->getCollider()->getMaterial().setMassDensity(9);
+            mWaistCapsule[ragdollIndex]->getCollider()->getMaterial().setFrictionCoefficient(frictionCoeff);
+            mWaistCapsule[ragdollIndex]->getRigidBody()->updateMassPropertiesFromColliders();
+            mWaistCapsule[ragdollIndex]->getRigidBody()->setLinearDamping(linearDamping);
+            mWaistCapsule[ragdollIndex]->getRigidBody()->setAngularDamping(angularDamping);
+            mWaistCapsule[ragdollIndex]->getRigidBody()->setType(rp3d::BodyType::STATIC);
+            mPhysicsObjects.push_back(mWaistCapsule[ragdollIndex]);
 
             // --------------- Create the chest capsule --------------- //
-            mChestPos[ragdollIndex] = mHeadPos[ragdollIndex] + rp3d::Vector3(0, -1.75, 0);
+            mChestPos[ragdollIndex] = mWaistPos[ragdollIndex] + rp3d::Vector3(0, 2, 0);
             mChestCapsule[ragdollIndex] = new Capsule(true, 1, 1.5, mPhysicsCommon, mPhysicsWorld, mMeshFolderPath);
             mChestCapsule[ragdollIndex]->setTransform(rp3d::Transform(mChestPos[ragdollIndex], rp3d::Quaternion::fromEulerAngles(0, 0, rp3d::PI_RP3D / 2.0)));
             mChestCapsule[ragdollIndex]->setColor(mObjectColorDemo);
@@ -171,32 +185,18 @@ void BvhScene::createRagdolls() {
             mChestCapsule[ragdollIndex]->getRigidBody()->setAngularDamping(angularDamping);
             mPhysicsObjects.push_back(mChestCapsule[ragdollIndex]);
 
-            // --------------- Create the waist capsule --------------- //
-            mWaistPos[ragdollIndex] = mChestPos[ragdollIndex] + rp3d::Vector3(0, -2, 0);
-            mWaistCapsule[ragdollIndex] = new Capsule(true, 1, 1.5, mPhysicsCommon, mPhysicsWorld, mMeshFolderPath);
-            mWaistCapsule[ragdollIndex]->setTransform(rp3d::Transform(mWaistPos[ragdollIndex], rp3d::Quaternion::identity()));
-            mWaistCapsule[ragdollIndex]->setColor(mObjectColorDemo);
-            mWaistCapsule[ragdollIndex]->setSleepingColor(mSleepingColorDemo);
-            mWaistCapsule[ragdollIndex]->getCollider()->getMaterial().setMassDensity(9);
-            mWaistCapsule[ragdollIndex]->getCollider()->getMaterial().setFrictionCoefficient(frictionCoeff);
-            mWaistCapsule[ragdollIndex]->getRigidBody()->updateMassPropertiesFromColliders();
-            mWaistCapsule[ragdollIndex]->getRigidBody()->setLinearDamping(linearDamping);
-            mWaistCapsule[ragdollIndex]->getRigidBody()->setAngularDamping(angularDamping);
-            // mWaistCapsule[ragdollIndex]->getRigidBody()->setType(rp3d::BodyType::STATIC);
-            mPhysicsObjects.push_back(mWaistCapsule[ragdollIndex]);
-
-            // --------------- Create the hips capsule --------------- //
-            mHipPos[ragdollIndex] = mWaistPos[ragdollIndex] + rp3d::Vector3(0, -2, 0);
-            mHipCapsule[ragdollIndex] = new Capsule(true, 1, 1, mPhysicsCommon, mPhysicsWorld, mMeshFolderPath);
-            mHipCapsule[ragdollIndex]->setTransform(rp3d::Transform(mHipPos[ragdollIndex], rp3d::Quaternion::fromEulerAngles(0, 0, rp3d::PI_RP3D / 2.0)));
-            mHipCapsule[ragdollIndex]->setColor(mObjectColorDemo);
-            mHipCapsule[ragdollIndex]->setSleepingColor(mSleepingColorDemo);
-            mHipCapsule[ragdollIndex]->getCollider()->getMaterial().setMassDensity(9);
-            mHipCapsule[ragdollIndex]->getCollider()->getMaterial().setFrictionCoefficient(frictionCoeff);
-            mHipCapsule[ragdollIndex]->getRigidBody()->updateMassPropertiesFromColliders();
-            mHipCapsule[ragdollIndex]->getRigidBody()->setLinearDamping(linearDamping);
-            mHipCapsule[ragdollIndex]->getRigidBody()->setAngularDamping(angularDamping);
-            mPhysicsObjects.push_back(mHipCapsule[ragdollIndex]);
+            // --------------- Create the head box --------------- //
+            mHeadPos[ragdollIndex] = mChestPos[ragdollIndex] + rp3d::Vector3(0, 1.75, 0);
+            mHeadBox[ragdollIndex] = new Sphere(true, 0.75f, mPhysicsCommon, mPhysicsWorld, mMeshFolderPath);
+            mHeadBox[ragdollIndex]->setTransform(rp3d::Transform(mHeadPos[ragdollIndex], rp3d::Quaternion::identity()));
+            mHeadBox[ragdollIndex]->setColor(mObjectColorDemo);
+            mHeadBox[ragdollIndex]->setSleepingColor(mSleepingColorDemo);
+            mHeadBox[ragdollIndex]->getCollider()->getMaterial().setMassDensity(7);
+            mHeadBox[ragdollIndex]->getCollider()->getMaterial().setFrictionCoefficient(frictionCoeff);
+            mHeadBox[ragdollIndex]->getRigidBody()->updateMassPropertiesFromColliders();
+            mHeadBox[ragdollIndex]->getRigidBody()->setLinearDamping(linearDamping);
+            mHeadBox[ragdollIndex]->getRigidBody()->setAngularDamping(angularDamping);
+            mPhysicsObjects.push_back(mHeadBox[ragdollIndex]);
 
             // --------------- Create the left upper arm capsule --------------- //
             mLeftUpperArmPos[ragdollIndex] = mChestPos[ragdollIndex] + rp3d::Vector3(2.25, 0, 0);

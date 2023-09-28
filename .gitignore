@@ -1,5 +1,11 @@
+# idea
+.idea
+
 # vscode
 .vscode
 
 # build
 build
+
+# cmake
+cmake-build-debug
