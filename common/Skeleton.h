@@ -48,7 +48,18 @@ namespace skeleton {
         const float linearDamping = 0.02f;
         const float angularDamping = 0.02f;
         const float frictionCoeff = 0.4f;
-        const openglframework::Vector3 boxSize;
+
+        enum BodyTypeGroup{
+            HEAD, BODY, LEG, HAND
+        };
+        vector<PhysicsObject *> headGroup, bodyGroup, legGroup, handGroup;
+
+        // -------------------- Methods -------------------- //
+        void BoneSizeAdjust(openglframework::Vector3 &vtr);
+
+        openglframework::Vector3 BoneSizeAdjust(float x, float y, float z);
+
+        void ConfigBoneByGroup(Box *new_bone, BodyTypeGroup bodyType, Box *parentBone);
     protected:
         // -------------------- Attributes -------------------- //
 
@@ -59,22 +70,23 @@ namespace skeleton {
 
         rp3d::Vector3 mHipPos;
 
-        openglframework::Color objectColor;
-        openglframework::Color sleepingColor;
+        openglframework::Color objectColor = openglframework::Color(0.0f, 0.68f, 0.99f, 1.0f);
+        openglframework::Color sleepingColor = openglframework::Color(1.0f, 0.0f, 0.0f, 1.0f);
 
-        std::vector<PhysicsObject *> mPhysicsObjects;
+        std::vector<PhysicsObject *> &mPhysicsObjects;
 
         // -------------------- Methods -------------------- //
         Box *CreateBone(const rp3d::Vector3 &pos, const openglframework::Vector3 &size);
-
-        void bvhJointToSkeleton(const rp3d::Vector3 &prevPos, bvh::Joint *joint, float scale);
-
     public:
+
+        void bvhJointToSkeleton(const rp3d::Vector3 &prevPos, const bvh::Joint *joint, float scale, Box *parentBone);
+
         // -------------------- Methods -------------------- //
 
         /// Constructor
-        Skeleton(rp3d::PhysicsCommon &mPhysicsCommon, rp3d::PhysicsWorld *mPhysicsWorld, std::string &mMeshFolderPath,
-                 bvh::Joint *joint);
+        Skeleton(rp3d::PhysicsCommon &mPhysicsCommon, rp3d::PhysicsWorld *mPhysicsWorld,
+                 vector<PhysicsObject *> &mPhysicsObjects, std::string &mMeshFolderPath,
+                 const bvh::Joint *joint);
 
         /// Destructor
         ~Skeleton();

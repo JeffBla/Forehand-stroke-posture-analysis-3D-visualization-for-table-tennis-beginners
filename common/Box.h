@@ -34,73 +34,79 @@
 // Class Box
 class Box : public PhysicsObject {
 
-	private :
+private :
 
-		// -------------------- Attributes -------------------- //
+    // -------------------- Attributes -------------------- //
 
-		/// Size of each side of the box
-		float mSize[3];
+    /// Size of each side of the box
+    float mSize[3];
 
-        rp3d::BoxShape* mBoxShape;
-        rp3d::Collider* mCollider;
+    rp3d::BoxShape *mBoxShape;
+    rp3d::Collider *mCollider;
 
-        /// Scaling matrix (applied to a cube to obtain the correct box dimensions)
-        openglframework::Matrix4 mScalingMatrix;
+    /// Scaling matrix (applied to a cube to obtain the correct box dimensions)
+    openglframework::Matrix4 mScalingMatrix;
 
-        rp3d::PhysicsWorld* mPhysicsWorld;
+    rp3d::PhysicsWorld *mPhysicsWorld;
 
-        /// Vertex Buffer Object for the vertices data
-        static openglframework::VertexBufferObject mVBOVertices;
+    /// Vertex Buffer Object for the vertices data
+    static openglframework::VertexBufferObject mVBOVertices;
 
-        /// Vertex Buffer Object for the normals data
-        static openglframework::VertexBufferObject mVBONormals;
+    /// Vertex Buffer Object for the normals data
+    static openglframework::VertexBufferObject mVBONormals;
 
-        /// Vertex Buffer Object for the texture coords
-        static openglframework::VertexBufferObject mVBOTextureCoords;
+    /// Vertex Buffer Object for the texture coords
+    static openglframework::VertexBufferObject mVBOTextureCoords;
 
-        /// Vertex Buffer Object for the indices
-        static openglframework::VertexBufferObject mVBOIndices;
+    /// Vertex Buffer Object for the indices
+    static openglframework::VertexBufferObject mVBOIndices;
 
-        /// Vertex Array Object for the vertex data
-        static openglframework::VertexArrayObject mVAO;
+    /// Vertex Array Object for the vertex data
+    static openglframework::VertexArrayObject mVAO;
 
-		/// Total number of boxes created
-		static int totalNbBoxes;
+    /// Total number of boxes created
+    static int totalNbBoxes;
 
-		// -------------------- Methods -------------------- //
+    // -------------------- Methods -------------------- //
 
-		/// Create a the VAO and VBOs to render to box with OpenGL
-        void createVBOAndVAO();
+    /// Create a the VAO and VBOs to render to box with OpenGL
+    void createVBOAndVAO();
 
-	public :
+public :
 
-		// -------------------- Methods -------------------- //
+    // -------------------- Methods -------------------- //
 
-		/// Constructor
-        Box(bool createRigidBody, const openglframework::Vector3& size, reactphysics3d::PhysicsCommon& physicsCommon,
-            reactphysics3d::PhysicsWorld* world, const std::string& meshFolderPath);
+    /// Constructor
+    Box(bool createRigidBody, const openglframework::Vector3 &size, reactphysics3d::PhysicsCommon &physicsCommon,
+        reactphysics3d::PhysicsWorld *world, const std::string &meshFolderPath);
 
-		/// Destructor
-        virtual ~Box() override;
+    /// Destructor
+    virtual ~Box() override;
 
-		/// Render the cube at the correct position and with the correct orientation
-        virtual void render(openglframework::Shader& shader, const openglframework::Matrix4& worldToCameraMatrix) override;
+    /// Render the cube at the correct position and with the correct orientation
+    virtual void render(openglframework::Shader &shader, const openglframework::Matrix4 &worldToCameraMatrix) override;
 
-        /// Update the transform matrix of the object
-        virtual void updateTransform(float interpolationFactor) override;
+    /// Update the transform matrix of the object
+    virtual void updateTransform(float interpolationFactor) override;
 
-        /// Return the collider
-        rp3d::Collider* getCollider();
+    /// Return the collider
+    rp3d::Collider *getCollider();
+
+    // Get Size
+    inline rp3d::Vector3 GetSize_rp3d() {
+        return {mSize[0], mSize[1], mSize[2]};
+    }
+
 };
 
 // Update the transform matrix of the object
 inline void Box::updateTransform(float interpolationFactor) {
-	mTransformMatrix = computeTransform(interpolationFactor, mScalingMatrix);
+    mTransformMatrix = computeTransform(interpolationFactor, mScalingMatrix);
 }
 
 // Return the collider
-inline rp3d::Collider* Box::getCollider() {
-   return mCollider;
+inline rp3d::Collider *Box::getCollider() {
+    return mCollider;
 }
 
 
