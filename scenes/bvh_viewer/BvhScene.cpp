@@ -66,31 +66,33 @@ void BvhScene::createPhysicsWorld() {
     // Create the ragdoll
 //    createRagdolls();
 
-    auto testBox = new Box(true, {10, 1, 1}, mPhysicsCommon, mPhysicsWorld, mMeshFolderPath);
-    testBox->setTransform(rp3d::Transform({0, 0, 5},
-                                          rp3d::Quaternion::fromEulerAngles(0, 0,
-                                                                            rp3d::PI_RP3D / 2.0)));
-    testBox->setColor(mObjectColorDemo);
-    testBox->setSleepingColor(mSleepingColorDemo);
-//    testBox->getRigidBody()->setType(rp3d::BodyType::STATIC);
-    mPhysicsObjects.push_back(testBox);
-
-    auto testBox2 = new Box(true, {5, 5, 5}, mPhysicsCommon, mPhysicsWorld, mMeshFolderPath);
-    testBox2->setTransform(rp3d::Transform({0, 10, 5},
-                                           rp3d::Quaternion::fromEulerAngles(0, 0,
-                                                                             rp3d::PI_RP3D / 2.0)));
-    testBox2->setColor(mObjectColorDemo);
-    testBox2->setSleepingColor(mSleepingColorDemo);
-    testBox2->getRigidBody()->setType(rp3d::BodyType::STATIC);
-    mPhysicsObjects.push_back(testBox2);
-
-    // Create the joint info object
-    rp3d::RigidBody *body1 = testBox2->getRigidBody();
-    rp3d::RigidBody *body2 = testBox->getRigidBody();
-    rp3d::BallAndSocketJointInfo jointInfo1(body1, body2,
-                                            testBox->getTransform().getPosition() +  rp3d::Vector3(0, -0.5, 0));
-    jointInfo1.isCollisionEnabled = false;
-    mPhysicsWorld->createJoint(jointInfo1);
+    {
+//        auto testBox = new Box(true, {10, 1, 1}, mPhysicsCommon, mPhysicsWorld, mMeshFolderPath);
+//        testBox->setTransform(rp3d::Transform({0, 0, 5},
+//                                              rp3d::Quaternion::fromEulerAngles(0, 0,
+//                                                                                rp3d::PI_RP3D / 2.0)));
+//        testBox->setColor(mObjectColorDemo);
+//        testBox->setSleepingColor(mSleepingColorDemo);
+////    testBox->getRigidBody()->setType(rp3d::BodyType::STATIC);
+//        mPhysicsObjects.push_back(testBox);
+//
+//        auto testBox2 = new Box(true, {5, 5, 5}, mPhysicsCommon, mPhysicsWorld, mMeshFolderPath);
+//        testBox2->setTransform(rp3d::Transform({0, 10, 5},
+//                                               rp3d::Quaternion::fromEulerAngles(0, 0,
+//                                                                                 rp3d::PI_RP3D / 2.0)));
+//        testBox2->setColor(mObjectColorDemo);
+//        testBox2->setSleepingColor(mSleepingColorDemo);
+//        testBox2->getRigidBody()->setType(rp3d::BodyType::STATIC);
+//        mPhysicsObjects.push_back(testBox2);
+//
+//        // Create the joint info object
+//        rp3d::RigidBody *body1 = testBox2->getRigidBody();
+//        rp3d::RigidBody *body2 = testBox->getRigidBody();
+//        rp3d::BallAndSocketJointInfo jointInfo1(body1, body2,
+//                                                testBox->getTransform().getPosition() + rp3d::Vector3(0, -0.5, 0));
+//        jointInfo1.isCollisionEnabled = false;
+//        mPhysicsWorld->createJoint(jointInfo1);
+    } // test object
 
     // ------------------------- FLOOR 2 ----------------------- //
     // Create the floor
