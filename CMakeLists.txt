@@ -123,6 +123,8 @@ set(COMMON_SOURCES
     common/AABB.cpp
         common/Skeleton.cpp
 		common/BVH.cpp
+        common/Bone.cpp
+        common/Bone.h
 )
 
 # Examples scenes source files

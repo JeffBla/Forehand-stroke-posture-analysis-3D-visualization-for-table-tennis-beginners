@@ -27,12 +27,15 @@
 #include "BvhScene.h"
 #include "Skeleton.h"
 #include "BVH.h"
+#include <nanogui/opengl.h>
+#include <nanogui/nanogui.h>
 
 #include <cmath>
 
 // Namespaces
 using namespace openglframework;
 using namespace bvhscene;
+using namespace nanogui;
 
 // Constructor
 BvhScene::BvhScene(const std::string &name, EngineSettings &settings, reactphysics3d::PhysicsCommon &physicsCommon)
@@ -80,6 +83,9 @@ void BvhScene::createPhysicsWorld() {
 //        testBox2->setTransform(rp3d::Transform({0, 10, 5},
 //                                               rp3d::Quaternion::fromEulerAngles(0, 0,
 //                                                                                 rp3d::PI_RP3D / 2.0)));
+//        testBox2->rotateAroundLocalPoint({1,0,0}, 20, {1,1,1});
+//        testBox2->getTransformMatrix();
+//        testBox2->getTransform().setOrientation({1,1,1, 1});
 //        testBox2->setColor(mObjectColorDemo);
 //        testBox2->setSleepingColor(mSleepingColorDemo);
 //        testBox2->getRigidBody()->setType(rp3d::BodyType::STATIC);
@@ -105,7 +111,7 @@ void BvhScene::createPhysicsWorld() {
 
     // test my skeleton
     bvh::BVH bvh("out.bvh");
-    skeleton::Skeleton skeleton(mPhysicsCommon, mPhysicsWorld, mPhysicsObjects, mMeshFolderPath, bvh.GetJoint(0));
+    skeleton1 = new skeleton::Skeleton(mPhysicsCommon, mPhysicsWorld, mPhysicsObjects, mMeshFolderPath, bvh.GetJoint(0));
 }
 
 // Initialize the bodies positions
@@ -147,6 +153,8 @@ void BvhScene::destroyPhysicsWorld() {
         }
 
         delete mFloor2;
+
+        delete skeleton1;
 
         mPhysicsObjects.clear();
 
@@ -521,4 +529,8 @@ void BvhScene::createRagdolls() {
                     jointInfo9));
         }
     }
+}
+
+skeleton::Skeleton *BvhScene::GetSkeleton() {
+    return skeleton1;
 }

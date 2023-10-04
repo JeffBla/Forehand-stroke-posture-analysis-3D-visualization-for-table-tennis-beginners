@@ -29,11 +29,14 @@
 // Libraries
 #include <reactphysics3d/reactphysics3d.h>
 
+#include "Bone.h"
 #include "Box.h"
 #include "BVH.h"
 #include "Sphere.h"
 #include "openglframework.h"
 #include "ConvexMesh.h"
+
+using namespace bone;
 
 namespace skeleton {
 
@@ -53,11 +56,6 @@ namespace skeleton {
         const float angularDamping = 0.02f;
         const float frictionCoeff = 0.4f;
 
-        enum BodyTypeGroup {
-            HEAD, BODY, LEG, HAND
-        };
-        vector<PhysicsObject *> headGroup, bodyGroup, legGroup, handGroup;
-
         // -------------------- Methods -------------------- //
 
     protected:
@@ -66,40 +64,54 @@ namespace skeleton {
         openglframework::Color sleepingColor = openglframework::Color(1.0f, 0.0f, 0.0f, 1.0f);
 
         rp3d::Vector3 mHipPos;
-        Sphere *mHip;
+        Sphere *mHipObject;
+        Bone *mHipBone;
 
         rp3d::Vector3 mWaistPos;
-        ConvexMesh *mWaist;
+        ConvexMesh *mWaistObject;
+        Bone *mWaistBone;
 
         rp3d::Vector3 mChestPos;
-        ConvexMesh *mChest;
+        ConvexMesh *mChestObject;
+        Bone *mChestBone;
 
         rp3d::Vector3 mHeadPos;
-        Sphere *mHead;
+        Sphere *mHeadObject;
+        Bone *mHeadBone;
 
         rp3d::Vector3 mLeftUpperArmPos;
-        ConvexMesh *mLeftUpperArm;
+        ConvexMesh *mLeftUpperArmObject;
+        Bone *mLeftUpperArmBone;
 
         rp3d::Vector3 mLeftLowerArmPos;
-        ConvexMesh *mLeftLowerArm;
+        ConvexMesh *mLeftLowerArmObject;
+        Bone *mLeftLowerArmBone;
 
         rp3d::Vector3 mLeftUpperLegPos;
-        ConvexMesh *mLeftUpperLeg;
+        ConvexMesh *mLeftUpperLegObject;
+        Bone *mLeftUpperLegBone;
 
         rp3d::Vector3 mLeftLowerLegPos;
-        ConvexMesh *mLeftLowerLeg;
+        ConvexMesh *mLeftLowerLegObject;
+        Bone* mLeftLowerLegBone;
 
         rp3d::Vector3 mRightUpperArmPos;
-        ConvexMesh *mRightUpperArm;
+        ConvexMesh *mRightUpperArmObject;
+        Bone *mRightUpperArmBone;
 
         rp3d::Vector3 mRightLowerArmPos;
-        ConvexMesh *mRightLowerArm;
+        ConvexMesh *mRightLowerArmObject;
+        Bone *mRightLowerArmBone;
 
         rp3d::Vector3 mRightUpperLegPos;
-        ConvexMesh *mRightUpperLeg;
+        ConvexMesh *mRightUpperLegObject;
+        Bone *mRightUpperLegBone;
 
         rp3d::Vector3 mRightLowerLegPos;
-        ConvexMesh *mRightLowerLeg;
+        ConvexMesh *mRightLowerLegObject;
+        Bone *mRightLowerLegBone;
+
+        bone::Bone *hierarchyBone;
 
         // Joint
         rp3d::BallAndSocketJoint *mHeadChestJoint;
@@ -129,17 +141,19 @@ namespace skeleton {
 
 
         ConvexMesh *
-        CreateBone(const rp3d::Vector3 &pos, const rp3d::Quaternion &orientation, const openglframework::Vector3 &size,
-                   rp3d::decimal massDensity,
-                   const string &model_file);
+        CreateBonePhysics(const rp3d::Vector3 &pos, const rp3d::Quaternion &orientation,
+                          const openglframework::Vector3 &size, rp3d::decimal massDensity,
+                          const string &model_file);
 
         Sphere *
-        CreateBoneSphere( const rp3d::Vector3 &pos, const rp3d::Quaternion &orientation,float radius, rp3d::decimal massDensity);
+        CreateBonePhysics_Sphere(const rp3d::Vector3 &pos, const rp3d::Quaternion &orientation, float radius,
+                                 rp3d::decimal massDensity);
 
         Box *
-        CreateBone(const rp3d::Vector3 &pos, const rp3d::Quaternion &orientation, const openglframework::Vector3 &size,
-                   rp3d::decimal massDensity);
+        CreateBonePhysics(const rp3d::Vector3 &pos, const rp3d::Quaternion &orientation,
+                          const openglframework::Vector3 &size, rp3d::decimal massDensity);
 
+        Bone *CreateBone(const std::string &bone_name, PhysicsObject *bone_object, Bone *parent);
 
     public:
 
@@ -155,6 +169,8 @@ namespace skeleton {
 
         /// Initialize the bodies positions
         void initBodiesPositions();
+
+        void SetLeftUpperLeftLowerArmJointRotation(rp3d::decimal angleX, rp3d::decimal angleY, rp3d::decimal angleZ);
     };
 
 }  // namespace skeleton

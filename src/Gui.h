@@ -92,6 +92,12 @@ class Gui {
         std::vector<CheckBox*> mCheckboxesScenes;
         ComboBox* mComboBoxScenes;
 
+        // Test panel
+        Label *mLeftUpperLeftLowerArmLabel;
+        Slider *mLeftUpperLeftLowerArmSlider;
+
+
+
         /// True if the GUI is displayed
         bool mIsDisplayed;
 
@@ -114,6 +120,9 @@ class Gui {
         // Cached update single physics step time
         static double mCachedPhysicsStepTime;
 
+        // Current scene
+        std::string mCurrentSceneName;
+
         // -------------------- Methods -------------------- //
 
         void createSimulationPanel();
@@ -121,6 +130,8 @@ class Gui {
         void createSettingsPanel();
 
         void createProfilingPanel();
+
+        void createTestPanel();
 
         // Convert float value to string
         std::string floatToString(float value, int precision);

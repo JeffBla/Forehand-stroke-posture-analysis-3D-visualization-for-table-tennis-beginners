@@ -34,6 +34,7 @@
 #include "SceneDemo.h"
 #include "Sphere.h"
 #include "openglframework.h"
+#include "Skeleton.h"
 
 namespace bvhscene {
 
@@ -136,6 +137,8 @@ class BvhScene : public SceneDemo {
     rp3d::Vector3 mRightUpperLegPos[NB_RAGDOLLS];
     rp3d::Vector3 mRightLowerLegPos[NB_RAGDOLLS];
 
+    skeleton::Skeleton *skeleton1;
+
     /// World settings
     rp3d::PhysicsWorld::WorldSettings mWorldSettings;
 
@@ -164,6 +167,8 @@ class BvhScene : public SceneDemo {
 
     /// Initialize the bodies positions
     void initBodiesPositions();
+
+    skeleton::Skeleton *GetSkeleton();
 };
 
 }  // namespace bvhscene
