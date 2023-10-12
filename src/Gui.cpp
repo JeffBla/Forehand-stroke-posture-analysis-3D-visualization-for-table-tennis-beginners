@@ -586,26 +586,81 @@ void Gui::createTestPanel() {
     testPanel->set_fixed_width(220);
 
     if (mCurrentSceneName == "BVH") {
-        mLeftUpperLeftLowerArmLabel = new Label(testPanel, "Left Upper Left Lower Arm");
-        mLeftUpperLeftLowerArmSlider = new Slider(testPanel);
-        mLeftUpperLeftLowerArmSlider->set_value(0.5f);
-        mLeftUpperLeftLowerArmSlider->set_fixed_width(200);
+        { // x
+            mLeftUpperLeftLowerArmLabel_x = new Label(testPanel, "Left Upper Left Lower Arm");
+            mLeftUpperLeftLowerArmSlider_x = new Slider(testPanel);
+            mLeftUpperLeftLowerArmSlider_x->set_value(0.5f);
+            mLeftUpperLeftLowerArmSlider_x->set_range(std::pair(-1, 1));
+            mLeftUpperLeftLowerArmSlider_x->set_fixed_width(200);
 
-        auto *textBox = new TextBox(testPanel);
-        textBox->set_fixed_size(Vector2i(60, 25));
-        textBox->set_value("50");
-        textBox->set_units("%");
-        auto tmpApp = mApp;
-        mLeftUpperLeftLowerArmSlider->set_callback([textBox, tmpApp](float value) {
-            ((bvhscene::BvhScene *) tmpApp->mCurrentScene)->GetSkeleton()->SetLeftUpperLeftLowerArmJointRotation(value,
-                                                                                                                 0, 0);
-            textBox->set_value(std::to_string((int) (value * 100)));
-        });
-        mLeftUpperLeftLowerArmSlider->set_final_callback([&](float value) {
-            std::cout << "Final slider value: " << (int) (value * 100) << std::endl;
-        });
-        textBox->set_font_size(20);
-        textBox->set_alignment(TextBox::Alignment::Right);
+            auto *textBox = new TextBox(testPanel);
+            textBox->set_fixed_size(Vector2i(60, 25));
+            textBox->set_value("0.5");
+            auto tmpApp = mApp;
+            mLeftUpperLeftLowerArmSlider_x->set_callback([textBox, tmpApp](float value) {
+                ((bvhscene::BvhScene *) tmpApp->mCurrentScene)->GetSkeleton()->RotateLeftUpperLeftLowerArmJoint(
+                        value,
+                        0, 0);
+                char text[6];
+                snprintf(text, 6, "%.5f", value);
+                textBox->set_value(text);
+            });
+            mLeftUpperLeftLowerArmSlider_x->set_final_callback([&](float value) {
+                std::cout << "Final slider value: " << value << std::endl;
+            });
+            textBox->set_font_size(20);
+            textBox->set_alignment(TextBox::Alignment::Right);
+        }
+        { // y
+            mLeftUpperLeftLowerArmLabel_y = new Label(testPanel, "Left Upper Left Lower Arm");
+            mLeftUpperLeftLowerArmSlider_y = new Slider(testPanel);
+            mLeftUpperLeftLowerArmSlider_y->set_value(0.5f);
+            mLeftUpperLeftLowerArmSlider_y->set_range(std::pair(-1,1));
+            mLeftUpperLeftLowerArmSlider_y->set_fixed_width(200);
+
+            auto *textBox = new TextBox(testPanel);
+            textBox->set_fixed_size(Vector2i(60, 25));
+            textBox->set_value("0.5");
+            auto tmpApp = mApp;
+            mLeftUpperLeftLowerArmSlider_y->set_callback([textBox, tmpApp](float value) {
+                ((bvhscene::BvhScene *) tmpApp->mCurrentScene)->GetSkeleton()->RotateLeftUpperLeftLowerArmJoint(
+                        0,
+                        value, 0);
+                char text[6];
+                snprintf(text, 6, "%.5f", value);
+                textBox->set_value(text);
+            });
+            mLeftUpperLeftLowerArmSlider_y->set_final_callback([&](float value) {
+                std::cout << "Final slider value: " << value << std::endl;
+            });
+            textBox->set_font_size(20);
+            textBox->set_alignment(TextBox::Alignment::Right);
+        }
+        { // z
+            mLeftUpperLeftLowerArmLabel_z = new Label(testPanel, "Left Upper Left Lower Arm");
+            mLeftUpperLeftLowerArmSlider_z = new Slider(testPanel);
+            mLeftUpperLeftLowerArmSlider_z->set_value(0.5f);
+            mLeftUpperLeftLowerArmSlider_z->set_range(std::pair(-1,1));
+            mLeftUpperLeftLowerArmSlider_z->set_fixed_width(200);
+
+            auto *textBox = new TextBox(testPanel);
+            textBox->set_fixed_size(Vector2i(60, 25));
+            textBox->set_value("0.5");
+            auto tmpApp = mApp;
+            mLeftUpperLeftLowerArmSlider_z->set_callback([textBox, tmpApp](float value) {
+                ((bvhscene::BvhScene *) tmpApp->mCurrentScene)->GetSkeleton()->RotateLeftUpperLeftLowerArmJoint(
+                        0,
+                        0, value);
+                char text[6];
+                snprintf(text, 6, "%.5f", value);
+                textBox->set_value(text);
+            });
+            mLeftUpperLeftLowerArmSlider_z->set_final_callback([&](float value) {
+                std::cout << "Final slider value: " << value << std::endl;
+            });
+            textBox->set_font_size(20);
+            textBox->set_alignment(TextBox::Alignment::Right);
+        }
     }
     testPanel->set_visible(true);
 }

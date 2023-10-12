@@ -171,6 +171,8 @@ namespace skeleton {
         void initBodiesPositions();
 
         void SetLeftUpperLeftLowerArmJointRotation(rp3d::decimal angleX, rp3d::decimal angleY, rp3d::decimal angleZ);
+
+        void RotateLeftUpperLeftLowerArmJoint(rp3d::decimal angleX, rp3d::decimal angleY, rp3d::decimal angleZ);
     };
 
 }  // namespace skeleton

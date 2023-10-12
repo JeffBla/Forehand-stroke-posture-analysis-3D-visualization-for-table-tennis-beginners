@@ -22,6 +22,10 @@ namespace bone {
         inline void AppendChild(Bone *child) {
             children[child->bone_name] = child;
         };
+
+        inline PhysicsObject *GetPhysicsObject(){
+            return bone_object;
+        };
     };
 }
 

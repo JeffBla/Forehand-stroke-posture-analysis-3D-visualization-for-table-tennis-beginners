@@ -93,9 +93,14 @@ class Gui {
         ComboBox* mComboBoxScenes;
 
         // Test panel
-        Label *mLeftUpperLeftLowerArmLabel;
-        Slider *mLeftUpperLeftLowerArmSlider;
+        Label *mLeftUpperLeftLowerArmLabel_x;
+        Slider *mLeftUpperLeftLowerArmSlider_x;
 
+        Label *mLeftUpperLeftLowerArmLabel_y;
+        Slider *mLeftUpperLeftLowerArmSlider_y;
+
+        Label *mLeftUpperLeftLowerArmLabel_z;
+        Slider *mLeftUpperLeftLowerArmSlider_z;
 
 
         /// True if the GUI is displayed
