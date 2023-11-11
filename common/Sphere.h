@@ -91,6 +91,8 @@ class Sphere : public PhysicsObject {
 
         /// Return the collider
         rp3d::Collider* getCollider();
+
+        float GetRadius();
 };
 
 // Update the transform matrix of the object
@@ -101,6 +103,10 @@ inline void Sphere::updateTransform(float interpolationFactor) {
 // Return the collider
 inline rp3d::Collider* Sphere::getCollider() {
     return mCollider;
+}
+
+inline float Sphere::GetRadius(){
+    return mRadius;
 }
 
 #endif
