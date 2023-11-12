@@ -30,6 +30,7 @@
 #include <nanogui/opengl.h>
 #include <nanogui/nanogui.h>
 #include "openglframework.h"
+#include "Bone.h"
 #include <sstream>
 #include <iomanip>
 
@@ -46,7 +47,7 @@ class Gui {
 
     protected :
 
-        enum LeftPane {SCENES, PHYSICS, RENDERING, PROFILING};
+        enum LeftPane {SCENES, PHYSICS, RENDERING, PROFILING, TESTING};
 
         // -------------------- Constants -------------------- //
 
@@ -93,15 +94,16 @@ class Gui {
         ComboBox* mComboBoxScenes;
 
         // Test panel
-        Label *mLeftUpperLeftLowerArmLabel_x;
+        TextBox *mLeftUpperLeftLowerArmTextBox_x;
         Slider *mLeftUpperLeftLowerArmSlider_x;
 
-        Label *mLeftUpperLeftLowerArmLabel_y;
+        TextBox *mLeftUpperLeftLowerArmTextBox_y;
         Slider *mLeftUpperLeftLowerArmSlider_y;
 
-        Label *mLeftUpperLeftLowerArmLabel_z;
+        TextBox *mLeftUpperLeftLowerArmTextBox_z;
         Slider *mLeftUpperLeftLowerArmSlider_z;
 
+        bone::Bone *raycastedBone;
 
         /// True if the GUI is displayed
         bool mIsDisplayed;
@@ -165,6 +167,8 @@ class Gui {
 
         /// Update the GUI values with the engine settings from the current scene
         void resetWithValuesFromCurrentScene();
+
+        void onChangeRaycastedTarget_bvhscene(bone::Bone *target);
 
         static void setScroll(double scrollX, double scrollY);
 

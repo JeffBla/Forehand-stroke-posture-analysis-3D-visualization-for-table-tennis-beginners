@@ -87,6 +87,8 @@ namespace skeleton {
 
         Bone *mRightLowerLegBone;
 
+        std::map<std::string, Bone *> bones;
+
         // Joint
         rp3d::BallAndSocketJoint *mHeadChestJoint;
 
@@ -152,6 +154,12 @@ namespace skeleton {
         void RotateLeftUpperLeftLowerArmJoint(rp3d::decimal angleX, rp3d::decimal angleY, rp3d::decimal angleZ);
 
         void RotatemChestLeftUpperArmJoint(rp3d::decimal angleX, rp3d::decimal angleY, rp3d::decimal angleZ);
+
+        void RotateJoint(Bone *bone, rp3d::decimal angleX, rp3d::decimal angleY, rp3d::decimal angleZ);
+
+        Bone *FindBone(rp3d::RigidBody *body);
+
+        Bone *FindBone(const string &name);
 
     };
 

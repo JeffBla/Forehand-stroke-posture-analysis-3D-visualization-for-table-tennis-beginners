@@ -41,7 +41,7 @@ const float MOUSE_MOVE_BODY_FORCE = 200000.0f;
 // Class SceneDemo
 // Abstract class that represents a 3D scene for the ReactPhysics3D examples.
 // This scene has a single light source with shadow mapping.
-class SceneDemo : public Scene, rp3d::RaycastCallback {
+class SceneDemo : public Scene, protected rp3d::RaycastCallback {
 
     protected:
 

@@ -11,6 +11,7 @@ Bone *Skeleton::CreateBone(const string &bone_name, Bone *parent, rp3d::Vector3 
     PhysicsObject *boneObject = CreateBonePhysics(pos, orientation, size, massDensity, model_file);
 
     auto new_bone = new Bone(bone_name, boneObject, BoneType::CONE, pos, parent);
+    bones[bone_name] = new_bone;
 
     if (parent != nullptr) {
         parent->AppendChild(new_bone);
@@ -23,6 +24,7 @@ Bone *Skeleton::CreateBone(const string &bone_name, Bone *parent, rp3d::Vector3 
     PhysicsObject *boneObject = CreateBonePhysics(pos, orientation, radius, massDensity);
 
     auto new_bone = new Bone(bone_name, boneObject, BoneType::SPHERE, pos, parent);
+    bones[bone_name] = new_bone;
 
     if (parent != nullptr) {
         parent->AppendChild(new_bone);
@@ -135,7 +137,7 @@ Skeleton::Skeleton(rp3d::PhysicsCommon &mPhysicsCommon, rp3d::PhysicsWorld *mPhy
 
     // --------------- Create the right upper leg Cone --------------- //
     rp3d::Vector3 mRightUpperLegPos = mHipBone->GetPosition() + rp3d::Vector3(-0.8, 0, 0);
-    mRightUpperLegBone = CreateBone("rightUpperArm", mHipBone, mRightUpperLegPos,
+    mRightUpperLegBone = CreateBone("rightUpperLeg", mHipBone, mRightUpperLegPos,
                                     rp3d::Quaternion::fromEulerAngles(rp3d::PI_RP3D, 0, 0),
                                     {0.2, 2, 0.2}, 8, "cone_offset.obj");
 
@@ -330,6 +332,37 @@ void Skeleton::RotatemChestLeftUpperArmJoint(rp3d::decimal angleX, rp3d::decimal
     mLeftUpperArmBone->UpdateChild();
 }
 
+void Skeleton::RotateJoint(Bone *bone, rp3d::decimal angleX, rp3d::decimal angleY, rp3d::decimal angleZ) {
+    rp3d::Quaternion quatern = bone->GetPhysicsObject()->getTransform().getOrientation();
+
+    rp3d::Quaternion new_quaternion = rp3d::Quaternion::fromEulerAngles(angleX, angleY, angleZ) * quatern;
+
+    bone->GetPhysicsObject()->setTransform(
+            rp3d::Transform(bone->GetPosition(), new_quaternion));
+
+    bone->UpdateChild();
+}
 
 
+Bone *Skeleton::FindBone(rp3d::RigidBody *body) {
+    Bone *target = nullptr;
+    for (auto &[key, bone]: bones) {
+        if (bone->GetPhysicsObject()->getRigidBody() == body) {
+            target = bone;
+            break;
+        }
+    }
+    return target;
+}
+
+Bone *Skeleton::FindBone(const string &name) {
+    Bone *target;
+    for (auto &[key, bone]: bones) {
+        if (key == name) {
+            target = bone;
+            break;
+        }
+    }
+    return target;
+}
 
