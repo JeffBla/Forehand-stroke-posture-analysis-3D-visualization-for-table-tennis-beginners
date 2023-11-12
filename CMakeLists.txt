@@ -127,7 +127,7 @@ set(COMMON_SOURCES
         common/Bone.h
 )
 
-# Examples scenes source files
+# Scenes source files
 set(SCENES_SOURCES
     scenes/ballandsocketjointsnet/BallAndSocketJointsNetScene.h
     scenes/ballandsocketjointsnet/BallAndSocketJointsNetScene.cpp
@@ -173,8 +173,16 @@ set(SCENES_SOURCES
     scenes/bvh_viewer/BvhScene.cpp
 )
 
+# Utils source files
+set(UTILS_SOURCES
+		utils/AngleTool.cpp
+		utils/AngleTool.h
+		utils/Event.cpp
+		utils/Event.h
+)
+
 # Create the executable
-add_executable(testbed ${TESTBED_SOURCES} ${SCENES_SOURCES} ${COMMON_SOURCES} ${OPENGLFRAMEWORK_SOURCES})
+add_executable(testbed ${TESTBED_SOURCES} ${SCENES_SOURCES} ${COMMON_SOURCES} ${OPENGLFRAMEWORK_SOURCES} ${UTILS_SOURCES})
 
 # Headers
 target_include_directories(testbed PRIVATE
@@ -183,6 +191,7 @@ target_include_directories(testbed PRIVATE
               $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/common>
               $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/scenes>
               $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/extern/nanogui/include>
+		      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/utils>
 )
 foreach(p ${NANOGUI_EXTRA_INCS})
     target_include_directories(testbed PRIVATE $<1:${p}>)
