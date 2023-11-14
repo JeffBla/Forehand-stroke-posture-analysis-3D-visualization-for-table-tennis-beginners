@@ -27,12 +27,17 @@
 #include "BvhScene.h"
 #include "Skeleton.h"
 #include "BVH.h"
+#include "AngleTool.h"
+#include <nanogui/opengl.h>
+#include <nanogui/nanogui.h>
 
 #include <cmath>
 
 // Namespaces
 using namespace openglframework;
 using namespace bvhscene;
+using namespace nanogui;
+using namespace angleTool;
 
 // Constructor
 BvhScene::BvhScene(const std::string &name, EngineSettings &settings, reactphysics3d::PhysicsCommon &physicsCommon)
@@ -66,32 +71,6 @@ void BvhScene::createPhysicsWorld() {
     // Create the ragdoll
 //    createRagdolls();
 
-    auto testBox = new Box(true, {10, 1, 1}, mPhysicsCommon, mPhysicsWorld, mMeshFolderPath);
-    testBox->setTransform(rp3d::Transform({0, 0, 5},
-                                          rp3d::Quaternion::fromEulerAngles(0, 0,
-                                                                            rp3d::PI_RP3D / 2.0)));
-    testBox->setColor(mObjectColorDemo);
-    testBox->setSleepingColor(mSleepingColorDemo);
-//    testBox->getRigidBody()->setType(rp3d::BodyType::STATIC);
-    mPhysicsObjects.push_back(testBox);
-
-    auto testBox2 = new Box(true, {5, 5, 5}, mPhysicsCommon, mPhysicsWorld, mMeshFolderPath);
-    testBox2->setTransform(rp3d::Transform({0, 10, 5},
-                                           rp3d::Quaternion::fromEulerAngles(0, 0,
-                                                                             rp3d::PI_RP3D / 2.0)));
-    testBox2->setColor(mObjectColorDemo);
-    testBox2->setSleepingColor(mSleepingColorDemo);
-    testBox2->getRigidBody()->setType(rp3d::BodyType::STATIC);
-    mPhysicsObjects.push_back(testBox2);
-
-    // Create the joint info object
-    rp3d::RigidBody *body1 = testBox2->getRigidBody();
-    rp3d::RigidBody *body2 = testBox->getRigidBody();
-    rp3d::BallAndSocketJointInfo jointInfo1(body1, body2,
-                                            testBox->getTransform().getPosition() +  rp3d::Vector3(0, -0.5, 0));
-    jointInfo1.isCollisionEnabled = false;
-    mPhysicsWorld->createJoint(jointInfo1);
-
     // ------------------------- FLOOR 2 ----------------------- //
     // Create the floor
     mFloor2 = new Box(true, FLOOR_2_SIZE, mPhysicsCommon, mPhysicsWorld, mMeshFolderPath);
@@ -101,9 +80,14 @@ void BvhScene::createPhysicsWorld() {
     mFloor2->getRigidBody()->setType(rp3d::BodyType::STATIC);
     mPhysicsObjects.push_back(mFloor2);
 
-    // test my skeleton
+    // create my skeleton
     bvh::BVH bvh("out.bvh");
-    skeleton::Skeleton skeleton(mPhysicsCommon, mPhysicsWorld, mPhysicsObjects, mMeshFolderPath, bvh.GetJoint(0));
+    skeleton1 = new skeleton::Skeleton(mPhysicsCommon, mPhysicsWorld, mPhysicsObjects, mMeshFolderPath,
+                                       bvh.GetJoint(0));
+    raycastedTarget_bone = skeleton1->FindBone("head");
+    raycastedTarget_bone->GetPhysicsObject()->setColor(pickedColor);
+    raycastedTarget_bone->GetPhysicsObject()->setSleepingColor(pickedColor);
+    skeleton_created.fire();
 }
 
 // Initialize the bodies positions
@@ -145,6 +129,8 @@ void BvhScene::destroyPhysicsWorld() {
         }
 
         delete mFloor2;
+
+        delete skeleton1;
 
         mPhysicsObjects.clear();
 
@@ -520,3 +506,37 @@ void BvhScene::createRagdolls() {
         }
     }
 }
+
+skeleton::Skeleton *BvhScene::GetSkeleton() {
+    return skeleton1;
+}
+
+// Called when a raycast hit occurs (show the information of the angles)
+rp3d::decimal BvhScene::notifyRaycastHit(const rp3d::RaycastInfo &raycastInfo) {
+
+    auto *body = dynamic_cast<rp3d::RigidBody *>(raycastInfo.body);
+
+    Bone *target_bone = skeleton1->FindBone(body);
+    if (target_bone != nullptr) {
+        RecordRaycastTarget(target_bone);
+    }
+
+    return SceneDemo::notifyRaycastHit(raycastInfo);
+}
+
+void BvhScene::RecordRaycastTarget(Bone *target) {
+    raycastedTarget_bone->GetPhysicsObject()->setColor(BvhScene::mObjectColorDemo);
+    raycastedTarget_bone->GetPhysicsObject()->setSleepingColor(BvhScene::mSleepingColorDemo);
+    raycastedTarget_bone = target;
+    raycastedTarget_bone->GetPhysicsObject()->setColor(pickedColor);
+    raycastedTarget_bone->GetPhysicsObject()->setSleepingColor(pickedColor);
+    // Event occur!!!
+    raycastedTarget_changed.fire(target);
+
+    raycastedTarget_bone_Transform = target->GetPhysicsObject()->getTransform();
+    /// Debug
+    cout << raycastedTarget_bone_Transform.getPosition().to_string() << endl;
+    rp3d::Vector3 tmp = AngleTool::QuaternionToEulerAngles(raycastedTarget_bone_Transform.getOrientation());
+    cout << AngleTool::EulerAnglesToDegree(tmp).to_string() << endl;
+}
+

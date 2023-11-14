@@ -32,7 +32,7 @@ ConvexMesh::ConvexMesh(bool createRigidBody, rp3d::PhysicsCommon& physicsCommon,
                        const std::string& meshPath, const rp3d::Vector3& scaling)
            : PhysicsObject(physicsCommon, meshPath), mPhysicsWorld(physicsWorld), mVBOVertices(GL_ARRAY_BUFFER),
              mVBONormals(GL_ARRAY_BUFFER), mVBOTextureCoords(GL_ARRAY_BUFFER),
-             mVBOIndices(GL_ELEMENT_ARRAY_BUFFER) {
+             mVBOIndices(GL_ELEMENT_ARRAY_BUFFER), mScaling(scaling) {
 
     // Compute the scaling matrix
     mScalingMatrix = openglframework::Matrix4(scaling.x, 0, 0, 0,

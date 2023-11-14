@@ -75,6 +75,8 @@ class ConvexMesh : public PhysicsObject {
 		/// Array with the vertex indices of the convex mesh (used for the physics shape)
 		std::vector<int> mConvexMeshIndices;
 
+        const rp3d::Vector3 mScaling;
+
         // -------------------- Methods -------------------- //
 
         /// Create the Vertex Buffer Objects used to render with OpenGL.
@@ -102,6 +104,8 @@ class ConvexMesh : public PhysicsObject {
 
         /// Return the collider
         rp3d::Collider* getCollider();
+
+        const rp3d::Vector3 &GetSize();
 };
 
 // Update the transform matrix of the object
@@ -112,6 +116,10 @@ inline void ConvexMesh::updateTransform(float interpolationFactor) {
 // Return the collider
 inline rp3d::Collider* ConvexMesh::getCollider() {
     return mCollider;
+}
+
+inline const rp3d::Vector3 &ConvexMesh::GetSize(){
+    return mScaling;
 }
 
 #endif
