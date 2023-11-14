@@ -30,6 +30,7 @@
 #include <nanogui/opengl.h>
 #include <nanogui/nanogui.h>
 #include "openglframework.h"
+#include "Bone.h"
 #include <sstream>
 #include <iomanip>
 
@@ -46,7 +47,7 @@ class Gui {
 
     protected :
 
-        enum LeftPane {SCENES, PHYSICS, RENDERING, PROFILING};
+        enum LeftPane {SCENES, PHYSICS, RENDERING, PROFILING, TESTING};
 
         // -------------------- Constants -------------------- //
 
@@ -70,6 +71,7 @@ class Gui {
         Widget* mSettingsPanel;
         Widget* mPhysicsPanel;
         Widget* mRenderingPanel;
+        Widget* mTestPanel;
 
         // Profiling panel
         Label* mFPSLabel;
@@ -91,6 +93,22 @@ class Gui {
 
         std::vector<CheckBox*> mCheckboxesScenes;
         ComboBox* mComboBoxScenes;
+
+        // Test panel
+        TextBox *mRotateTextBox_x;
+        Slider *mRotateSlider_x;
+
+        TextBox *mRotateTextBox_y;
+        Slider *mRotateSlider_y;
+
+        TextBox *mRotateTextBox_z;
+        Slider *mRotateSlider_z;
+
+        bone::Bone *raycastedBone;
+
+        Label *mRotateTitle;
+
+        std::vector<Label *> angleLabels;
 
         /// True if the GUI is displayed
         bool mIsDisplayed;
@@ -114,6 +132,9 @@ class Gui {
         // Cached update single physics step time
         static double mCachedPhysicsStepTime;
 
+        // Current scene
+        std::string mCurrentSceneName;
+
         // -------------------- Methods -------------------- //
 
         void createSimulationPanel();
@@ -121,6 +142,8 @@ class Gui {
         void createSettingsPanel();
 
         void createProfilingPanel();
+
+        void createTestPanel();
 
         // Convert float value to string
         std::string floatToString(float value, int precision);
@@ -149,6 +172,12 @@ class Gui {
 
         /// Update the GUI values with the engine settings from the current scene
         void resetWithValuesFromCurrentScene();
+
+        void onChangeRaycastedTarget_bvhscene(bone::Bone *target);
+
+        void onChangeBoneTransform_bvhscene(bone::Bone *target);
+
+        void onCreateSkeleton_bvhscene();
 
         static void setScroll(double scrollX, double scrollY);
 

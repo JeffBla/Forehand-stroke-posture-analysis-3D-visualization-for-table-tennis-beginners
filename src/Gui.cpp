@@ -26,9 +26,13 @@
 // Libraries
 #include "Gui.h"
 #include <GLFW/glfw3.h>
+
 #include "TestbedApplication.h"
+#include "bvh_viewer/BvhScene.h"
+#include "AngleTool.h"
 
 using namespace nanogui;
+using namespace angleTool;
 
 //GLFWwindow* Gui::mWindow = NULL;
 double Gui::mScrollX = 0.0;
@@ -40,12 +44,10 @@ double Gui::mCachedTotalPhysicsUpdateTime = 0;
 double Gui::mCachedPhysicsStepTime = 0;
 
 // Constructor
-Gui::Gui(TestbedApplication* app)
-    : mApp(app), mSimulationPanel(nullptr), mSettingsPanel(nullptr), mPhysicsPanel(nullptr),
-      mRenderingPanel(nullptr), mFPSLabel(nullptr), mFrameTimeLabel(nullptr), mTotalPhysicsTimeLabel(nullptr),
-      mPhysicsStepTimeLabel(nullptr), mIsDisplayed(true)
-{
-
+Gui::Gui(TestbedApplication *app)
+        : mApp(app), mSimulationPanel(nullptr), mSettingsPanel(nullptr), mPhysicsPanel(nullptr),
+          mRenderingPanel(nullptr), mFPSLabel(nullptr), mFrameTimeLabel(nullptr), mTotalPhysicsTimeLabel(nullptr),
+          mPhysicsStepTimeLabel(nullptr), mIsDisplayed(true) {
 }
 
 // Destructor
@@ -55,13 +57,12 @@ Gui::~Gui() {
 }
 
 /// Initialize the GUI
-void Gui::init(GLFWwindow* window) {
+void Gui::init(GLFWwindow *window) {
 
     mWindow = window;
 
     mScreen = new Screen();
     mScreen->initialize(window, true);
-
     // Create the Simulation panel
     createSimulationPanel();
 
@@ -70,6 +71,9 @@ void Gui::init(GLFWwindow* window) {
 
     // Create the Profiling panel
     createProfilingPanel();
+
+    // Create the Test panel
+    createTestPanel();
 
     mScreen->set_visible(true);
     mScreen->perform_layout();
@@ -84,19 +88,19 @@ void Gui::drawAll() {
 
 void Gui::draw() {
 
-  if (mIsDisplayed) {
-      mScreen->draw_setup();
-      mScreen->draw_contents();
-  }
+    if (mIsDisplayed) {
+        mScreen->draw_setup();
+        mScreen->draw_contents();
+    }
 }
 
 void Gui::drawTearDown() {
 
-  if (mIsDisplayed) {
-      mScreen->draw_widgets();
-  }
+    if (mIsDisplayed) {
+        mScreen->draw_widgets();
+    }
 
-  mScreen->draw_teardown();
+    mScreen->draw_teardown();
 }
 
 
@@ -111,8 +115,10 @@ void Gui::resetWithValuesFromCurrentScene() {
     out << std::setprecision(1) << std::fixed << (mApp->getCurrentSceneEngineSettings().timeStep.count() * 1000);
     mTextboxTimeStep->set_value(out.str());
 
-    mTextboxVelocityIterations->set_value(std::to_string(mApp->getCurrentSceneEngineSettings().nbVelocitySolverIterations));
-    mTextboxPositionIterations->set_value(std::to_string(mApp->getCurrentSceneEngineSettings().nbPositionSolverIterations));
+    mTextboxVelocityIterations->set_value(
+            std::to_string(mApp->getCurrentSceneEngineSettings().nbVelocitySolverIterations));
+    mTextboxPositionIterations->set_value(
+            std::to_string(mApp->getCurrentSceneEngineSettings().nbPositionSolverIterations));
 
     out.str("");
     out << std::setprecision(0) << std::fixed << (mApp->getCurrentSceneEngineSettings().timeBeforeSleep * 1000);
@@ -131,7 +137,7 @@ void Gui::resetWithValuesFromCurrentScene() {
 void Gui::update() {
 
     // Update Profiling GUI every seconds
-    if ((mApp->mCurrentTime - mTimeSinceLastProfilingDisplay)  > TIME_INTERVAL_DISPLAY_PROFILING_INFO) {
+    if ((mApp->mCurrentTime - mTimeSinceLastProfilingDisplay) > TIME_INTERVAL_DISPLAY_PROFILING_INFO) {
         mTimeSinceLastProfilingDisplay = mApp->mCurrentTime;
         mCachedFPS = mApp->mFPS;
         mCachedUpdateTime = mApp->mFrameTime;
@@ -143,59 +149,69 @@ void Gui::update() {
     mFPSLabel->set_caption(std::string("FPS : ") + floatToString(mCachedFPS, 0));
 
     // Frame time
-    mFrameTimeLabel->set_caption(std::string("Frame time : ") + floatToString(mCachedUpdateTime * 1000.0, 1) + std::string(" ms"));
+    mFrameTimeLabel->set_caption(
+            std::string("Frame time : ") + floatToString(mCachedUpdateTime * 1000.0, 1) + std::string(" ms"));
 
     // Total Physics time
-    mTotalPhysicsTimeLabel->set_caption(std::string("Total physics time : ") + floatToString(mCachedTotalPhysicsUpdateTime * 1000.0, 1) + std::string(" ms"));
+    mTotalPhysicsTimeLabel->set_caption(
+            std::string("Total physics time : ") + floatToString(mCachedTotalPhysicsUpdateTime * 1000.0, 1) +
+            std::string(" ms"));
 
     // Physics step time
-    mPhysicsStepTimeLabel->set_caption(std::string("Physics step time : ") + floatToString(mCachedPhysicsStepTime * 1000.0, 1) + std::string(" ms"));
+    mPhysicsStepTimeLabel->set_caption(
+            std::string("Physics step time : ") + floatToString(mCachedPhysicsStepTime * 1000.0, 1) +
+            std::string(" ms"));
+
+    // Get current scene
+
 }
 
 void Gui::createSimulationPanel() {
 
     mSimulationPanel = new Window(mScreen, "Simulation");
     mSimulationPanel->set_position(Vector2i(15, 15));
-    mSimulationPanel->set_layout(new GroupLayout(10, 5, 10 , 20));
+    mSimulationPanel->set_layout(new GroupLayout(10, 5, 10, 20));
     //mSimulationPanel->setId("SimulationPanel");
     mSimulationPanel->set_fixed_width(220);
 
     // Scenes/Physics/Rendering buttons
-    new Label(mSimulationPanel, "Controls","sans-bold");
-    Widget* panelControls = new Widget(mSimulationPanel);
+    new Label(mSimulationPanel, "Controls", "sans-bold");
+    Widget *panelControls = new Widget(mSimulationPanel);
     panelControls->set_layout(new BoxLayout(Orientation::Horizontal, Alignment::Middle, 0, 5));
-    ToolButton* buttonPlay = new ToolButton(panelControls, FA_PLAY);
+    ToolButton *buttonPlay = new ToolButton(panelControls, FA_PLAY);
     buttonPlay->set_flags(Button::NormalButton);
     buttonPlay->set_callback([&] {
         mApp->playSimulation();
     });
-    ToolButton* buttonPause = new ToolButton(panelControls, FA_PAUSE);
+    ToolButton *buttonPause = new ToolButton(panelControls, FA_PAUSE);
     buttonPause->set_flags(Button::NormalButton);
     buttonPause->set_callback([&] {
         mApp->pauseSimulation();
     });
-    ToolButton* buttonPlayStep = new ToolButton(panelControls, FA_STEP_FORWARD);
+    ToolButton *buttonPlayStep = new ToolButton(panelControls, FA_STEP_FORWARD);
     buttonPlayStep->set_flags(Button::NormalButton);
     buttonPlayStep->set_callback([&] {
         mApp->toggleTakeSinglePhysicsStep();
     });
-    ToolButton* buttonRestart = new ToolButton(panelControls, FA_REDO);
+    ToolButton *buttonRestart = new ToolButton(panelControls, FA_REDO);
     buttonRestart->set_flags(Button::NormalButton);
     buttonRestart->set_callback([&] {
         mApp->restartSimulation();
     });
 
     // Scenes
-    std::vector<Scene*> scenes = mApp->getScenes();
+    std::vector<Scene *> scenes = mApp->getScenes();
     std::vector<std::string> scenesNames;
-    for (uint i=0; i<scenes.size(); i++) {
+    for (uint i = 0; i < scenes.size(); i++) {
         scenesNames.push_back(scenes[i]->getName().c_str());
     }
-    new Label(mSimulationPanel, "Scene","sans-bold");
+    mCurrentSceneName = scenesNames[0];
+    new Label(mSimulationPanel, "Scene", "sans-bold");
 
     mComboBoxScenes = new ComboBox(mSimulationPanel, scenesNames);
     mComboBoxScenes->set_callback([&, scenes](int index) {
         mApp->switchScene(scenes[index]);
+        mCurrentSceneName = scenes[index]->getName();
     });
 }
 
@@ -208,9 +224,9 @@ void Gui::createSettingsPanel() {
     mSettingsPanel->set_fixed_width(220);
 
     // Scenes/Physics/Rendering buttons
-    Widget* buttonsPanel = new Widget(mSettingsPanel);
+    Widget *buttonsPanel = new Widget(mSettingsPanel);
     buttonsPanel->set_layout(new BoxLayout(Orientation::Horizontal, Alignment::Middle, 5, 5));
-    Button* buttonPhysics = new Button(buttonsPanel, "Physics");
+    Button *buttonPhysics = new Button(buttonsPanel, "Physics");
     buttonPhysics->set_flags(Button::RadioButton);
     buttonPhysics->set_pushed(true);
     buttonPhysics->set_change_callback([&](bool /*state*/) {
@@ -218,7 +234,7 @@ void Gui::createSettingsPanel() {
         mRenderingPanel->set_visible(false);
         mScreen->perform_layout();
     });
-    Button* buttonRendering = new Button(buttonsPanel, "Rendering");
+    Button *buttonRendering = new Button(buttonsPanel, "Rendering");
     buttonRendering->set_flags(Button::RadioButton);
     buttonRendering->set_change_callback([&](bool /*state*/) {
         mRenderingPanel->set_visible(true);
@@ -247,9 +263,9 @@ void Gui::createSettingsPanel() {
     });
 
     // Timestep
-    Widget* panelTimeStep = new Widget(mPhysicsPanel);
+    Widget *panelTimeStep = new Widget(mPhysicsPanel);
     panelTimeStep->set_layout(new BoxLayout(Orientation::Horizontal, Alignment::Middle, 0, 5));
-    Label* labelTimeStep = new Label(panelTimeStep, "Time step","sans-bold");
+    Label *labelTimeStep = new Label(panelTimeStep, "Time step", "sans-bold");
     labelTimeStep->set_fixed_width(120);
     mTextboxTimeStep = new TextBox(panelTimeStep);
     mTextboxTimeStep->set_fixed_size(Vector2i(70, 25));
@@ -282,9 +298,9 @@ void Gui::createSettingsPanel() {
     mTextboxTimeStep->set_alignment(TextBox::Alignment::Right);
 
     // Velocity solver iterations
-    Widget* panelVelocityIterations = new Widget(mPhysicsPanel);
+    Widget *panelVelocityIterations = new Widget(mPhysicsPanel);
     panelVelocityIterations->set_layout(new BoxLayout(Orientation::Horizontal, Alignment::Middle, 0, 5));
-    Label* labelVelocityIterations = new Label(panelVelocityIterations, "Velocity solver","sans-bold");
+    Label *labelVelocityIterations = new Label(panelVelocityIterations, "Velocity solver", "sans-bold");
     labelVelocityIterations->set_fixed_width(120);
     mTextboxVelocityIterations = new TextBox(panelVelocityIterations);
     mTextboxVelocityIterations->set_fixed_size(Vector2i(70, 25));
@@ -314,9 +330,9 @@ void Gui::createSettingsPanel() {
     mTextboxVelocityIterations->set_alignment(TextBox::Alignment::Right);
 
     // Position solver iterations
-    Widget* panelPositionIterations = new Widget(mPhysicsPanel);
+    Widget *panelPositionIterations = new Widget(mPhysicsPanel);
     panelPositionIterations->set_layout(new BoxLayout(Orientation::Horizontal, Alignment::Middle, 0, 5));
-    Label* labelPositionIterations = new Label(panelPositionIterations, "Position solver","sans-bold");
+    Label *labelPositionIterations = new Label(panelPositionIterations, "Position solver", "sans-bold");
     labelPositionIterations->set_fixed_width(120);
     mTextboxPositionIterations = new TextBox(panelPositionIterations);
     mTextboxPositionIterations->set_fixed_size(Vector2i(70, 25));
@@ -346,9 +362,9 @@ void Gui::createSettingsPanel() {
     mTextboxPositionIterations->set_alignment(TextBox::Alignment::Right);
 
     // Time before sleep
-    Widget* panelTimeSleep = new Widget(mPhysicsPanel);
+    Widget *panelTimeSleep = new Widget(mPhysicsPanel);
     panelTimeSleep->set_layout(new BoxLayout(Orientation::Horizontal, Alignment::Middle, 0, 5));
-    Label* labelTimeSleep = new Label(panelTimeSleep, "Time before sleep","sans-bold");
+    Label *labelTimeSleep = new Label(panelTimeSleep, "Time before sleep", "sans-bold");
     labelTimeSleep->set_fixed_width(120);
     out.str("");
     out << std::setprecision(0) << std::fixed << 0;
@@ -381,9 +397,9 @@ void Gui::createSettingsPanel() {
     mTextboxTimeSleep->set_alignment(TextBox::Alignment::Right);
 
     // Sleep linear velocity
-    Widget* panelSleepLinearVel = new Widget(mPhysicsPanel);
+    Widget *panelSleepLinearVel = new Widget(mPhysicsPanel);
     panelSleepLinearVel->set_layout(new GridLayout(Orientation::Horizontal, 2, Alignment::Middle, 0, 5));
-    Label* labelSleepLinearVel = new Label(panelSleepLinearVel, "Sleep linear velocity","sans-bold");
+    Label *labelSleepLinearVel = new Label(panelSleepLinearVel, "Sleep linear velocity", "sans-bold");
     labelSleepLinearVel->set_fixed_width(120);
     out.str("");
     out << std::setprecision(2) << std::fixed << 0;
@@ -416,9 +432,9 @@ void Gui::createSettingsPanel() {
     mTextboxSleepLinearVel->set_alignment(TextBox::Alignment::Right);
 
     // Sleep angular velocity
-    Widget* panelSleepAngularVel = new Widget(mPhysicsPanel);
+    Widget *panelSleepAngularVel = new Widget(mPhysicsPanel);
     panelSleepAngularVel->set_layout(new GridLayout(Orientation::Horizontal, 2, Alignment::Middle, 0, 5));
-    Label* labelSleepAngularVel = new Label(panelSleepAngularVel, "Sleep angular velocity","sans-bold");
+    Label *labelSleepAngularVel = new Label(panelSleepAngularVel, "Sleep angular velocity", "sans-bold");
     labelSleepAngularVel->set_fixed_width(120);
     out.str("");
     out << std::setprecision(2) << std::fixed << 0;
@@ -455,11 +471,11 @@ void Gui::createSettingsPanel() {
     mRenderingPanel->set_layout(new BoxLayout(Orientation::Vertical, Alignment::Fill, 0, 5));
 
     // Display/Hide contact points
-    CheckBox* checkboxDebugRendererEnabled = new CheckBox(mRenderingPanel, "Debug rendering");
+    CheckBox *checkboxDebugRendererEnabled = new CheckBox(mRenderingPanel, "Debug rendering");
     checkboxDebugRendererEnabled->set_checked(mApp->mIsDebugRendererEnabled);
 
     // Display/Hide contact points
-    CheckBox* checkboxContactPoints = new CheckBox(mRenderingPanel, "Contact points");
+    CheckBox *checkboxContactPoints = new CheckBox(mRenderingPanel, "Contact points");
     checkboxContactPoints->set_checked(mApp->mAreContactPointsDisplayed);
     checkboxContactPoints->set_enabled(false);
     checkboxContactPoints->set_callback([&](bool value) {
@@ -467,7 +483,7 @@ void Gui::createSettingsPanel() {
     });
 
     // Display/Hide contact normals
-    CheckBox* checkboxContactNormals = new CheckBox(mRenderingPanel, "Contact normals");
+    CheckBox *checkboxContactNormals = new CheckBox(mRenderingPanel, "Contact normals");
     checkboxContactNormals->set_checked(mApp->mAreContactNormalsDisplayed);
     checkboxContactNormals->set_enabled(false);
     checkboxContactNormals->set_callback([&](bool value) {
@@ -475,7 +491,7 @@ void Gui::createSettingsPanel() {
     });
 
     // Display/Hide the Broad-phase AABBs
-    CheckBox* checkboxBroadPhaseAABBs = new CheckBox(mRenderingPanel, "Broad phase AABBs");
+    CheckBox *checkboxBroadPhaseAABBs = new CheckBox(mRenderingPanel, "Broad phase AABBs");
     checkboxBroadPhaseAABBs->set_checked(mApp->mAreBroadPhaseAABBsDisplayed);
     checkboxBroadPhaseAABBs->set_enabled(false);
     checkboxBroadPhaseAABBs->set_callback([&](bool value) {
@@ -483,7 +499,7 @@ void Gui::createSettingsPanel() {
     });
 
     // Display/Hide the colliders AABBs
-    CheckBox* checkboxColliderAABBs = new CheckBox(mRenderingPanel, "Colliders AABBs");
+    CheckBox *checkboxColliderAABBs = new CheckBox(mRenderingPanel, "Colliders AABBs");
     checkboxColliderAABBs->set_checked(mApp->mAreCollidersAABBsDisplayed);
     checkboxColliderAABBs->set_enabled(false);
     checkboxColliderAABBs->set_callback([&](bool value) {
@@ -491,7 +507,7 @@ void Gui::createSettingsPanel() {
     });
 
     // Display/Hide the collision shapes
-    CheckBox* checkboxCollisionShapes = new CheckBox(mRenderingPanel, "Collision shapes");
+    CheckBox *checkboxCollisionShapes = new CheckBox(mRenderingPanel, "Collision shapes");
     checkboxCollisionShapes->set_checked(mApp->mAreCollisionShapesDisplayed);
     checkboxCollisionShapes->set_enabled(false);
     checkboxCollisionShapes->set_callback([&](bool value) {
@@ -499,29 +515,29 @@ void Gui::createSettingsPanel() {
     });
 
     // Enable/Disable wireframe mode
-    CheckBox* checkboxWireframe = new CheckBox(mRenderingPanel, "Objects Wireframe");
+    CheckBox *checkboxWireframe = new CheckBox(mRenderingPanel, "Objects Wireframe");
     checkboxWireframe->set_checked(mApp->mAreObjectsWireframeEnabled);
     checkboxWireframe->set_callback([&](bool value) {
         mApp->mAreObjectsWireframeEnabled = value;
     });
 
     // Enabled/Disable VSync
-    CheckBox* checkboxVSync = new CheckBox(mRenderingPanel, "V-Sync");
+    CheckBox *checkboxVSync = new CheckBox(mRenderingPanel, "V-Sync");
     checkboxVSync->set_checked(mApp->mIsVSyncEnabled);
     checkboxVSync->set_callback([&](bool value) {
         mApp->enableVSync(value);
     });
 
     // Enabled/Disable Shadows
-    CheckBox* checkboxShadows = new CheckBox(mRenderingPanel, "Shadows");
+    CheckBox *checkboxShadows = new CheckBox(mRenderingPanel, "Shadows");
     checkboxShadows->set_checked(mApp->mIsShadowMappingEnabled);
     checkboxShadows->set_callback([&](bool value) {
         mApp->mIsShadowMappingEnabled = value;
     });
 
     checkboxDebugRendererEnabled->set_callback([&, checkboxContactPoints, checkboxContactNormals,
-                                               checkboxBroadPhaseAABBs, checkboxColliderAABBs,
-                                               checkboxCollisionShapes](bool value) {
+                                                       checkboxBroadPhaseAABBs, checkboxColliderAABBs,
+                                                       checkboxCollisionShapes](bool value) {
         mApp->mIsDebugRendererEnabled = value;
         checkboxContactPoints->set_enabled(value);
         checkboxContactNormals->set_enabled(value);
@@ -536,29 +552,141 @@ void Gui::createSettingsPanel() {
 
 void Gui::createProfilingPanel() {
 
-    Widget* profilingPanel = new Window(mScreen, "Profiling");
+    Widget *profilingPanel = new Window(mScreen, "Profiling");
     profilingPanel->set_position(Vector2i(15, 505));
     profilingPanel->set_layout(new BoxLayout(Orientation::Vertical, Alignment::Fill, 10, 5));
     //profilingPanel->setId("SettingsPanel");
     profilingPanel->set_fixed_width(220);
 
     // Framerate (FPS)
-    mFPSLabel = new Label(profilingPanel, std::string("FPS : ") + floatToString(mCachedFPS, 0),"sans-bold");
+    mFPSLabel = new Label(profilingPanel, std::string("FPS : ") + floatToString(mCachedFPS, 0), "sans-bold");
 
     // Update time
-    mFrameTimeLabel = new Label(profilingPanel, std::string("Frame time : ") + floatToString(mCachedUpdateTime * 1000.0, 1) + std::string(" ms"),"sans-bold");
+    mFrameTimeLabel = new Label(profilingPanel,
+                                std::string("Frame time : ") + floatToString(mCachedUpdateTime * 1000.0, 1) +
+                                std::string(" ms"), "sans-bold");
 
     // Total physics time
-    mTotalPhysicsTimeLabel = new Label(profilingPanel, std::string("Total physics time : ") + floatToString(mCachedTotalPhysicsUpdateTime * 1000.0, 1) + std::string(" ms"),"sans-bold");
+    mTotalPhysicsTimeLabel = new Label(profilingPanel, std::string("Total physics time : ") +
+                                                       floatToString(mCachedTotalPhysicsUpdateTime * 1000.0, 1) +
+                                                       std::string(" ms"), "sans-bold");
 
     // Physics step time
-    mPhysicsStepTimeLabel = new Label(profilingPanel, std::string("Physics step time : ") + floatToString(mCachedPhysicsStepTime * 1000.0, 1) + std::string(" ms"),"sans-bold");
+    mPhysicsStepTimeLabel = new Label(profilingPanel, std::string("Physics step time : ") +
+                                                      floatToString(mCachedPhysicsStepTime * 1000.0, 1) +
+                                                      std::string(" ms"), "sans-bold");
 
     profilingPanel->set_visible(true);
 }
 
+void Gui::createTestPanel() {
+    mTestPanel = new Window(mScreen, "Test");
+    mTestPanel->set_fixed_width(220);
+    mTestPanel->set_layout((new BoxLayout(Orientation::Vertical, Alignment::Fill, 10, 5)));
+    mTestPanel->set_position(Vector2i(mScreen->width() - mTestPanel->fixed_width() - 15, 15));
+
+    if (mCurrentSceneName == "BVH") {
+        // Event register
+        auto scene = (bvhscene::BvhScene *) (mApp->getScenes()[0]);
+        scene->raycastedTarget_changed.add_handler([this](Bone *target_bone) {
+            onChangeRaycastedTarget_bvhscene(target_bone);
+            onChangeBoneTransform_bvhscene(target_bone);
+        });
+
+        scene->skeleton_created.add_handler([this]() {
+            onCreateSkeleton_bvhscene();
+        });
+
+        // Panel setting
+        new Label(mTestPanel, "Rotation", "sans-bold");
+        { // x
+            mRotateSlider_x = new Slider(mTestPanel);
+            mRotateSlider_x->set_value(0);
+            mRotateSlider_x->set_range(std::pair(-180, 180));
+            mRotateSlider_x->set_fixed_width(200);
+
+            mRotateTextBox_x = new TextBox(mTestPanel);
+            mRotateTextBox_x->set_fixed_size(Vector2i(60, 25));
+            mRotateTextBox_x->set_value("0");
+            auto tmpApp = mApp;
+            auto textBox = mRotateTextBox_x;
+            mRotateSlider_x->set_callback([textBox, tmpApp](float value) {
+                auto euler_angle = AngleTool::DegreeToEulerAngles(value);
+                bvhscene::BvhScene *scene = ((bvhscene::BvhScene *) tmpApp->mCurrentScene);
+                scene->GetSkeleton()->RotateJoint(scene->GetRaycastedTarget_bone(), euler_angle, 0, 0);
+                char text[6];
+                snprintf(text, 6, "%.5f", value);
+                textBox->set_value(text);
+            });
+            mRotateSlider_x->set_final_callback([&](float value) {
+                std::cout << "Final slider value: " << value << std::endl;
+            });
+            mRotateTextBox_x->set_font_size(20);
+            mRotateTextBox_x->set_alignment(TextBox::Alignment::Right);
+        }
+        { // y
+            mRotateSlider_y = new Slider(mTestPanel);
+            mRotateSlider_y->set_value(0);
+            mRotateSlider_y->set_range(std::pair(-180, 180));
+            mRotateSlider_y->set_fixed_width(200);
+
+            mRotateTextBox_y = new TextBox(mTestPanel);
+            mRotateTextBox_y->set_fixed_size(Vector2i(60, 25));
+            mRotateTextBox_y->set_value("0");
+            auto tmpApp = mApp;
+            auto textBox = mRotateTextBox_y;
+            mRotateSlider_y->set_callback([textBox, tmpApp](float value) {
+                auto euler_angle = AngleTool::DegreeToEulerAngles(value);
+                bvhscene::BvhScene *scene = ((bvhscene::BvhScene *) tmpApp->mCurrentScene);
+                scene->GetSkeleton()->RotateJoint(scene->GetRaycastedTarget_bone(), 0, euler_angle, 0);
+                char text[6];
+                snprintf(text, 6, "%.5f", value);
+                textBox->set_value(text);
+            });
+            mRotateSlider_y->set_final_callback([&](float value) {
+                std::cout << "Final slider value: " << value << std::endl;
+            });
+            mRotateTextBox_y->set_font_size(20);
+            mRotateTextBox_y->set_alignment(TextBox::Alignment::Right);
+        }
+        { // z
+            mRotateSlider_z = new Slider(mTestPanel);
+            mRotateSlider_z->set_value(0);
+            mRotateSlider_z->set_range(std::pair(-180, 180));
+            mRotateSlider_z->set_fixed_width(200);
+
+            mRotateTextBox_z = new TextBox(mTestPanel);
+            mRotateTextBox_z->set_fixed_size(Vector2i(60, 25));
+            mRotateTextBox_z->set_value("0");
+            auto tmpApp = mApp;
+            auto textBox = mRotateTextBox_z;
+            mRotateSlider_z->set_callback([textBox, tmpApp](float value) {
+                auto euler_angle = AngleTool::DegreeToEulerAngles(value);
+                bvhscene::BvhScene *scene = ((bvhscene::BvhScene *) tmpApp->mCurrentScene);
+                scene->GetSkeleton()->RotateJoint(scene->GetRaycastedTarget_bone(), 0, 0, euler_angle);
+                char text[6];
+                snprintf(text, 6, "%.5f", value);
+                textBox->set_value(text);
+            });
+            mRotateSlider_z->set_final_callback([&](float value) {
+                std::cout << "Final slider value: " << value << std::endl;
+            });
+            mRotateTextBox_z->set_font_size(20);
+            mRotateTextBox_z->set_alignment(TextBox::Alignment::Right);
+        }
+
+        mRotateTitle = new Label(mTestPanel, "Rotate Info", "sans-bold");
+        {
+            angleLabels.push_back(new Label(mTestPanel, "..."));
+        }
+    }
+    mTestPanel->set_visible(true);
+}
+
 void Gui::onWindowResizeEvent(int width, int height) {
     mScreen->resize_callback_event(width, height);
+
+    mTestPanel->set_position(Vector2i(mScreen->width() - mTestPanel->fixed_width() - 15, 15));
 }
 
 void Gui::onMouseMotionEvent(double x, double y) {
@@ -572,7 +700,8 @@ bool Gui::onScrollEvent(double x, double y) {
 
     // If the mouse cursor is over the scenes choice scrolling menu
     const float pixelRatio = mScreen->pixel_ratio();
-    if (mComboBoxScenes->popup()->visible() && mComboBoxScenes->popup()->contains(Vector2i(xMouse, yMouse) / pixelRatio)) {
+    if (mComboBoxScenes->popup()->visible() &&
+        mComboBoxScenes->popup()->contains(Vector2i(xMouse, yMouse) / pixelRatio)) {
         mScreen->scroll_callback_event(x, y);
         return true;
     }
@@ -587,3 +716,49 @@ void Gui::onMouseButtonEvent(int button, int action, int modifiers) {
 void Gui::onKeyboardEvent(int key, int scancode, int action, int modifiers) {
     mScreen->key_callback_event(key, scancode, action, modifiers);
 }
+
+void Gui::onChangeRaycastedTarget_bvhscene(Bone *target) {
+    raycastedBone = target;
+
+    auto degrees = AngleTool::QuaternionToEulerAngles(
+            raycastedBone->GetPhysicsObject()->getTransform().getOrientation());
+    degrees = AngleTool::EulerAnglesToDegree(degrees);
+    mRotateSlider_x->set_value(degrees.x);
+    mRotateSlider_y->set_value(degrees.y);
+    mRotateSlider_z->set_value(degrees.z);
+
+    char text[6];
+    snprintf(text, 6, "%.5f", degrees.x);
+    mRotateTextBox_x->set_value(text);
+
+    snprintf(text, 6, "%.5f", degrees.y);
+    mRotateTextBox_y->set_value(text);
+
+    snprintf(text, 6, "%.5f", degrees.z);
+    mRotateTextBox_z->set_value(text);
+}
+
+void Gui::onChangeBoneTransform_bvhscene(Bone *target) {
+    auto angles = target->GetAngleWithNeighbor();
+
+    for (auto l: angleLabels) {
+        mTestPanel->remove_child(l);
+    }
+    angleLabels.clear();
+    Label *angle_name, *angle_deg;
+    for (auto &[name, deg]: angles) {
+        angle_name = new Label(mTestPanel, name, "sans-bold");
+        angle_deg = new Label(mTestPanel, floatToString(deg, 1));
+        angleLabels.push_back(angle_name);
+        angleLabels.push_back(angle_deg);
+    }
+    mScreen->perform_layout();
+}
+
+void Gui::onCreateSkeleton_bvhscene() {
+    auto scene = (bvhscene::BvhScene *) (mApp->getScenes()[0]);
+    scene->GetSkeleton()->bone_transform_changed.add_handler([this](Bone *target_bone) {
+        onChangeBoneTransform_bvhscene(target_bone);
+    });
+}
+
