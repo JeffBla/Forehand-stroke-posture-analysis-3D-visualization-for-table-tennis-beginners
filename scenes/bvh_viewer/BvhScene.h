@@ -68,6 +68,9 @@ namespace bvhscene {
         /// Event for raycasted target
         Event<Bone *> raycastedTarget_changed;
 
+        /// Event for create skeleton
+        Event<> skeleton_created;
+
     protected:
         /// Head sphere
         Sphere *mHeadBox[NB_RAGDOLLS];
@@ -154,7 +157,7 @@ namespace bvhscene {
         rp3d::Vector3 mRightUpperLegPos[NB_RAGDOLLS];
         rp3d::Vector3 mRightLowerLegPos[NB_RAGDOLLS];
 
-        skeleton::Skeleton *skeleton1;
+        skeleton::Skeleton *skeleton1 = nullptr;
 
         /// World settings
         rp3d::PhysicsWorld::WorldSettings mWorldSettings;
@@ -188,10 +191,6 @@ namespace bvhscene {
 
         /// Initialize the bodies positions
         void initBodiesPositions();
-
-        const rp3d::Quaternion &transmitAngleInfo(rp3d::RigidBody *body);
-
-        bool mouseButtonEvent(int button, bool down, int mods, double mousePosX, double mousePosY) override;
 
         float notifyRaycastHit(const rp3d::RaycastInfo &raycastInfo) override;
 

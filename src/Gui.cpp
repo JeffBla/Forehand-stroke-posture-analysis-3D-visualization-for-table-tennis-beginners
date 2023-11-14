@@ -48,7 +48,6 @@ Gui::Gui(TestbedApplication *app)
         : mApp(app), mSimulationPanel(nullptr), mSettingsPanel(nullptr), mPhysicsPanel(nullptr),
           mRenderingPanel(nullptr), mFPSLabel(nullptr), mFrameTimeLabel(nullptr), mTotalPhysicsTimeLabel(nullptr),
           mPhysicsStepTimeLabel(nullptr), mIsDisplayed(true) {
-
 }
 
 // Destructor
@@ -64,7 +63,6 @@ void Gui::init(GLFWwindow *window) {
 
     mScreen = new Screen();
     mScreen->initialize(window, true);
-
     // Create the Simulation panel
     createSimulationPanel();
 
@@ -81,12 +79,6 @@ void Gui::init(GLFWwindow *window) {
     mScreen->perform_layout();
 
     mTimeSinceLastProfilingDisplay = glfwGetTime();
-
-    // Event registe
-    auto scenes =  mApp->getScenes();
-    ((bvhscene::BvhScene *)scenes[0])->raycastedTarget_changed.add_handler([this](Bone *target_bone){
-        onChangeRaycastedTarget_bvhscene(target_bone);
-    });
 }
 
 void Gui::drawAll() {
@@ -588,25 +580,37 @@ void Gui::createProfilingPanel() {
 }
 
 void Gui::createTestPanel() {
-    Widget *testPanel = new Window(mScreen, "Test");
-    testPanel->set_position(Vector2i(15, 650));
-    testPanel->set_layout((new BoxLayout(Orientation::Vertical, Alignment::Fill, 10, 5)));
-    testPanel->set_fixed_width(220);
+    mTestPanel = new Window(mScreen, "Test");
+    mTestPanel->set_fixed_width(220);
+    mTestPanel->set_layout((new BoxLayout(Orientation::Vertical, Alignment::Fill, 10, 5)));
+    mTestPanel->set_position(Vector2i(mScreen->width() - mTestPanel->fixed_width() - 15, 15));
 
-    new Label(testPanel, "Rotation");
     if (mCurrentSceneName == "BVH") {
-        { // x
-            mLeftUpperLeftLowerArmSlider_x = new Slider(testPanel);
-            mLeftUpperLeftLowerArmSlider_x->set_value(0);
-            mLeftUpperLeftLowerArmSlider_x->set_range(std::pair(-180, 180));
-            mLeftUpperLeftLowerArmSlider_x->set_fixed_width(200);
+        // Event register
+        auto scene = (bvhscene::BvhScene *) (mApp->getScenes()[0]);
+        scene->raycastedTarget_changed.add_handler([this](Bone *target_bone) {
+            onChangeRaycastedTarget_bvhscene(target_bone);
+            onChangeBoneTransform_bvhscene(target_bone);
+        });
 
-            mLeftUpperLeftLowerArmTextBox_x = new TextBox(testPanel);
-            mLeftUpperLeftLowerArmTextBox_x->set_fixed_size(Vector2i(60, 25));
-            mLeftUpperLeftLowerArmTextBox_x->set_value("0");
+        scene->skeleton_created.add_handler([this]() {
+            onCreateSkeleton_bvhscene();
+        });
+
+        // Panel setting
+        new Label(mTestPanel, "Rotation", "sans-bold");
+        { // x
+            mRotateSlider_x = new Slider(mTestPanel);
+            mRotateSlider_x->set_value(0);
+            mRotateSlider_x->set_range(std::pair(-180, 180));
+            mRotateSlider_x->set_fixed_width(200);
+
+            mRotateTextBox_x = new TextBox(mTestPanel);
+            mRotateTextBox_x->set_fixed_size(Vector2i(60, 25));
+            mRotateTextBox_x->set_value("0");
             auto tmpApp = mApp;
-            auto textBox = mLeftUpperLeftLowerArmTextBox_x;
-            mLeftUpperLeftLowerArmSlider_x->set_callback([textBox, tmpApp](float value) {
+            auto textBox = mRotateTextBox_x;
+            mRotateSlider_x->set_callback([textBox, tmpApp](float value) {
                 auto euler_angle = AngleTool::DegreeToEulerAngles(value);
                 bvhscene::BvhScene *scene = ((bvhscene::BvhScene *) tmpApp->mCurrentScene);
                 scene->GetSkeleton()->RotateJoint(scene->GetRaycastedTarget_bone(), euler_angle, 0, 0);
@@ -614,24 +618,24 @@ void Gui::createTestPanel() {
                 snprintf(text, 6, "%.5f", value);
                 textBox->set_value(text);
             });
-            mLeftUpperLeftLowerArmSlider_x->set_final_callback([&](float value) {
+            mRotateSlider_x->set_final_callback([&](float value) {
                 std::cout << "Final slider value: " << value << std::endl;
             });
-            mLeftUpperLeftLowerArmTextBox_x->set_font_size(20);
-            mLeftUpperLeftLowerArmTextBox_x->set_alignment(TextBox::Alignment::Right);
+            mRotateTextBox_x->set_font_size(20);
+            mRotateTextBox_x->set_alignment(TextBox::Alignment::Right);
         }
         { // y
-            mLeftUpperLeftLowerArmSlider_y = new Slider(testPanel);
-            mLeftUpperLeftLowerArmSlider_y->set_value(0);
-            mLeftUpperLeftLowerArmSlider_y->set_range(std::pair(-180, 180));
-            mLeftUpperLeftLowerArmSlider_y->set_fixed_width(200);
+            mRotateSlider_y = new Slider(mTestPanel);
+            mRotateSlider_y->set_value(0);
+            mRotateSlider_y->set_range(std::pair(-180, 180));
+            mRotateSlider_y->set_fixed_width(200);
 
-            mLeftUpperLeftLowerArmTextBox_y = new TextBox(testPanel);
-            mLeftUpperLeftLowerArmTextBox_y->set_fixed_size(Vector2i(60, 25));
-            mLeftUpperLeftLowerArmTextBox_y->set_value("0");
+            mRotateTextBox_y = new TextBox(mTestPanel);
+            mRotateTextBox_y->set_fixed_size(Vector2i(60, 25));
+            mRotateTextBox_y->set_value("0");
             auto tmpApp = mApp;
-            auto textBox = mLeftUpperLeftLowerArmTextBox_y;
-            mLeftUpperLeftLowerArmSlider_y->set_callback([textBox, tmpApp](float value) {
+            auto textBox = mRotateTextBox_y;
+            mRotateSlider_y->set_callback([textBox, tmpApp](float value) {
                 auto euler_angle = AngleTool::DegreeToEulerAngles(value);
                 bvhscene::BvhScene *scene = ((bvhscene::BvhScene *) tmpApp->mCurrentScene);
                 scene->GetSkeleton()->RotateJoint(scene->GetRaycastedTarget_bone(), 0, euler_angle, 0);
@@ -639,24 +643,24 @@ void Gui::createTestPanel() {
                 snprintf(text, 6, "%.5f", value);
                 textBox->set_value(text);
             });
-            mLeftUpperLeftLowerArmSlider_y->set_final_callback([&](float value) {
+            mRotateSlider_y->set_final_callback([&](float value) {
                 std::cout << "Final slider value: " << value << std::endl;
             });
-            mLeftUpperLeftLowerArmTextBox_y->set_font_size(20);
-            mLeftUpperLeftLowerArmTextBox_y->set_alignment(TextBox::Alignment::Right);
+            mRotateTextBox_y->set_font_size(20);
+            mRotateTextBox_y->set_alignment(TextBox::Alignment::Right);
         }
         { // z
-            mLeftUpperLeftLowerArmSlider_z = new Slider(testPanel);
-            mLeftUpperLeftLowerArmSlider_z->set_value(0);
-            mLeftUpperLeftLowerArmSlider_z->set_range(std::pair(-180, 180));
-            mLeftUpperLeftLowerArmSlider_z->set_fixed_width(200);
+            mRotateSlider_z = new Slider(mTestPanel);
+            mRotateSlider_z->set_value(0);
+            mRotateSlider_z->set_range(std::pair(-180, 180));
+            mRotateSlider_z->set_fixed_width(200);
 
-            mLeftUpperLeftLowerArmTextBox_z = new TextBox(testPanel);
-            mLeftUpperLeftLowerArmTextBox_z->set_fixed_size(Vector2i(60, 25));
-            mLeftUpperLeftLowerArmTextBox_z->set_value("0");
+            mRotateTextBox_z = new TextBox(mTestPanel);
+            mRotateTextBox_z->set_fixed_size(Vector2i(60, 25));
+            mRotateTextBox_z->set_value("0");
             auto tmpApp = mApp;
-            auto textBox = mLeftUpperLeftLowerArmTextBox_z;
-            mLeftUpperLeftLowerArmSlider_z->set_callback([textBox, tmpApp](float value) {
+            auto textBox = mRotateTextBox_z;
+            mRotateSlider_z->set_callback([textBox, tmpApp](float value) {
                 auto euler_angle = AngleTool::DegreeToEulerAngles(value);
                 bvhscene::BvhScene *scene = ((bvhscene::BvhScene *) tmpApp->mCurrentScene);
                 scene->GetSkeleton()->RotateJoint(scene->GetRaycastedTarget_bone(), 0, 0, euler_angle);
@@ -664,18 +668,25 @@ void Gui::createTestPanel() {
                 snprintf(text, 6, "%.5f", value);
                 textBox->set_value(text);
             });
-            mLeftUpperLeftLowerArmSlider_z->set_final_callback([&](float value) {
+            mRotateSlider_z->set_final_callback([&](float value) {
                 std::cout << "Final slider value: " << value << std::endl;
             });
-            mLeftUpperLeftLowerArmTextBox_z->set_font_size(20);
-            mLeftUpperLeftLowerArmTextBox_z->set_alignment(TextBox::Alignment::Right);
+            mRotateTextBox_z->set_font_size(20);
+            mRotateTextBox_z->set_alignment(TextBox::Alignment::Right);
+        }
+
+        mRotateTitle = new Label(mTestPanel, "Rotate Info", "sans-bold");
+        {
+            angleLabels.push_back(new Label(mTestPanel, "..."));
         }
     }
-    testPanel->set_visible(true);
+    mTestPanel->set_visible(true);
 }
 
 void Gui::onWindowResizeEvent(int width, int height) {
     mScreen->resize_callback_event(width, height);
+
+    mTestPanel->set_position(Vector2i(mScreen->width() - mTestPanel->fixed_width() - 15, 15));
 }
 
 void Gui::onMouseMotionEvent(double x, double y) {
@@ -709,20 +720,45 @@ void Gui::onKeyboardEvent(int key, int scancode, int action, int modifiers) {
 void Gui::onChangeRaycastedTarget_bvhscene(Bone *target) {
     raycastedBone = target;
 
-    auto degrees = AngleTool::QuaternionToEulerAngles(raycastedBone->GetPhysicsObject()->getTransform().getOrientation());
+    auto degrees = AngleTool::QuaternionToEulerAngles(
+            raycastedBone->GetPhysicsObject()->getTransform().getOrientation());
     degrees = AngleTool::EulerAnglesToDegree(degrees);
-    mLeftUpperLeftLowerArmSlider_x->set_value(degrees.x);
-    mLeftUpperLeftLowerArmSlider_y->set_value(degrees.y);
-    mLeftUpperLeftLowerArmSlider_z->set_value(degrees.z);
+    mRotateSlider_x->set_value(degrees.x);
+    mRotateSlider_y->set_value(degrees.y);
+    mRotateSlider_z->set_value(degrees.z);
 
     char text[6];
     snprintf(text, 6, "%.5f", degrees.x);
-    mLeftUpperLeftLowerArmTextBox_x->set_value(text);
+    mRotateTextBox_x->set_value(text);
 
     snprintf(text, 6, "%.5f", degrees.y);
-    mLeftUpperLeftLowerArmTextBox_y->set_value(text);
+    mRotateTextBox_y->set_value(text);
 
     snprintf(text, 6, "%.5f", degrees.z);
-    mLeftUpperLeftLowerArmTextBox_z->set_value(text);
+    mRotateTextBox_z->set_value(text);
+}
+
+void Gui::onChangeBoneTransform_bvhscene(Bone *target) {
+    auto angles = target->GetAngleWithNeighbor();
+
+    for (auto l: angleLabels) {
+        mTestPanel->remove_child(l);
+    }
+    angleLabels.clear();
+    Label *angle_name, *angle_deg;
+    for (auto &[name, deg]: angles) {
+        angle_name = new Label(mTestPanel, name, "sans-bold");
+        angle_deg = new Label(mTestPanel, floatToString(deg, 1));
+        angleLabels.push_back(angle_name);
+        angleLabels.push_back(angle_deg);
+    }
+    mScreen->perform_layout();
+}
+
+void Gui::onCreateSkeleton_bvhscene() {
+    auto scene = (bvhscene::BvhScene *) (mApp->getScenes()[0]);
+    scene->GetSkeleton()->bone_transform_changed.add_handler([this](Bone *target_bone) {
+        onChangeBoneTransform_bvhscene(target_bone);
+    });
 }
 

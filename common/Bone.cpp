@@ -1,7 +1,9 @@
 #include "Bone.h"
 #include "Sphere.h"
 #include "ConvexMesh.h"
+#include "AngleTool.h"
 
+using namespace angleTool;
 using namespace bone;
 
 Bone::Bone(const std::string &bone_name, PhysicsObject *bone_object, BoneType boneType, rp3d::Vector3 &pos,
@@ -22,7 +24,7 @@ void Bone::UpdateChild() {
         // If the shape cBone is sphere, need offset
         float offset = 0;
         if (cBone->GetBoneType() == SPHERE) {
-            offset = ((Sphere *) cObject)->GetRadius() / 2;
+            offset = ((Sphere *) cObject)->GetRadius();
         }
 
         switch (boneType) { // check parent boneType
@@ -40,4 +42,27 @@ void Bone::UpdateChild() {
         cBone->GetPhysicsObject()->setTransform(rp3d::Transform(pos, quatern));
         cBone->UpdateChild();
     }
+}
+
+std::map<std::string, float> Bone::GetAngleWithNeighbor() {
+    std::map<std::string, float> angles;
+
+    rp3d::Quaternion myQuaternion = bone_object->getTransform().getOrientation();
+    rp3d::Vector3 myOrientation = (myQuaternion * default_orientation).getUnit();
+
+    rp3d::Quaternion otherQuatern;
+    rp3d::Vector3 otherOrient;
+    for (auto &[name, cBone]: children) {
+        otherQuatern = cBone->GetPhysicsObject()->getTransform().getOrientation();
+        otherOrient = (otherQuatern * default_orientation).getUnit();
+
+        angles[name] = AngleTool::EulerAnglesToDegree(
+                acos(otherOrient.dot(myOrientation))); // since the orientation vectors are unit len.
+    }
+    { // calculate angle between parent and itself
+        otherQuatern = parent->GetPhysicsObject()->getTransform().getOrientation();
+        otherOrient = (otherQuatern * default_orientation).getUnit();
+        angles["parent"] = AngleTool::EulerAnglesToDegree(acos(otherOrient.dot(myOrientation)));
+    }
+    return angles;
 }

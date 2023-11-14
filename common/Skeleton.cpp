@@ -5,6 +5,7 @@
 using namespace skeleton;
 using namespace bone;
 
+
 Bone *Skeleton::CreateBone(const string &bone_name, Bone *parent, rp3d::Vector3 &pos,
                            const rp3d::Quaternion &orientation, const openglframework::Vector3 &size,
                            rp3d::decimal massDensity, const string &model_file) {
@@ -78,81 +79,115 @@ Skeleton::Skeleton(rp3d::PhysicsCommon &mPhysicsCommon, rp3d::PhysicsWorld *mPhy
           mMeshFolderPath(mMeshFolderPath) {
 
     rp3d::Vector3 ragdollPosition(0, 0, 0);
+    rp3d::Vector3 defaultPosition(0, 0, 0);
+    float mHip_radius = 0.2f;
 
     // --------------- Create the hips Sphere --------------- //
-    mHipBone = CreateBone("hip", nullptr, ragdollPosition, rp3d::Quaternion::identity(), 0.5f, 20);
+    mHipBone = CreateBone("hip", nullptr, ragdollPosition, rp3d::Quaternion::identity(),
+                          mHip_radius, 20);
     mHipBone->GetPhysicsObject()->getRigidBody()->setType(rp3d::BodyType::STATIC);
 
+    // --------------- Create the hips left Cone --------------- //
+    mHipLeftBone = CreateBone("hipLeft", mHipBone, defaultPosition,
+                              rp3d::Quaternion::fromEulerAngles(0, 0, -rp3d::PI_RP3D / 3.0),
+                              {0.15, 1, 0.15}, 9,
+                              "cone_offset.obj");
+
+    // --------------- Create the hips right Cone --------------- //
+    mHipRightBone = CreateBone("hipRight", mHipBone, defaultPosition,
+                               rp3d::Quaternion::fromEulerAngles(0, 0, rp3d::PI_RP3D / 3.0),
+                               {0.15, 1, 0.15}, 9,
+                               "cone_offset.obj");
+
     // --------------- Create the waist Cone --------------- //
-    rp3d::Vector3 mWaistPos = mHipBone->GetPosition() + rp3d::Vector3(0, 0.5, 0);
-    mWaistBone = CreateBone("waist", mHipBone, mWaistPos, rp3d::Quaternion::identity(),
+    mWaistBone = CreateBone("waist", mHipBone, defaultPosition, rp3d::Quaternion::identity(),
                             {0.2, 2, 0.2}, 9,
                             "cone_offset.obj");
 
     // --------------- Create the chest Cone --------------- //
-    rp3d::Vector3 mChestPos = mWaistPos + rp3d::Vector3(0, 2, 0);
-    mChestBone = CreateBone("chest", mWaistBone, mChestPos, rp3d::Quaternion::identity(),
+    mChestBone = CreateBone("chest", mWaistBone, defaultPosition, rp3d::Quaternion::identity(),
                             {0.2, 1.5, 0.2}, 9,
                             "cone_offset.obj");
 
+    // --------------- Create the chest left Cone --------------- //
+    mChestLeftBone = CreateBone("chestLeft", mWaistBone, defaultPosition,
+                                rp3d::Quaternion::fromEulerAngles(0, 0, -rp3d::PI_RP3D / 10.0),
+                                {0.2, 1.5, 0.2}, 9,
+                                "cone_offset.obj");
+
+    // --------------- Create the chest right Cone --------------- //
+    mChestRightBone = CreateBone("chestRight", mWaistBone, defaultPosition,
+                                 rp3d::Quaternion::fromEulerAngles(0, 0, rp3d::PI_RP3D / 10.0),
+                                 {0.2, 1.5, 0.2}, 9,
+                                 "cone_offset.obj");
+
+    // --------------- Create the neck Cone --------------- //
+    mNeckBone = CreateBone("neck", mChestBone, defaultPosition, rp3d::Quaternion::identity(),
+                           {0.2, 0.8, 0.2}, 9,
+                           "cone_offset.obj");
+
     // --------------- Create the head Sphere --------------- //
-    rp3d::Vector3 mHeadPos = mChestPos + rp3d::Vector3(0, 2.25, 0);
-    mHeadBone = CreateBone("head", mChestBone, mHeadPos, rp3d::Quaternion::identity(), 0.75f, 7);
+    mHeadBone = CreateBone("head", mNeckBone, defaultPosition,
+                           rp3d::Quaternion::identity(), 0.75f, 7);
+
+    // --------------- Create the left shoulder Cone --------------- //
+    mLeftShoulderBone = CreateBone("leftShoulder", mChestLeftBone, defaultPosition,
+                                   rp3d::Quaternion::fromEulerAngles(0, 0, -rp3d::PI_RP3D / 1.8),
+                                   {0.15, 1, 0.15}, 8, "cone_offset.obj");
 
     // --------------- Create the left upper arm Cone --------------- //
-    rp3d::Vector3 mLeftUpperArmPos = mChestPos + rp3d::Vector3(1.125, 0.75, 0);
-    mLeftUpperArmBone = CreateBone("leftUpperArm", mChestBone, mLeftUpperArmPos,
+    mLeftUpperArmBone = CreateBone("leftUpperArm", mLeftShoulderBone, defaultPosition,
                                    rp3d::Quaternion::fromEulerAngles(0, 0, -rp3d::PI_RP3D / 2.0),
                                    {0.2, 2, 0.2}, 8, "cone_offset.obj");
 
     // --------------- Create the left lower arm Cone --------------- //
-    rp3d::Vector3 mLeftLowerArmPos = mLeftUpperArmPos + rp3d::Vector3(2, 0, 0);
-    mLeftLowerArmBone = CreateBone("leftLowerArm", mLeftUpperArmBone, mLeftLowerArmPos,
+    mLeftLowerArmBone = CreateBone("leftLowerArm", mLeftUpperArmBone, defaultPosition,
                                    rp3d::Quaternion::fromEulerAngles(0, 0, -rp3d::PI_RP3D / 2.0),
                                    {0.2, 2, 0.2}, 8, "cone_offset.obj");
 
     // --------------- Create the left upper leg Cone --------------- //
-    rp3d::Vector3 mLeftUpperLegPos = mHipBone->GetPosition() + rp3d::Vector3(0.8, 0, 0);
-    mLeftUpperLegBone = CreateBone("leftUpperLeg", mHipBone, mLeftUpperLegPos,
-                                   rp3d::Quaternion::fromEulerAngles(rp3d::PI_RP3D, 0, 0),
-                                   {0.2, 2, 0.2}, 8, "cone_offset.obj");
-
-    // --------------- Create the left lower leg Cone --------------- //
-    rp3d::Vector3 mLeftLowerLegPos = mLeftUpperLegPos + rp3d::Vector3(0, -2, 0);
-    mLeftLowerLegBone = CreateBone("leftLowerLeg", mLeftUpperLegBone, mLeftLowerLegPos,
+    mLeftUpperLegBone = CreateBone("leftUpperLeg", mHipLeftBone, defaultPosition,
                                    rp3d::Quaternion::fromEulerAngles(rp3d::PI_RP3D, 0, 0),
                                    {0.2, 3, 0.2}, 8, "cone_offset.obj");
 
+    // --------------- Create the left lower leg Cone --------------- //
+    mLeftLowerLegBone = CreateBone("leftLowerLeg", mLeftUpperLegBone, defaultPosition,
+                                   rp3d::Quaternion::fromEulerAngles(rp3d::PI_RP3D, 0, 0),
+                                   {0.2, 3.5, 0.2}, 8, "cone_offset.obj");
+
+    // --------------- Create the right shoulder Cone --------------- //
+    mRightShoulderBone = CreateBone("rightShoulder", mChestRightBone, defaultPosition,
+                                    rp3d::Quaternion::fromEulerAngles(0, 0, rp3d::PI_RP3D / 1.8),
+                                    {0.15, 1, 0.15}, 8, "cone_offset.obj");
+
     // --------------- Create the right upper arm Cone --------------- //
-    rp3d::Vector3 mRightUpperArmPos = mChestPos + rp3d::Vector3(-1.125, 0.75, 0);
-    mRightUpperArmBone = CreateBone("rightUpperArm", mChestBone, mRightUpperArmPos,
+    mRightUpperArmBone = CreateBone("rightUpperArm", mRightShoulderBone, defaultPosition,
                                     rp3d::Quaternion::fromEulerAngles(0, 0, rp3d::PI_RP3D / 2.0),
                                     {0.2, 2, 0.2}, 8, "cone_offset.obj");
 
     // --------------- Create the right lower arm Cone --------------- //
-    rp3d::Vector3 mRightLowerArmPos = mRightUpperArmPos + rp3d::Vector3(-2, 0, 0);
-    mRightLowerArmBone = CreateBone("rightLowerArm", mRightUpperArmBone, mRightLowerArmPos,
+    mRightLowerArmBone = CreateBone("rightLowerArm", mRightUpperArmBone, defaultPosition,
                                     rp3d::Quaternion::fromEulerAngles(0, 0, rp3d::PI_RP3D / 2.0),
                                     {0.2, 2, 0.2}, 8, "cone_offset.obj");
 
     // --------------- Create the right upper leg Cone --------------- //
-    rp3d::Vector3 mRightUpperLegPos = mHipBone->GetPosition() + rp3d::Vector3(-0.8, 0, 0);
-    mRightUpperLegBone = CreateBone("rightUpperLeg", mHipBone, mRightUpperLegPos,
-                                    rp3d::Quaternion::fromEulerAngles(rp3d::PI_RP3D, 0, 0),
-                                    {0.2, 2, 0.2}, 8, "cone_offset.obj");
-
-    // --------------- Create the right lower leg Cone --------------- //
-    rp3d::Vector3 mRightLowerLegPos = mRightUpperLegPos + rp3d::Vector3(0, -2, 0);
-    mRightLowerLegBone = CreateBone("rightLowerLeg", mRightUpperLegBone, mRightLowerLegPos,
+    mRightUpperLegBone = CreateBone("rightUpperLeg", mHipRightBone, defaultPosition,
                                     rp3d::Quaternion::fromEulerAngles(rp3d::PI_RP3D, 0, 0),
                                     {0.2, 3, 0.2}, 8, "cone_offset.obj");
 
+    // --------------- Create the right lower leg Cone --------------- //
+    mRightLowerLegBone = CreateBone("rightLowerLeg", mRightUpperLegBone, defaultPosition,
+                                    rp3d::Quaternion::fromEulerAngles(rp3d::PI_RP3D, 0, 0),
+                                    {0.2, 3.5, 0.2}, 8, "cone_offset.obj");
+
+    mHipBone->UpdateChild();
     // --------------- Create the joint between head and chest --------------- //
 
     // Create the joint info object
     rp3d::RigidBody *body1 = mHeadBone->GetPhysicsObject()->getRigidBody();
     rp3d::RigidBody *body2 = mChestBone->GetPhysicsObject()->getRigidBody();
-    rp3d::BallAndSocketJointInfo jointInfo1(body1, body2, mHeadPos + rp3d::Vector3(0, -0.75, 0));
+    rp3d::BallAndSocketJointInfo jointInfo1(body1, body2,
+                                            mHipBone->GetPosition() + rp3d::Vector3(0, -0.75, 0));
     jointInfo1.isCollisionEnabled = false;
     mHeadChestJoint = dynamic_cast<rp3d::BallAndSocketJoint *>(mPhysicsWorld->createJoint(jointInfo1));
     mHeadChestJoint->setConeLimitHalfAngle(40.0 * rp3d::PI_RP3D / 180.0);
@@ -163,7 +198,8 @@ Skeleton::Skeleton(rp3d::PhysicsCommon &mPhysicsCommon, rp3d::PhysicsWorld *mPhy
     // Create the joint info object
     body1 = mChestBone->GetPhysicsObject()->getRigidBody();
     body2 = mLeftUpperArmBone->GetPhysicsObject()->getRigidBody();
-    rp3d::BallAndSocketJointInfo jointInfo2(body1, body2, mLeftUpperArmPos + rp3d::Vector3(-1, 0, 0));
+    rp3d::BallAndSocketJointInfo jointInfo2(body1, body2,
+                                            mLeftUpperArmBone->GetPosition() + rp3d::Vector3(-1, 0, 0));
     jointInfo2.isCollisionEnabled = false;
     mChestLeftUpperArmJoint = dynamic_cast<rp3d::BallAndSocketJoint *>(mPhysicsWorld->createJoint(jointInfo2));
     mChestLeftUpperArmJoint->setConeLimitHalfAngle(180.0 * rp3d::PI_RP3D / 180.0);
@@ -177,7 +213,8 @@ Skeleton::Skeleton(rp3d::PhysicsCommon &mPhysicsCommon, rp3d::PhysicsWorld *mPhy
     rp3d::Vector3 joint2WorldAnchor =
             (body1->getTransform().getPosition() + body2->getTransform().getPosition()) * 0.5f;
     rp3d::Vector3 joint2WorldAxis(0, 0, 1);
-    rp3d::HingeJointInfo jointInfo3(body1, body2, joint2WorldAnchor, joint2WorldAxis);
+    rp3d::HingeJointInfo jointInfo3(body1, body2, joint2WorldAnchor,
+                                    joint2WorldAxis);
     jointInfo3.isCollisionEnabled = false;
     mLeftUpperLeftLowerArmJoint = dynamic_cast<rp3d::HingeJoint *>(mPhysicsWorld->createJoint(jointInfo3));
     mLeftUpperLeftLowerArmJoint->enableLimit(true);
@@ -211,7 +248,8 @@ Skeleton::Skeleton(rp3d::PhysicsCommon &mPhysicsCommon, rp3d::PhysicsWorld *mPhy
     // Create the joint info object
     body1 = mHipBone->GetPhysicsObject()->getRigidBody();
     body2 = mLeftUpperLegBone->GetPhysicsObject()->getRigidBody();
-    rp3d::BallAndSocketJointInfo jointInfo4(body1, body2, mHipBone->GetPosition() + rp3d::Vector3(0.8, 0, 0));
+    rp3d::BallAndSocketJointInfo jointInfo4(body1, body2,
+                                            mHipBone->GetPosition() + rp3d::Vector3(0.8, 0, 0));
     jointInfo4.isCollisionEnabled = false;
     mHipLeftUpperLegJoint = dynamic_cast<rp3d::BallAndSocketJoint *>(mPhysicsWorld->createJoint(jointInfo4));
     mHipLeftUpperLegJoint->setConeLimitHalfAngle(80.0 * rp3d::PI_RP3D / 180.0);
@@ -227,7 +265,8 @@ Skeleton::Skeleton(rp3d::PhysicsCommon &mPhysicsCommon, rp3d::PhysicsWorld *mPhy
     rp3d::Vector3 joint5WorldAxis(1, 0, 0);
     const rp3d::decimal joint5MinAngle = 0.0 * rp3d::PI_RP3D / 180.0;
     const rp3d::decimal joint5MaxAngle = 140.0 * rp3d::PI_RP3D / 180.0;
-    rp3d::HingeJointInfo jointInfo5(body1, body2, joint5WorldAnchor, joint5WorldAxis, joint5MinAngle, joint5MaxAngle);
+    rp3d::HingeJointInfo jointInfo5(body1, body2, joint5WorldAnchor,
+                                    joint5WorldAxis, joint5MinAngle, joint5MaxAngle);
     jointInfo5.isCollisionEnabled = false;
     mLeftUpperLeftLowerLegJoint = dynamic_cast<rp3d::HingeJoint *>(mPhysicsWorld->createJoint(jointInfo5));
 
@@ -236,7 +275,8 @@ Skeleton::Skeleton(rp3d::PhysicsCommon &mPhysicsCommon, rp3d::PhysicsWorld *mPhy
     // Create the joint info object
     body1 = mChestBone->GetPhysicsObject()->getRigidBody();
     body2 = mRightUpperArmBone->GetPhysicsObject()->getRigidBody();
-    rp3d::BallAndSocketJointInfo jointInfo6(body1, body2, mRightUpperArmPos + rp3d::Vector3(1, 0, 0));
+    rp3d::BallAndSocketJointInfo jointInfo6(body1, body2,
+                                            mRightUpperArmBone->GetPosition() + rp3d::Vector3(1, 0, 0));
     jointInfo6.isCollisionEnabled = false;
     mChestRightUpperArmJoint = dynamic_cast<rp3d::BallAndSocketJoint *>(mPhysicsWorld->createJoint(jointInfo6));
     mChestRightUpperArmJoint->setConeLimitHalfAngle(180.0 * rp3d::PI_RP3D / 180.0);
@@ -312,26 +352,6 @@ Skeleton::SetLeftUpperLeftLowerArmJointRotation(rp3d::decimal angleX, rp3d::deci
 
 }
 
-void Skeleton::RotateLeftUpperLeftLowerArmJoint(rp3d::decimal angleX, rp3d::decimal angleY, rp3d::decimal angleZ) {
-    rp3d::Quaternion quatern = mLeftLowerArmBone->GetPhysicsObject()->getTransform().getOrientation();
-
-    rp3d::Quaternion new_quaternion = rp3d::Quaternion::fromEulerAngles(angleX, angleY, angleZ) * quatern;
-
-    mLeftLowerArmBone->GetPhysicsObject()->setTransform(
-            rp3d::Transform(mLeftLowerArmBone->GetPosition(), new_quaternion));
-}
-
-void Skeleton::RotatemChestLeftUpperArmJoint(rp3d::decimal angleX, rp3d::decimal angleY, rp3d::decimal angleZ) {
-    rp3d::Quaternion quatern = mLeftUpperArmBone->GetPhysicsObject()->getTransform().getOrientation();
-
-    rp3d::Quaternion new_quaternion = rp3d::Quaternion::fromEulerAngles(angleX, angleY, angleZ) * quatern;
-
-    mLeftUpperArmBone->GetPhysicsObject()->setTransform(
-            rp3d::Transform(mLeftUpperArmBone->GetPosition(), new_quaternion));
-
-    mLeftUpperArmBone->UpdateChild();
-}
-
 void Skeleton::RotateJoint(Bone *bone, rp3d::decimal angleX, rp3d::decimal angleY, rp3d::decimal angleZ) {
     rp3d::Quaternion quatern = bone->GetPhysicsObject()->getTransform().getOrientation();
 
@@ -340,6 +360,8 @@ void Skeleton::RotateJoint(Bone *bone, rp3d::decimal angleX, rp3d::decimal angle
     bone->GetPhysicsObject()->setTransform(
             rp3d::Transform(bone->GetPosition(), new_quaternion));
 
+    // Event occur!!!
+    bone_transform_changed.fire(bone);
     bone->UpdateChild();
 }
 

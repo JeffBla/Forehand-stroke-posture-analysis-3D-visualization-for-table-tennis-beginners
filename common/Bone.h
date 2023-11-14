@@ -4,6 +4,7 @@
 
 #include <string>
 #include <map>
+#include <vector>
 #include "PhysicsObject.h"
 
 namespace bone {
@@ -31,6 +32,8 @@ namespace bone {
         void AppendChild(Bone *child);
 
         void UpdateChild();
+
+        std::map<std::string, float> GetAngleWithNeighbor();
 
         const std::string &GetBoneName();
 
@@ -67,7 +70,6 @@ namespace bone {
     inline BoneType Bone::GetBoneType() const{
         return boneType;
     }
-
 }
 
 

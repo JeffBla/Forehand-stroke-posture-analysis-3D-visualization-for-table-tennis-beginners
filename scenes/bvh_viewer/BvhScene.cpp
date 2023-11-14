@@ -80,13 +80,14 @@ void BvhScene::createPhysicsWorld() {
     mFloor2->getRigidBody()->setType(rp3d::BodyType::STATIC);
     mPhysicsObjects.push_back(mFloor2);
 
-    // test my skeleton
+    // create my skeleton
     bvh::BVH bvh("out.bvh");
     skeleton1 = new skeleton::Skeleton(mPhysicsCommon, mPhysicsWorld, mPhysicsObjects, mMeshFolderPath,
                                        bvh.GetJoint(0));
     raycastedTarget_bone = skeleton1->FindBone("head");
     raycastedTarget_bone->GetPhysicsObject()->setColor(pickedColor);
     raycastedTarget_bone->GetPhysicsObject()->setSleepingColor(pickedColor);
+    skeleton_created.fire();
 }
 
 // Initialize the bodies positions
@@ -510,22 +511,6 @@ skeleton::Skeleton *BvhScene::GetSkeleton() {
     return skeleton1;
 }
 
-const rp3d::Quaternion &BvhScene::transmitAngleInfo(rp3d::RigidBody *body) {
-    return body->getTransform().getOrientation();
-}
-
-// Called when a mouse button event occurs
-bool BvhScene::mouseButtonEvent(int button, bool down, int mods, double mousePosX, double mousePosY) {
-
-//    // when press button 1 (left button) & SHIFT, see the target angles
-//    if (down && (button == 0) && mods == GLFW_MOD_SHIFT) {
-//        pickWithMouse(mousePosX, mousePosY);
-//        return true;
-//    }
-
-    return SceneDemo::mouseButtonEvent(button, down, mods, mousePosX, mousePosY);
-}
-
 // Called when a raycast hit occurs (show the information of the angles)
 rp3d::decimal BvhScene::notifyRaycastHit(const rp3d::RaycastInfo &raycastInfo) {
 
@@ -545,10 +530,11 @@ void BvhScene::RecordRaycastTarget(Bone *target) {
     raycastedTarget_bone = target;
     raycastedTarget_bone->GetPhysicsObject()->setColor(pickedColor);
     raycastedTarget_bone->GetPhysicsObject()->setSleepingColor(pickedColor);
-    // trigger an event
+    // Event occur!!!
     raycastedTarget_changed.fire(target);
 
     raycastedTarget_bone_Transform = target->GetPhysicsObject()->getTransform();
+    /// Debug
     cout << raycastedTarget_bone_Transform.getPosition().to_string() << endl;
     rp3d::Vector3 tmp = AngleTool::QuaternionToEulerAngles(raycastedTarget_bone_Transform.getOrientation());
     cout << AngleTool::EulerAnglesToDegree(tmp).to_string() << endl;

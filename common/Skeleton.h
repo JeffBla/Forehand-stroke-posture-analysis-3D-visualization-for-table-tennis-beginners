@@ -31,12 +31,14 @@
 
 #include "Bone.h"
 #include "Box.h"
-#include "BVH.h"
 #include "Sphere.h"
-#include "openglframework.h"
 #include "ConvexMesh.h"
+#include "openglframework.h"
+#include "BVH.h"
+#include "Event.h"
 
 using namespace bone;
+using namespace event;
 
 namespace skeleton {
 
@@ -65,11 +67,23 @@ namespace skeleton {
 
         Bone *mHipBone;
 
+        Bone *mHipLeftBone;
+
+        Bone *mHipRightBone;
+
         Bone *mWaistBone;
 
         Bone *mChestBone;
 
+        Bone *mChestLeftBone;
+
+        Bone *mChestRightBone;
+
         Bone *mHeadBone;
+
+        Bone *mNeckBone;
+
+        Bone *mLeftShoulderBone;
 
         Bone *mLeftUpperArmBone;
 
@@ -78,6 +92,8 @@ namespace skeleton {
         Bone *mLeftUpperLegBone;
 
         Bone *mLeftLowerLegBone;
+
+        Bone *mRightShoulderBone;
 
         Bone *mRightUpperArmBone;
 
@@ -135,6 +151,8 @@ namespace skeleton {
 
 
     public:
+        // -------------------- Attributes -------------------- //
+        Event<Bone *> bone_transform_changed;
 
         // -------------------- Methods -------------------- //
 
@@ -150,10 +168,6 @@ namespace skeleton {
         void initBodiesPositions();
 
         void SetLeftUpperLeftLowerArmJointRotation(rp3d::decimal angleX, rp3d::decimal angleY, rp3d::decimal angleZ);
-
-        void RotateLeftUpperLeftLowerArmJoint(rp3d::decimal angleX, rp3d::decimal angleY, rp3d::decimal angleZ);
-
-        void RotatemChestLeftUpperArmJoint(rp3d::decimal angleX, rp3d::decimal angleY, rp3d::decimal angleZ);
 
         void RotateJoint(Bone *bone, rp3d::decimal angleX, rp3d::decimal angleY, rp3d::decimal angleZ);
 

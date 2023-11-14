@@ -71,6 +71,7 @@ class Gui {
         Widget* mSettingsPanel;
         Widget* mPhysicsPanel;
         Widget* mRenderingPanel;
+        Widget* mTestPanel;
 
         // Profiling panel
         Label* mFPSLabel;
@@ -94,16 +95,20 @@ class Gui {
         ComboBox* mComboBoxScenes;
 
         // Test panel
-        TextBox *mLeftUpperLeftLowerArmTextBox_x;
-        Slider *mLeftUpperLeftLowerArmSlider_x;
+        TextBox *mRotateTextBox_x;
+        Slider *mRotateSlider_x;
 
-        TextBox *mLeftUpperLeftLowerArmTextBox_y;
-        Slider *mLeftUpperLeftLowerArmSlider_y;
+        TextBox *mRotateTextBox_y;
+        Slider *mRotateSlider_y;
 
-        TextBox *mLeftUpperLeftLowerArmTextBox_z;
-        Slider *mLeftUpperLeftLowerArmSlider_z;
+        TextBox *mRotateTextBox_z;
+        Slider *mRotateSlider_z;
 
         bone::Bone *raycastedBone;
+
+        Label *mRotateTitle;
+
+        std::vector<Label *> angleLabels;
 
         /// True if the GUI is displayed
         bool mIsDisplayed;
@@ -169,6 +174,10 @@ class Gui {
         void resetWithValuesFromCurrentScene();
 
         void onChangeRaycastedTarget_bvhscene(bone::Bone *target);
+
+        void onChangeBoneTransform_bvhscene(bone::Bone *target);
+
+        void onCreateSkeleton_bvhscene();
 
         static void setScroll(double scrollX, double scrollY);
 
