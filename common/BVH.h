@@ -59,7 +59,7 @@ namespace bvh {
     public:
         BVH();
 
-        BVH(const char *bvh_file_name);
+        explicit BVH(const char *bvh_file_name);
 
         ~BVH();
 
@@ -69,48 +69,68 @@ namespace bvh {
 
     public:
 
-        bool IsLoadSuccess() const { return is_load_success; }
+        bool IsLoadSuccess() const;
 
-        const string &GetFileName() const { return file_name; }
+        const string &GetFileName() const;
 
-        const string &GetMotionName() const { return motion_name; }
+        const string &GetMotionName() const;
 
-        const int GetNumJoint() const { return joints.size(); }
+        const int GetNumJoint() const;
 
-        const Joint *GetJoint(int no) const { return joints[no]; }
+        const Joint *GetJoint(int no) const;
 
-        const int GetNumChannel() const { return channels.size(); }
+        const int GetNumChannel() const;
 
-        const Channel *GetChannel(int no) const { return channels[no]; }
+        const Channel *GetChannel(int no) const;
 
-        const Joint *GetJoint(const string &j) const {
-            map<string, Joint *>::const_iterator i = joint_index.find(j);
-            return (i != joint_index.end()) ? (*i).second : NULL;
-        }
+        const Joint *GetJoint(const string &j) const;
 
-        vector<Joint *> GetJoints() const{return joints;}
+        vector<Joint *> GetJoints() const;
 
-        const Joint *GetJoint(const char *j) const {
-            map<string, Joint *>::const_iterator i = joint_index.find(j);
-            return (i != joint_index.end()) ? (*i).second : NULL;
-        }
+        const Joint *GetJoint(const char *j) const;
 
-        int GetNumFrame() const { return num_frame; }
+        int GetNumFrame() const;
 
-        double GetInterval() const { return interval; }
+        double GetInterval() const;
 
-        double GetMotion(int f, int c) const { return motion[f * num_channel + c]; }
+        double GetMotion(int f, int c) const;
 
-        void SetMotion(int f, int c, double v) { motion[f * num_channel + c] = v; }
-
-    public:
-
-        void RenderFigure(int frame_no, float scale = 1.0f);
-
-        static void RenderFigure(const Joint *root, const double *data, float scale = 1.0f);
-
-        static void RenderBone(float x0, float y0, float z0, float x1, float y1, float z1);
+        void SetMotion(int f, int c, double v);
     };
+
+    inline bool BVH::IsLoadSuccess() const { return is_load_success; }
+
+    inline const string &BVH::GetFileName() const { return file_name; }
+
+    inline const string &BVH::GetMotionName() const { return motion_name; }
+
+    inline const int BVH::GetNumJoint() const { return joints.size(); }
+
+    inline const Joint *BVH::GetJoint(int no) const { return joints[no]; }
+
+    inline const int BVH::GetNumChannel() const { return channels.size(); }
+
+    inline const Channel *BVH::GetChannel(int no) const { return channels[no]; }
+
+    inline const Joint *BVH::GetJoint(const string &j) const {
+        auto i = joint_index.find(j);
+        return (i != joint_index.end()) ? (*i).second : NULL;
+    }
+
+    inline vector<Joint *> BVH::GetJoints() const { return joints; }
+
+    inline const Joint *BVH::GetJoint(const char *j) const {
+        auto i = joint_index.find(j);
+        return (i != joint_index.end()) ? (*i).second : NULL;
+    }
+
+    inline int BVH::GetNumFrame() const { return num_frame; }
+
+    inline double BVH::GetInterval() const { return interval; }
+
+    inline double BVH::GetMotion(int f, int c) const { return motion[f * num_channel + c]; }
+
+    inline void BVH::SetMotion(int f, int c, double v) { motion[f * num_channel + c] = v; }
 
 } // namespace bvh
 
