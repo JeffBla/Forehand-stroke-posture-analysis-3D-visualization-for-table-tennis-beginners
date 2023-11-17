@@ -7,13 +7,13 @@ using namespace angleTool;
 using namespace bone;
 
 Bone::Bone(const std::string &bone_name, PhysicsObject *bone_object, BoneType boneType, rp3d::Vector3 &pos,
-           Bone *parent)
-        : bone_name(bone_name), position(pos), parent(parent), bone_object(bone_object), boneType(boneType) {}
+           Bone *parent, const rp3d::Quaternion &quatern)
+        : bone_name(bone_name), position(pos), parent(parent), bone_object(bone_object), boneType(boneType),
+          origin_quatern(quatern) {}
 
 Bone::~Bone() {
 
 }
-
 
 void Bone::UpdateChild() {
     for (auto &[key, cBone]: children) {
@@ -59,7 +59,7 @@ std::map<std::string, float> Bone::GetAngleWithNeighbor() {
         angles[name] = AngleTool::EulerAnglesToDegree(
                 acos(otherOrient.dot(myOrientation))); // since the orientation vectors are unit len.
     }
-    { // calculate angle between parent and itself
+    if (parent != nullptr) {// calculate angle between parent and itself
         otherQuatern = parent->GetPhysicsObject()->getTransform().getOrientation();
         otherOrient = (otherQuatern * default_orientation).getUnit();
         angles["parent"] = AngleTool::EulerAnglesToDegree(acos(otherOrient.dot(myOrientation)));

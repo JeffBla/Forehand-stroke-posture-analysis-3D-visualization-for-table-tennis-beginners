@@ -21,11 +21,12 @@ namespace bone {
         const std::string bone_name;
         PhysicsObject *bone_object;
         rp3d::Vector3 position;
+        const rp3d::Quaternion origin_quatern;
         Bone *parent;
         std::map<std::string, Bone *> children;
     public:
         Bone(const std::string &bone_name, PhysicsObject *bone_object, BoneType boneType, rp3d::Vector3 &pos,
-             Bone *parent);
+             Bone *parent, const rp3d::Quaternion &quatern);
 
         ~Bone();
 
@@ -41,6 +42,8 @@ namespace bone {
 
         rp3d::Vector3 &GetPosition();
 
+        const rp3d::Quaternion &GetOriginQuaternion();
+
         void SetPosition(rp3d::Vector3 &pos);
 
         BoneType GetBoneType() const;
@@ -54,7 +57,6 @@ namespace bone {
         return bone_name;
     }
 
-
     inline PhysicsObject *Bone::GetPhysicsObject() {
         return bone_object;
     };
@@ -63,11 +65,15 @@ namespace bone {
         return position;
     }
 
+    inline const rp3d::Quaternion &Bone::GetOriginQuaternion() {
+        return origin_quatern;
+    }
+
     inline void Bone::SetPosition(rp3d::Vector3 &pos) {
         position = pos;
     }
 
-    inline BoneType Bone::GetBoneType() const{
+    inline BoneType Bone::GetBoneType() const {
         return boneType;
     }
 }

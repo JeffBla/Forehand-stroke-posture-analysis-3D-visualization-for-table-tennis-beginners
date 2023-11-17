@@ -159,6 +159,11 @@ namespace bvhscene {
 
         skeleton::Skeleton *skeleton1 = nullptr;
 
+        // -------------------- Bvh -------------------- //
+        bool isMotionStart;
+        int timer_bvh;
+        BVH *bvh;
+
         /// World settings
         rp3d::PhysicsWorld::WorldSettings mWorldSettings;
 
@@ -171,6 +176,7 @@ namespace bvhscene {
 
         void RecordRaycastTarget(Bone *target);
 
+        void MotionNext();
     public:
         // -------------------- Methods -------------------- //
 
@@ -179,6 +185,9 @@ namespace bvhscene {
 
         /// Destructor
         virtual ~BvhScene() override;
+
+        /// Update the scene
+        virtual void update() override;
 
         /// Reset the scene
         virtual void reset() override;
@@ -193,6 +202,9 @@ namespace bvhscene {
         void initBodiesPositions();
 
         float notifyRaycastHit(const rp3d::RaycastInfo &raycastInfo) override;
+
+        /// Called when a keyboard event occurs
+        virtual bool keyboardEvent(int key, int scancode, int action, int mods) override;
 
         skeleton::Skeleton *GetSkeleton();
 

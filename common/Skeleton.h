@@ -37,6 +37,7 @@
 #include "BVH.h"
 #include "Event.h"
 
+using namespace bvh;
 using namespace bone;
 using namespace event;
 
@@ -128,6 +129,7 @@ namespace skeleton {
 
         rp3d::HingeJoint *mRightUpperRightLowerLegJoint;
 
+
         // -------------------- Methods -------------------- //
         void ConfigNewObject(PhysicsObject *new_object, const rp3d::Vector3 &pos, const rp3d::Quaternion &orientation);
 
@@ -158,8 +160,7 @@ namespace skeleton {
 
         /// Constructor
         Skeleton(rp3d::PhysicsCommon &mPhysicsCommon, rp3d::PhysicsWorld *mPhysicsWorld,
-                 vector<PhysicsObject *> &mPhysicsObjects, std::string &mMeshFolderPath,
-                 const bvh::Joint *joint);
+                 vector<PhysicsObject *> &mPhysicsObjects, std::string &mMeshFolderPath);
 
         /// Destructor
         ~Skeleton();
@@ -167,7 +168,12 @@ namespace skeleton {
         /// Initialize the bodies positions
         void initBodiesPositions();
 
-        void SetLeftUpperLeftLowerArmJointRotation(rp3d::decimal angleX, rp3d::decimal angleY, rp3d::decimal angleZ);
+        /// Use Euler angle
+        void SetJointRotation(Bone *bone,  rp3d::Vector3 &angle);
+
+        void SetJointRotation(Bone *bone, rp3d::decimal angleX, rp3d::decimal angleY, rp3d::decimal angleZ);
+
+        void RotateJoint(Bone *bone, rp3d::Vector3 &angle);
 
         void RotateJoint(Bone *bone, rp3d::decimal angleX, rp3d::decimal angleY, rp3d::decimal angleZ);
 
@@ -175,6 +181,9 @@ namespace skeleton {
 
         Bone *FindBone(const string &name);
 
+        // -------------------- Motion -------------------- //
+
+        void ApplyBvhMotion(const int time, BVH *bvh);
     };
 
 }  // namespace skeleton

@@ -81,13 +81,13 @@ void BvhScene::createPhysicsWorld() {
     mPhysicsObjects.push_back(mFloor2);
 
     // create my skeleton
-    bvh::BVH bvh("out.bvh");
-    skeleton1 = new skeleton::Skeleton(mPhysicsCommon, mPhysicsWorld, mPhysicsObjects, mMeshFolderPath,
-                                       bvh.GetJoint(0));
+    bvh = new BVH("out.bvh");
+    skeleton1 = new skeleton::Skeleton(mPhysicsCommon, mPhysicsWorld, mPhysicsObjects, mMeshFolderPath);
+    skeleton_created.fire();
+
     raycastedTarget_bone = skeleton1->FindBone("head");
     raycastedTarget_bone->GetPhysicsObject()->setColor(pickedColor);
     raycastedTarget_bone->GetPhysicsObject()->setSleepingColor(pickedColor);
-    skeleton_created.fire();
 }
 
 // Initialize the bodies positions
@@ -139,6 +139,15 @@ void BvhScene::destroyPhysicsWorld() {
     }
 }
 
+
+void BvhScene::update() {
+    if (isMotionStart) {
+        MotionNext();
+    }
+
+    SceneDemo::update();
+}
+
 // Reset the scene
 void BvhScene::reset() {
     SceneDemo::reset();
@@ -146,6 +155,9 @@ void BvhScene::reset() {
     destroyPhysicsWorld();
     createPhysicsWorld();
     initBodiesPositions();
+
+    isMotionStart = false;
+    timer_bvh = 0;
 }
 
 // Create the boxes and joints for the ragdoll
@@ -538,5 +550,25 @@ void BvhScene::RecordRaycastTarget(Bone *target) {
     cout << raycastedTarget_bone_Transform.getPosition().to_string() << endl;
     rp3d::Vector3 tmp = AngleTool::QuaternionToEulerAngles(raycastedTarget_bone_Transform.getOrientation());
     cout << AngleTool::EulerAnglesToDegree(tmp).to_string() << endl;
+}
+
+bool BvhScene::keyboardEvent(int key, int scancode, int action, int mods) {
+    // If the space key has been pressed
+    // start bvh motion
+    if (key == GLFW_KEY_SPACE && action == GLFW_PRESS) {
+        isMotionStart = !isMotionStart;
+        return true;
+    }
+    if (key == GLFW_KEY_N && action == GLFW_PRESS) {
+        MotionNext();
+        return true;
+    }
+
+    return false;
+}
+
+void BvhScene::MotionNext() {
+    skeleton1->ApplyBvhMotion(timer_bvh, bvh);
+    timer_bvh = (timer_bvh + 1) % bvh->GetNumFrame();
 }
 
