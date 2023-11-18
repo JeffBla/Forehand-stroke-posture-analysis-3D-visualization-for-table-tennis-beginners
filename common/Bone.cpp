@@ -7,17 +7,38 @@ using namespace angleTool;
 using namespace bone;
 
 Bone::Bone(const std::string &bone_name, PhysicsObject *bone_object, BoneType boneType, rp3d::Vector3 &pos,
+           Bone *parent, rp3d::Quaternion &quatern)
+        : bone_name(bone_name), position(pos), parent(parent), bone_object(bone_object), boneType(boneType),
+          origin_quatern(quatern), init_quatern(quatern) {}
+
+Bone::Bone(const std::string &bone_name, PhysicsObject *bone_object, BoneType boneType, rp3d::Vector3 &pos,
            Bone *parent, const rp3d::Quaternion &quatern)
         : bone_name(bone_name), position(pos), parent(parent), bone_object(bone_object), boneType(boneType),
-          origin_quatern(quatern) {}
+          origin_quatern(quatern), init_quatern(quatern) {}
 
 Bone::~Bone() {
 
 }
 
-void Bone::UpdateChild() {
+void Bone::UpdateChild(const rp3d::Quaternion &changedQuatern) {
     for (auto &[key, cBone]: children) {
-        rp3d::Quaternion quatern = cBone->GetPhysicsObject()->getTransform().getOrientation();
+        /// rotation
+        auto old_init_euler = AngleTool::QuaternionToEulerAngles(cBone->GetInitQuaternion());
+        auto old_origin_euler = AngleTool::QuaternionToEulerAngles(cBone->GetOriginQuaternion());
+        auto old_rotation_euler = AngleTool::QuaternionToEulerAngles(
+                cBone->GetPhysicsObject()->getTransform().getOrientation());
+
+        auto change_euler = AngleTool::QuaternionToEulerAngles(changedQuatern);
+        cBone->SetOriginQuaternion(rp3d::Quaternion::fromEulerAngles(change_euler.x + old_init_euler.x,
+                                                                     change_euler.y + old_init_euler.y,
+                                                                     change_euler.z + old_init_euler.z));
+        auto new_origin_euler = AngleTool::QuaternionToEulerAngles(cBone->GetOriginQuaternion());
+        auto new_quatern = rp3d::Quaternion::fromEulerAngles(
+                old_rotation_euler.x - old_origin_euler.x + new_origin_euler.x,
+                old_rotation_euler.y - old_origin_euler.y + new_origin_euler.y,
+                old_rotation_euler.z - old_origin_euler.z + new_origin_euler.z);
+
+        /// translation
         rp3d::Vector3 pos;
         auto cObject = cBone->GetPhysicsObject();
 
@@ -39,8 +60,8 @@ void Bone::UpdateChild() {
         }
 
         cBone->SetPosition(pos);
-        cBone->GetPhysicsObject()->setTransform(rp3d::Transform(pos, quatern));
-        cBone->UpdateChild();
+        cBone->GetPhysicsObject()->setTransform(rp3d::Transform(pos, new_quatern));
+        cBone->UpdateChild(changedQuatern);
     }
 }
 

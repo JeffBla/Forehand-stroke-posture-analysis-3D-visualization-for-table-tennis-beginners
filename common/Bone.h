@@ -21,10 +21,14 @@ namespace bone {
         const std::string bone_name;
         PhysicsObject *bone_object;
         rp3d::Vector3 position;
-        const rp3d::Quaternion origin_quatern;
+        const rp3d::Quaternion init_quatern;
+        rp3d::Quaternion origin_quatern;
         Bone *parent;
         std::map<std::string, Bone *> children;
     public:
+        Bone(const std::string &bone_name, PhysicsObject *bone_object, BoneType boneType, rp3d::Vector3 &pos,
+             Bone *parent, rp3d::Quaternion &quatern);
+
         Bone(const std::string &bone_name, PhysicsObject *bone_object, BoneType boneType, rp3d::Vector3 &pos,
              Bone *parent, const rp3d::Quaternion &quatern);
 
@@ -32,7 +36,7 @@ namespace bone {
 
         void AppendChild(Bone *child);
 
-        void UpdateChild();
+        void UpdateChild(const rp3d::Quaternion &changedQuatern);
 
         std::map<std::string, float> GetAngleWithNeighbor();
 
@@ -42,7 +46,11 @@ namespace bone {
 
         rp3d::Vector3 &GetPosition();
 
+        const rp3d::Quaternion &GetInitQuaternion();
+
         const rp3d::Quaternion &GetOriginQuaternion();
+
+        void SetOriginQuaternion(const rp3d::Quaternion &q);
 
         void SetPosition(rp3d::Vector3 &pos);
 
@@ -65,8 +73,16 @@ namespace bone {
         return position;
     }
 
+    inline const rp3d::Quaternion &Bone::GetInitQuaternion(){
+        return init_quatern;
+    }
+
     inline const rp3d::Quaternion &Bone::GetOriginQuaternion() {
         return origin_quatern;
+    }
+
+    inline void Bone::SetOriginQuaternion(const rp3d::Quaternion &q){
+        origin_quatern = q;
     }
 
     inline void Bone::SetPosition(rp3d::Vector3 &pos) {

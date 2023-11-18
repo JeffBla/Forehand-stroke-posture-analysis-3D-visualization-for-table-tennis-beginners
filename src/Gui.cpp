@@ -733,22 +733,25 @@ void Gui::onChangeBoneTransform_bvhscene(Bone *target) {
     // Only change the info if the target is raycasted target
     if (raycastedBone == target) {
         /// Update Slider info
-//        auto degrees = AngleTool::QuaternionToEulerAngles(
-//                raycastedBone->GetPhysicsObject()->getTransform().getOrientation());
-//        degrees = AngleTool::EulerAnglesToDegree(degrees);
-//        mRotateSlider_x->set_value(degrees.x);
-//        mRotateSlider_y->set_value(degrees.y);
-//        mRotateSlider_z->set_value(degrees.z);
-//
-//        char text[6];
-//        snprintf(text, 6, "%.5f", degrees.x);
-//        mRotateTextBox_x->set_value(text);
-//
-//        snprintf(text, 6, "%.5f", degrees.y);
-//        mRotateTextBox_y->set_value(text);
-//
-//        snprintf(text, 6, "%.5f", degrees.z);
-//        mRotateTextBox_z->set_value(text);
+        auto degrees = AngleTool::QuaternionToEulerAngles(
+                raycastedBone->GetPhysicsObject()->getTransform().getOrientation());
+        auto offset_degrees = AngleTool::QuaternionToEulerAngles(raycastedBone->GetOriginQuaternion());
+        degrees = AngleTool::EulerAnglesToDegree(degrees);
+        offset_degrees = AngleTool::EulerAnglesToDegree(offset_degrees);
+        auto result_deg = degrees-offset_degrees;
+        mRotateSlider_x->set_value(result_deg.x);
+        mRotateSlider_y->set_value(result_deg.y);
+        mRotateSlider_z->set_value(result_deg.z);
+
+        char text[6];
+        snprintf(text, 6, "%.5f", result_deg.x);
+        mRotateTextBox_x->set_value(text);
+
+        snprintf(text, 6, "%.5f", result_deg.y);
+        mRotateTextBox_y->set_value(text);
+
+        snprintf(text, 6, "%.5f", result_deg.z);
+        mRotateTextBox_z->set_value(text);
 
         /// Update AngleWithNeighbor
         auto angles = target->GetAngleWithNeighbor();

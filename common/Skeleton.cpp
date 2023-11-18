@@ -164,7 +164,7 @@ Skeleton::Skeleton(rp3d::PhysicsCommon &mPhysicsCommon, rp3d::PhysicsWorld *mPhy
     // --------------- Create the right upper arm Cone --------------- //
     mRightUpperArmBone = CreateBone("rShldr", mRightShoulderBone, defaultPosition,
                                     rp3d::Quaternion::fromEulerAngles(0, 0, rp3d::PI_RP3D / 2.0),
-                                    {0.2, 2, 0.2}, 8, "cube.obj");
+                                    {0.2, 2, 0.2}, 8, "cone_offset.obj");
 
     // --------------- Create the right lower arm Cone --------------- //
     mRightLowerArmBone = CreateBone("rForeArm", mRightUpperArmBone, defaultPosition,
@@ -181,7 +181,7 @@ Skeleton::Skeleton(rp3d::PhysicsCommon &mPhysicsCommon, rp3d::PhysicsWorld *mPhy
                                     rp3d::Quaternion::fromEulerAngles(rp3d::PI_RP3D, 0, 0),
                                     {0.2, 3.5, 0.2}, 8, "cone_offset.obj");
 
-    mHipBone->UpdateChild();
+    mHipBone->UpdateChild(rp3d::Quaternion::identity());
     // --------------- Create the joint between head and chest --------------- //
 
     // Create the joint info object
@@ -349,16 +349,16 @@ void Skeleton::SetJointRotation(Bone *bone, rp3d::Vector3 &angle) {
     SetJointRotation(bone, angle.x, angle.y, angle.z);
 }
 
-
+/// rotate worldly
 void Skeleton::SetJointRotation(Bone *bone, rp3d::decimal angleX, rp3d::decimal angleY, rp3d::decimal angleZ) {
     auto old_eulerAngle = AngleTool::QuaternionToEulerAngles(bone->GetOriginQuaternion());
-    auto new_quatern = rp3d::Quaternion::fromEulerAngles(angleX + old_eulerAngle.x,angleY + old_eulerAngle.y,
+    auto new_quatern = rp3d::Quaternion::fromEulerAngles(angleX + old_eulerAngle.x, angleY + old_eulerAngle.y,
                                                          angleZ + old_eulerAngle.z);
     bone->GetPhysicsObject()->setTransform({bone->GetPosition(), new_quatern});
 
     // Event occur!!!
     bone_transform_changed.fire(bone);
-    bone->UpdateChild();
+    bone->UpdateChild(rp3d::Quaternion::fromEulerAngles(angleX, angleY, angleZ));
 }
 
 void Skeleton::RotateJoint(Bone *bone, rp3d::Vector3 &angle) {
@@ -366,15 +366,17 @@ void Skeleton::RotateJoint(Bone *bone, rp3d::Vector3 &angle) {
 }
 
 void Skeleton::RotateJoint(Bone *bone, rp3d::decimal angleX, rp3d::decimal angleY, rp3d::decimal angleZ) {
-    rp3d::Quaternion quatern = bone->GetPhysicsObject()->getTransform().getOrientation();
+    rp3d::Vector3 old_eulerAngle = AngleTool::QuaternionToEulerAngles(
+            bone->GetPhysicsObject()->getTransform().getOrientation());
 
-    rp3d::Quaternion new_quaternion = rp3d::Quaternion::fromEulerAngles(angleX, angleY, angleZ) * quatern;
+    auto new_quatern = rp3d::Quaternion::fromEulerAngles(angleX + old_eulerAngle.x, angleY + old_eulerAngle.y,
+                                                         angleZ + old_eulerAngle.z);
 
-    bone->GetPhysicsObject()->setTransform({bone->GetPosition(), new_quaternion});
+    bone->GetPhysicsObject()->setTransform({bone->GetPosition(), new_quatern});
 
     // Event occur!!!
     bone_transform_changed.fire(bone);
-    bone->UpdateChild();
+    bone->UpdateChild(rp3d::Quaternion::fromEulerAngles(angleX, angleY, angleZ));
 }
 
 
