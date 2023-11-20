@@ -563,6 +563,10 @@ bool BvhScene::keyboardEvent(int key, int scancode, int action, int mods) {
         MotionNext();
         return true;
     }
+    if (key == GLFW_KEY_T && action == GLFW_PRESS) {
+        skeleton1->SetJointRotation_local(raycastedTarget_bone, 0, M_PI / 6, 0);
+        return true;
+    }
 
     return false;
 }
