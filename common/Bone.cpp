@@ -7,36 +7,59 @@ using namespace angleTool;
 using namespace bone;
 
 Bone::Bone(const std::string &bone_name, PhysicsObject *bone_object, BoneType boneType, rp3d::Vector3 &pos,
-           Bone *parent, rp3d::Quaternion &quatern)
+           Bone *parent, rp3d::Quaternion &quatern, rp3d::Quaternion local_coordinate_quatern)
         : bone_name(bone_name), position(pos), parent(parent), bone_object(bone_object), boneType(boneType),
-          origin_quatern(quatern), init_quatern(quatern) {}
+          origin_quatern(quatern), init_quatern(quatern), local_coordinate_quatern(local_coordinate_quatern),
+          init_local_coordinate_quatern(local_coordinate_quatern) {}
 
 Bone::Bone(const std::string &bone_name, PhysicsObject *bone_object, BoneType boneType, rp3d::Vector3 &pos,
-           Bone *parent, const rp3d::Quaternion &quatern)
+           Bone *parent, const rp3d::Quaternion &quatern, rp3d::Quaternion local_coordinate_quatern)
         : bone_name(bone_name), position(pos), parent(parent), bone_object(bone_object), boneType(boneType),
-          origin_quatern(quatern), init_quatern(quatern) {}
+          origin_quatern(quatern), init_quatern(quatern), local_coordinate_quatern(local_coordinate_quatern),
+          init_local_coordinate_quatern(local_coordinate_quatern) {}
 
 Bone::~Bone() {
 
 }
 
+
+void Bone::SetJointRotation_local(rp3d::Vector3 &angle) {
+    SetJointRotation_local(angle.x, angle.y, angle.z);
+}
+
+
+void Bone::SetJointRotation_local(rp3d::decimal angleX, rp3d::decimal angleY, rp3d::decimal angleZ) {
+    auto q = AngleTool::rotate_local(angleX, angleY, angleZ, local_coordinate_quatern);
+    auto new_quatern = q * origin_quatern;
+
+    bone_object->setTransform({position, new_quatern});
+}
+
 void Bone::UpdateChild(const rp3d::Quaternion &changedQuatern) {
     for (auto &[key, cBone]: children) {
         /// rotation
-        auto old_init_euler = AngleTool::QuaternionToEulerAngles(cBone->GetInitQuaternion());
-        auto old_origin_euler = AngleTool::QuaternionToEulerAngles(cBone->GetOriginQuaternion());
+        auto parentChanged_euler = AngleTool::QuaternionToEulerAngles(origin_quatern * init_quatern.getInverse());
+        auto changedQ_euler = AngleTool::QuaternionToEulerAngles(changedQuatern);
+        auto new_origin_quatern = AngleTool::rotate_local(changedQ_euler.x + parentChanged_euler.x,
+                                                          changedQ_euler.y + parentChanged_euler.y,
+                                                          changedQ_euler.z + parentChanged_euler.z,
+                                                          cBone->GetLocalCoordinateQuatern()) *
+                                  cBone->GetInitQuaternion();
         auto old_rotation_euler = AngleTool::QuaternionToEulerAngles(
-                cBone->GetPhysicsObject()->getTransform().getOrientation());
+                cBone->GetPhysicsObject()->getTransform().getOrientation() * cBone->GetOriginQuaternion().getInverse());
 
-        auto change_euler = AngleTool::QuaternionToEulerAngles(changedQuatern);
-        cBone->SetOriginQuaternion(rp3d::Quaternion::fromEulerAngles(change_euler.x + old_init_euler.x,
-                                                                     change_euler.y + old_init_euler.y,
-                                                                     change_euler.z + old_init_euler.z));
-        auto new_origin_euler = AngleTool::QuaternionToEulerAngles(cBone->GetOriginQuaternion());
-        auto new_quatern = rp3d::Quaternion::fromEulerAngles(
-                old_rotation_euler.x - old_origin_euler.x + new_origin_euler.x,
-                old_rotation_euler.y - old_origin_euler.y + new_origin_euler.y,
-                old_rotation_euler.z - old_origin_euler.z + new_origin_euler.z);
+        cBone->SetOriginQuaternion(new_origin_quatern);
+
+        cBone->SetJointRotation_local(old_rotation_euler.x, old_rotation_euler.y, old_rotation_euler.z);
+
+        auto new_local_coordinate_quatern = AngleTool::rotate_local(changedQ_euler.x + parentChanged_euler.x,
+                                                                    changedQ_euler.y + parentChanged_euler.y,
+                                                                    changedQ_euler.z + parentChanged_euler.z,
+                                                                    cBone->GetLocalCoordinateQuatern()) *
+                                            cBone->GetInitLocalCoordinateQuatern();
+        cBone->SetLocalCoordinateQuatern(new_local_coordinate_quatern);
+
+        auto new_quatern = cBone->GetPhysicsObject()->getTransform().getOrientation();
 
         /// translation
         rp3d::Vector3 pos;
@@ -61,7 +84,9 @@ void Bone::UpdateChild(const rp3d::Quaternion &changedQuatern) {
 
         cBone->SetPosition(pos);
         cBone->GetPhysicsObject()->setTransform(rp3d::Transform(pos, new_quatern));
-        cBone->UpdateChild(changedQuatern);
+
+        // right now it is no good for manipulate skeleton. this is only for bvh
+        cBone->UpdateChild(rp3d::Quaternion::identity());
     }
 }
 

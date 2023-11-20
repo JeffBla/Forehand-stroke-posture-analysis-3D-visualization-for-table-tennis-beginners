@@ -145,11 +145,12 @@ namespace skeleton {
 
         /// Create a Bone with ConvexMesh
         Bone *CreateBone(const string &bone_name, Bone *parent, rp3d::Vector3 &pos, const rp3d::Quaternion &orientation,
-                         const openglframework::Vector3 &size, rp3d::decimal massDensity, const string &model_file);
+                         const openglframework::Vector3 &size, rp3d::decimal massDensity, const string &model_file,
+                         const rp3d::Quaternion &local_coordinate_quatern);
 
         /// Create a Bone with Sphere shape
         Bone *CreateBone(const string &bone_name, Bone *parent, rp3d::Vector3 &pos, const rp3d::Quaternion &orientation,
-                         float radius, rp3d::decimal massDensity);
+                         float radius, rp3d::decimal massDensity, const rp3d::Quaternion &local_coordinate_quatern);
 
 
     public:
@@ -168,10 +169,23 @@ namespace skeleton {
         /// Initialize the bodies positions
         void initBodiesPositions();
 
-        /// Use Euler angle
-        void SetJointRotation(Bone *bone,  rp3d::Vector3 &angle);
+        /** SetJointRotation
+         * @details rotate worldly & use Euler angle
+         * @param bone
+         * @param angle
+         */
+        void SetJointRotation(Bone *bone, rp3d::Vector3 &angle);
 
         void SetJointRotation(Bone *bone, rp3d::decimal angleX, rp3d::decimal angleY, rp3d::decimal angleZ);
+
+	/** SetJointRotation_local
+         * @details rotate locally & use Euler angle
+         * @param bone
+         * @param angle
+         */
+        void SetJointRotation_local(Bone *bone, rp3d::Vector3 &angle);
+
+        void SetJointRotation_local(Bone *bone, rp3d::decimal angleX, rp3d::decimal angleY, rp3d::decimal angleZ);
 
         void RotateJoint(Bone *bone, rp3d::Vector3 &angle);
 
