@@ -43,6 +43,10 @@ namespace bone {
 
         void SetJointRotation_local( rp3d::decimal angleX, rp3d::decimal angleY, rp3d::decimal angleZ);
 
+        void SetJointRotation_bvh(rp3d::Vector3 &angle);
+
+        void SetJointRotation_bvh( rp3d::decimal angleX, rp3d::decimal angleY, rp3d::decimal angleZ);
+
         void UpdateChild(const rp3d::Quaternion &changedQuatern);
 
         std::map<std::string, float> GetAngleWithNeighbor();
@@ -118,7 +122,6 @@ namespace bone {
     inline BoneType Bone::GetBoneType() const {
         return boneType;
     }
-
 }
 
 

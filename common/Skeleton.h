@@ -129,6 +129,8 @@ namespace skeleton {
 
         rp3d::HingeJoint *mRightUpperRightLowerLegJoint;
 
+        BVH *bvh;
+        int bvh_frame;
 
         // -------------------- Methods -------------------- //
         void ConfigNewObject(PhysicsObject *new_object, const rp3d::Vector3 &pos, const rp3d::Quaternion &orientation);
@@ -161,13 +163,10 @@ namespace skeleton {
 
         /// Constructor
         Skeleton(rp3d::PhysicsCommon &mPhysicsCommon, rp3d::PhysicsWorld *mPhysicsWorld,
-                 vector<PhysicsObject *> &mPhysicsObjects, std::string &mMeshFolderPath);
+                 vector<PhysicsObject *> &mPhysicsObjects, std::string &mMeshFolderPath, BVH *bvh);
 
         /// Destructor
         ~Skeleton();
-
-        /// Initialize the bodies positions
-        void initBodiesPositions();
 
         /** SetJointRotation
          * @details rotate worldly & use Euler angle
@@ -178,7 +177,7 @@ namespace skeleton {
 
         void SetJointRotation(Bone *bone, rp3d::decimal angleX, rp3d::decimal angleY, rp3d::decimal angleZ);
 
-	/** SetJointRotation_local
+	    /** SetJointRotation_local
          * @details rotate locally & use Euler angle
          * @param bone
          * @param angle
@@ -186,6 +185,9 @@ namespace skeleton {
         void SetJointRotation_local(Bone *bone, rp3d::Vector3 &angle);
 
         void SetJointRotation_local(Bone *bone, rp3d::decimal angleX, rp3d::decimal angleY, rp3d::decimal angleZ);
+
+        void SetJointRotation_bvh(Bone *bone, reactphysics3d::decimal angleX, reactphysics3d::decimal angleY,
+                                  reactphysics3d::decimal angleZ);
 
         void RotateJoint(Bone *bone, rp3d::Vector3 &angle);
 
@@ -197,7 +199,9 @@ namespace skeleton {
 
         // -------------------- Motion -------------------- //
 
-        void ApplyBvhMotion(const int time, BVH *bvh);
+        void NextBvhMotion();
+
+        void ApplyBvhMotion(const int frame, BVH *other_bvh);
     };
 
 }  // namespace skeleton

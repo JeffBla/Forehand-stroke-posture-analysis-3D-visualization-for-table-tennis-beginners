@@ -35,6 +35,26 @@ void Bone::SetJointRotation_local(rp3d::decimal angleX, rp3d::decimal angleY, rp
     bone_object->setTransform({position, new_quatern});
 }
 
+
+void Bone::SetJointRotation_bvh(rp3d::Vector3 &angle) {
+    SetJointRotation_bvh(angle.x, angle.y, angle.z);
+}
+
+void Bone::SetJointRotation_bvh(rp3d::decimal angleX, rp3d::decimal angleY, rp3d::decimal angleZ) {
+    auto qZ = AngleTool::rotate_local(0, 0, angleZ, local_coordinate_quatern);
+    auto local_coordinate_quatern_z = qZ * local_coordinate_quatern;
+
+    auto qX= AngleTool::rotate_local(angleX, 0, 0, local_coordinate_quatern_z);
+    auto local_coordinate_quatern_x = qX * local_coordinate_quatern_z;
+
+    auto qY = AngleTool::rotate_local(0, angleY, 0, local_coordinate_quatern_x);
+    auto local_coordinate_quatern_y = qY * local_coordinate_quatern_x;
+
+    auto new_quatern = local_coordinate_quatern_y * origin_quatern;
+
+    bone_object->setTransform({position, new_quatern});
+}
+
 void Bone::UpdateChild(const rp3d::Quaternion &changedQuatern) {
     for (auto &[key, cBone]: children) {
         /// rotation
