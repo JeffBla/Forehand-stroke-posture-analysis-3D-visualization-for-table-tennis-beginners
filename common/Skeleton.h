@@ -186,8 +186,8 @@ namespace skeleton {
 
         void SetJointRotation_local(Bone *bone, rp3d::decimal angleX, rp3d::decimal angleY, rp3d::decimal angleZ);
 
-        void SetJointRotation_bvh(Bone *bone, reactphysics3d::decimal angleX, reactphysics3d::decimal angleY,
-                                  reactphysics3d::decimal angleZ);
+        void SetJointRotation_bvh(Bone *bone, rp3d::decimal angleX, rp3d::decimal angleY, rp3d::decimal angleZ,
+                                  const bvh::Joint *bone_bvh);
 
         void RotateJoint(Bone *bone, rp3d::Vector3 &angle);
 

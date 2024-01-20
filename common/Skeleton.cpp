@@ -95,15 +95,16 @@ Skeleton::Skeleton(rp3d::PhysicsCommon &mPhysicsCommon, rp3d::PhysicsWorld *mPhy
 
         // --------------- Create the hips left Cone --------------- //
         mHipLeftBone = CreateBone("lButtock", mHipBone, defaultPosition,
-                                  rp3d::Quaternion::fromEulerAngles(0, 0, -rp3d::PI_RP3D / 3.0),
+                                  rp3d::Quaternion::fromEulerAngles(0, 0, -rp3d::PI_RP3D * 0.64647),
                                   {0.15, 1, 0.15}, 9, "cone_offset.obj",
-                                  rp3d::Quaternion::fromEulerAngles(0, 0, rp3d::PI_RP3D / 2.0 - rp3d::PI_RP3D / 3.0));
+                                  rp3d::Quaternion::fromEulerAngles(0, 0, rp3d::PI_RP3D / 2 - rp3d::PI_RP3D * 0.64647));
 
         // --------------- Create the hips right Cone --------------- //
         mHipRightBone = CreateBone("rButtock", mHipBone, defaultPosition,
-                                   rp3d::Quaternion::fromEulerAngles(0, 0, rp3d::PI_RP3D / 3.0),
+                                   rp3d::Quaternion::fromEulerAngles(0, 0, rp3d::PI_RP3D * 0.64647),
                                    {0.15, 1, 0.15}, 9, "cone_offset.obj",
-                                   rp3d::Quaternion::fromEulerAngles(0, 0, rp3d::PI_RP3D / 3.0 - rp3d::PI_RP3D / 2.0));
+                                   rp3d::Quaternion::fromEulerAngles(0, 0,
+                                                                     rp3d::PI_RP3D * 0.64647 - rp3d::PI_RP3D / 2));
 
         // --------------- Create the waist Cone --------------- //
         mWaistBone = CreateBone("abdomen", mHipBone, defaultPosition, rp3d::Quaternion::identity(),
@@ -114,14 +115,14 @@ Skeleton::Skeleton(rp3d::PhysicsCommon &mPhysicsCommon, rp3d::PhysicsWorld *mPhy
                                 {0.2, 1.5, 0.2}, 9, "cone_offset.obj", rp3d::Quaternion::identity());
 
         // --------------- Create the chest left Cone --------------- //
-        mChestLeftBone = CreateBone("lCollar", mWaistBone, defaultPosition,
+        mChestLeftBone = CreateBone("lChestCollar", mWaistBone, defaultPosition,
                                     rp3d::Quaternion::fromEulerAngles(0, 0, -rp3d::PI_RP3D / 10.0),
                                     {0.2, 1.5, 0.2}, 9, "cone_offset.obj",
                                     rp3d::Quaternion::fromEulerAngles(0, 0,
                                                                       rp3d::PI_RP3D / 2.0 - rp3d::PI_RP3D / 10.0));
 
         // --------------- Create the chest right Cone --------------- //
-        mChestRightBone = CreateBone("rCollar", mWaistBone, defaultPosition,
+        mChestRightBone = CreateBone("rChestCollar", mWaistBone, defaultPosition,
                                      rp3d::Quaternion::fromEulerAngles(0, 0, rp3d::PI_RP3D / 10.0),
                                      {0.2, 1.5, 0.2}, 9, "cone_offset.obj",
                                      rp3d::Quaternion::fromEulerAngles(0, 0,
@@ -137,10 +138,10 @@ Skeleton::Skeleton(rp3d::PhysicsCommon &mPhysicsCommon, rp3d::PhysicsWorld *mPhy
 
         // --------------- Create the left shoulder Cone --------------- //
         mLeftShoulderBone = CreateBone("lCollar", mChestLeftBone, defaultPosition,
-                                       rp3d::Quaternion::fromEulerAngles(0, 0, -rp3d::PI_RP3D / 1.8),
+                                       rp3d::Quaternion::fromEulerAngles(0, 0, -rp3d::PI_RP3D * 0.5696 /* 102 deg */),
                                        {0.15, 1, 0.15}, 8, "cone_offset.obj",
                                        rp3d::Quaternion::fromEulerAngles(0, 0,
-                                                                         rp3d::PI_RP3D / 2.0 - rp3d::PI_RP3D / 1.8));
+                                                                         rp3d::PI_RP3D / 2.0 - rp3d::PI_RP3D * 0.5696));
 
         // --------------- Create the left upper arm Cone --------------- //
         mLeftUpperArmBone = CreateBone("lShldr", mLeftShoulderBone, defaultPosition,
@@ -164,10 +165,11 @@ Skeleton::Skeleton(rp3d::PhysicsCommon &mPhysicsCommon, rp3d::PhysicsWorld *mPhy
 
         // --------------- Create the right shoulder Cone --------------- //
         mRightShoulderBone = CreateBone("rCollar", mChestRightBone, defaultPosition,
-                                        rp3d::Quaternion::fromEulerAngles(0, 0, rp3d::PI_RP3D / 1.8),
+                                        rp3d::Quaternion::fromEulerAngles(0, 0, rp3d::PI_RP3D * 0.5696 /* 102 deg */),
                                         {0.15, 1, 0.15}, 8, "cone_offset.obj",
                                         rp3d::Quaternion::fromEulerAngles(0, 0,
-                                                                          rp3d::PI_RP3D / 1.8 - rp3d::PI_RP3D / 2.0));
+                                                                          rp3d::PI_RP3D * 0.5696 -
+                                                                          rp3d::PI_RP3D / 2.0));
 
         // --------------- Create the right upper arm Cone --------------- //
         mRightUpperArmBone = CreateBone("rShldr", mRightShoulderBone, defaultPosition,
@@ -365,8 +367,9 @@ void Skeleton::SetJointRotation_local(Bone *bone, rp3d::decimal angleX, rp3d::de
     bone->UpdateChild(rp3d::Quaternion::fromEulerAngles(angleX, angleY, angleZ));
 }
 
-void Skeleton::SetJointRotation_bvh(Bone *bone, rp3d::decimal angleX, rp3d::decimal angleY, rp3d::decimal angleZ) {
-    bone->SetJointRotation_bvh(angleX, angleY, angleZ);
+void Skeleton::SetJointRotation_bvh(Bone *bone, rp3d::decimal angleX, rp3d::decimal angleY, rp3d::decimal angleZ,
+                                    const bvh::Joint *bone_bvh) {
+    bone->SetJointRotation_bvh(angleX, angleY, angleZ, bone_bvh);
 
     // Event occur!!!
     bone_transform_changed.fire(bone);
@@ -421,7 +424,7 @@ void Skeleton::ApplyBvhMotion(const int frame, BVH *other_bvh) {
     rp3d::Vector3 pos;
     rp3d::Vector3 angle;
     for (auto &[name, bone]: bones) {
-        if (name == "hip" || name == "rCollar" || name == "lCollar" || name == "rButtock" || name == "lButtock")
+        if (name == "lChestCollar" || name == "rChestCollar" )
             continue;
         pos = bone->GetPosition();
 
@@ -453,7 +456,7 @@ void Skeleton::ApplyBvhMotion(const int frame, BVH *other_bvh) {
         bone->GetPhysicsObject()->setTransform({pos, quatern});
         // rotate
         angle = AngleTool::DegreeToEulerAngles(angle);
-        SetJointRotation_bvh(bone, angle.x, angle.y, angle.z);
+        SetJointRotation_bvh(bone, angle.x, angle.y, angle.z, bone_bvh);
 
         bone_transform_changed.fire(bone);
     }

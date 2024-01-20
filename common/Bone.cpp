@@ -1,7 +1,11 @@
+#include <queue>
+
+
 #include "Bone.h"
 #include "Sphere.h"
 #include "ConvexMesh.h"
 #include "AngleTool.h"
+#include "BVH.h"
 
 using namespace angleTool;
 using namespace bone;
@@ -36,21 +40,49 @@ void Bone::SetJointRotation_local(rp3d::decimal angleX, rp3d::decimal angleY, rp
 }
 
 
-void Bone::SetJointRotation_bvh(rp3d::Vector3 &angle) {
-    SetJointRotation_bvh(angle.x, angle.y, angle.z);
+rp3d::Quaternion
+Bone::_SetJointRotation_bvh(rp3d::decimal angleX, rp3d::decimal angleY, rp3d::decimal angleZ,
+                            const bvh::Joint *bvh_joint) {
+    auto result_local_coordinate_quatern = local_coordinate_quatern;
+    rp3d::Quaternion rotation_q;
+    auto bone_channel = bvh_joint->channels;
+    for (auto &channel: bone_channel) {
+        auto channel_type = channel->type;
+        switch (channel_type) {
+            case X_ROTATION:
+                rotation_q = AngleTool::rotate_local(angleX, 0, 0, result_local_coordinate_quatern);
+                result_local_coordinate_quatern = rotation_q * result_local_coordinate_quatern;
+                break;
+            case Y_ROTATION:
+                rotation_q = AngleTool::rotate_local(0, angleY, 0, result_local_coordinate_quatern);
+                result_local_coordinate_quatern = rotation_q * result_local_coordinate_quatern;
+                break;
+            case Z_ROTATION:
+                rotation_q = AngleTool::rotate_local(0, 0, angleZ, result_local_coordinate_quatern);
+                result_local_coordinate_quatern = rotation_q * result_local_coordinate_quatern;
+                break;
+            default:
+                break;
+        }
+    }
+    return rotation_q;
 }
 
-void Bone::SetJointRotation_bvh(rp3d::decimal angleX, rp3d::decimal angleY, rp3d::decimal angleZ) {
-    auto qZ = AngleTool::rotate_local(0, 0, angleZ, local_coordinate_quatern);
-    auto local_coordinate_quatern_z = qZ * local_coordinate_quatern;
+void Bone::SetJointRotation_bvh(rp3d::Vector3 &angle, const bvh::Joint *bvh_joint) {
+    SetJointRotation_bvh(angle.x, angle.y, angle.z, bvh_joint);
+}
 
-    auto qX= AngleTool::rotate_local(angleX, 0, 0, local_coordinate_quatern_z);
-    auto local_coordinate_quatern_x = qX * local_coordinate_quatern_z;
+void Bone::SetJointRotation_bvh(rp3d::decimal angleX, rp3d::decimal angleY, rp3d::decimal angleZ,
+                                const bvh::Joint *bvh_joint) {
+    local_angle = {angleX, angleY, angleZ};
+    this->bvh_joint = bvh_joint;
 
-    auto qY = AngleTool::rotate_local(0, angleY, 0, local_coordinate_quatern_x);
-    auto local_coordinate_quatern_y = qY * local_coordinate_quatern_x;
-
-    auto new_quatern = local_coordinate_quatern_y * origin_quatern;
+    auto result_q = _SetJointRotation_bvh(angleX, angleY, angleZ, bvh_joint);
+//    if (bone_name == "lThigh")
+//        result_q = AngleTool::rotate_local(0, 0, rp3d::PI_RP3D / 20, local_coordinate_quatern) * result_q;
+//    else if (bone_name == "rThigh")
+//        result_q = AngleTool::rotate_local(0, 0, -rp3d::PI_RP3D / 20, local_coordinate_quatern) * result_q;
+    auto new_quatern = result_q * origin_quatern;
 
     bone_object->setTransform({position, new_quatern});
 }
@@ -60,24 +92,17 @@ void Bone::UpdateChild(const rp3d::Quaternion &changedQuatern) {
         /// rotation
         auto parentChanged_euler = AngleTool::QuaternionToEulerAngles(origin_quatern * init_quatern.getInverse());
         auto changedQ_euler = AngleTool::QuaternionToEulerAngles(changedQuatern);
-        auto new_origin_quatern = AngleTool::rotate_local(changedQ_euler.x + parentChanged_euler.x,
+        auto changedQ = rp3d::Quaternion::fromEulerAngles(changedQ_euler.x + parentChanged_euler.x,
                                                           changedQ_euler.y + parentChanged_euler.y,
-                                                          changedQ_euler.z + parentChanged_euler.z,
-                                                          cBone->GetLocalCoordinateQuatern()) *
-                                  cBone->GetInitQuaternion();
-        auto old_rotation_euler = AngleTool::QuaternionToEulerAngles(
-                cBone->GetPhysicsObject()->getTransform().getOrientation() * cBone->GetOriginQuaternion().getInverse());
-
+                                                          changedQ_euler.z + parentChanged_euler.z);
+        auto new_origin_quatern = changedQ * cBone->GetInitQuaternion();
         cBone->SetOriginQuaternion(new_origin_quatern);
 
-        cBone->SetJointRotation_local(old_rotation_euler.x, old_rotation_euler.y, old_rotation_euler.z);
-
-        auto new_local_coordinate_quatern = AngleTool::rotate_local(changedQ_euler.x + parentChanged_euler.x,
-                                                                    changedQ_euler.y + parentChanged_euler.y,
-                                                                    changedQ_euler.z + parentChanged_euler.z,
-                                                                    cBone->GetLocalCoordinateQuatern()) *
-                                            cBone->GetInitLocalCoordinateQuatern();
+        auto new_local_coordinate_quatern = changedQ * cBone->GetInitLocalCoordinateQuatern();
         cBone->SetLocalCoordinateQuatern(new_local_coordinate_quatern);
+
+        if (bvh_joint != nullptr)
+            cBone->SetJointRotation_bvh(cBone->GetLocalAngle(), bvh_joint);
 
         auto new_quatern = cBone->GetPhysicsObject()->getTransform().getOrientation();
 
@@ -102,7 +127,7 @@ void Bone::UpdateChild(const rp3d::Quaternion &changedQuatern) {
                                  (((ConvexMesh *) bone_object)->GetSize().y + offset);
         }
 
-        cBone->SetPosition(pos);
+        cBone->SetPosition(pos); // The position is for the object bone, not physic object
         cBone->GetPhysicsObject()->setTransform(rp3d::Transform(pos, new_quatern));
 
         // right now it is no good for manipulate skeleton. this is only for bvh
