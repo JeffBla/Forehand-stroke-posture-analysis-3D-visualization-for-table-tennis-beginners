@@ -29,6 +29,10 @@
 // Libraries
 #include <reactphysics3d/reactphysics3d.h>
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 #include "Bone.h"
 #include "Box.h"
 #include "Sphere.h"
@@ -36,6 +40,8 @@
 #include "openglframework.h"
 #include "BVH.h"
 #include "Event.h"
+
+#define SCALE 0.2f
 
 using namespace bvh;
 using namespace bone;
@@ -104,7 +110,7 @@ namespace skeleton {
 
         Bone *mRightLowerLegBone;
 
-        std::map<std::string, Bone *> bones;
+        std::vector<Bone *> bones;
 
         // Joint
         rp3d::BallAndSocketJoint *mHeadChestJoint;

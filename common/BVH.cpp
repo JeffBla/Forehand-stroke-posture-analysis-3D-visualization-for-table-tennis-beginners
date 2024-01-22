@@ -106,7 +106,10 @@ void BVH::Load(const char *bvh_file_name) {
             (strcmp(token, "JOINT") == 0)) {
             new_joint = new Joint();
             new_joint->index = joints.size();
-            new_joint->parent = joint;
+            if (joint != nullptr) {
+                new_joint->parents.assign(joint->parents.begin(), joint->parents.end());
+                new_joint->parents.push_back(joint);
+            }
             new_joint->has_site = false;
             new_joint->offset[0] = 0.0;
             new_joint->offset[1] = 0.0;
@@ -157,6 +160,7 @@ void BVH::Load(const char *bvh_file_name) {
             token = strtok(nullptr, separater);
             joint->channels.resize(token ? atoi(token) : 0);
 
+            rotationOrder.emplace_back(3);
             for (i = 0; i < joint->channels.size(); i++) {
                 Channel *channel = new Channel();
                 channel->joint = joint;
@@ -165,13 +169,16 @@ void BVH::Load(const char *bvh_file_name) {
                 joint->channels[i] = channel;
 
                 token = strtok(nullptr, separater);
-                if (strcmp(token, "Xrotation") == 0)
+                if (strcmp(token, "Xrotation") == 0) {
                     channel->type = X_ROTATION;
-                else if (strcmp(token, "Yrotation") == 0)
+                    rotationOrder.back().push_back(channel->type);
+                } else if (strcmp(token, "Yrotation") == 0) {
                     channel->type = Y_ROTATION;
-                else if (strcmp(token, "Zrotation") == 0)
+                    rotationOrder.back().push_back(channel->type);
+                } else if (strcmp(token, "Zrotation") == 0) {
                     channel->type = Z_ROTATION;
-                else if (strcmp(token, "Xposition") == 0)
+                    rotationOrder.back().push_back(channel->type);
+                } else if (strcmp(token, "Xposition") == 0)
                     channel->type = X_POSITION;
                 else if (strcmp(token, "Yposition") == 0)
                     channel->type = Y_POSITION;

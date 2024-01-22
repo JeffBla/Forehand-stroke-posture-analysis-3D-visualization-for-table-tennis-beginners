@@ -78,10 +78,6 @@ void Bone::SetJointRotation_bvh(rp3d::decimal angleX, rp3d::decimal angleY, rp3d
     this->bvh_joint = bvh_joint;
 
     auto result_q = _SetJointRotation_bvh(angleX, angleY, angleZ, bvh_joint);
-//    if (bone_name == "lThigh")
-//        result_q = AngleTool::rotate_local(0, 0, rp3d::PI_RP3D / 20, local_coordinate_quatern) * result_q;
-//    else if (bone_name == "rThigh")
-//        result_q = AngleTool::rotate_local(0, 0, -rp3d::PI_RP3D / 20, local_coordinate_quatern) * result_q;
     auto new_quatern = result_q * origin_quatern;
 
     bone_object->setTransform({position, new_quatern});

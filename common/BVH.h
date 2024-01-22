@@ -27,7 +27,7 @@ namespace bvh {
         string name;
         int index;
 
-        Joint *parent;
+        std::vector<Joint *> parents;
         vector<Joint *> children;
 
         double offset[3];
@@ -50,6 +50,7 @@ namespace bvh {
         vector<Channel *> channels;
         vector<Joint *> joints;
         map<string, Joint *> joint_index;
+        vector<vector<ChannelEnum>> rotationOrder;
 
         int num_frame;
         double interval;
@@ -96,6 +97,9 @@ namespace bvh {
         double GetMotion(int f, int c) const;
 
         void SetMotion(int f, int c, double v);
+
+        const vector<ChannelEnum> &GetRotationOrder(int index);
+
     };
 
     inline bool BVH::IsLoadSuccess() const { return is_load_success; }
@@ -132,6 +136,10 @@ namespace bvh {
 
     inline void BVH::SetMotion(int f, int c, double v) { motion[f * num_channel + c] = v; }
 
+
+    inline const vector<ChannelEnum> &BVH::GetRotationOrder(int index) {
+        return rotationOrder[index];
+    }
 } // namespace bvh
 
 #endif // _BVH_H_
