@@ -266,5 +266,6 @@ void BVH::SetCurrentFrame(int frame) {
                     break;
             }
         }
+        pos *= position_scale;
     }
 }

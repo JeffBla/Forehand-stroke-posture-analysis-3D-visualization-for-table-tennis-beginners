@@ -76,9 +76,6 @@ Skeleton::Skeleton(rp3d::PhysicsCommon &mPhysicsCommon, rp3d::PhysicsWorld *mPhy
                    vector<PhysicsObject *> &mPhysicsObjects, std::string &mMeshFolderPath, BVH *bvh)
         : mPhysicsCommon(mPhysicsCommon), mPhysicsWorld(mPhysicsWorld), mPhysicsObjects(mPhysicsObjects),
           mMeshFolderPath(mMeshFolderPath), bvh(bvh) {
-
-    InitBvhMotion();
-
     {
         ragdollPosition.setAllValues(0, 0, 0);
         defaultPosition.setAllValues(0, 0, 0);
@@ -101,12 +98,15 @@ Skeleton::Skeleton(rp3d::PhysicsCommon &mPhysicsCommon, rp3d::PhysicsWorld *mPhy
                 length *= SCALE;
                 bone = CreateBone(joint->name, bones[joint->parents.back()->name], defaultPosition,
                                   rp3d::Quaternion::identity(),
-                                  {0.15, length, 0.15}, 9, "cone_offset_down.obj",
+                                  {0.15, length, 0.15}, 9, "cone_offset.obj",
                                   rp3d::Quaternion::identity());
                 bones[joint->name] = bone;
             }
         }
     }// Physic
+
+    InitBvhMotion();
+    bvh->SetPositionScale(SCALE);
 }
 
 Skeleton::~Skeleton() {
@@ -224,9 +224,10 @@ void Skeleton::ApplyBvhMotion(const int frame) {
         glm::vec3 pos(positions[id]);
 
         // Move to current joint's position
-        translations[id] = glm::translate(translations[id], pos);
+        if (joint_name == "hip")
+            translations[id] = glm::translate(translations[id], pos);
 
-        // rotate current joint object to turn to parent
+        // rotate current joint object to turn to child
         pos = glm::normalize(pos);
         glm::vec3 orig = glm::vec3(0.0, -1.0, 0.0);
         glm::vec3 cross = glm::normalize(glm::cross(pos, orig));
@@ -241,7 +242,7 @@ void Skeleton::ApplyBvhMotion(const int frame) {
             translations[id] = glm::rotate(translations[id], glm::radians(180.0f),
                                            glm::vec3(0.0, 1.0, 0.0));
         }
-//        bone_transform_changed.fire(bones[id]);
+//        bone_transform_changed.fire(bones[joint_name]);
 
         // use result
         if (std::find(target_bone_names.begin(), target_bone_names.end(), joint_name) !=

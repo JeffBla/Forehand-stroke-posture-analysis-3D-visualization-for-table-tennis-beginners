@@ -59,7 +59,7 @@ namespace bvh {
         int num_frame;
         double interval;
         double *motion;
-
+        float position_scale = 0.1f;
         int current_frame;
         vector<glm::vec3> current_frame_positions;
         vector<glm::vec3> current_frame_angles;
@@ -76,11 +76,11 @@ namespace bvh {
 
         void Load(const char *bvh_file_name);
 
-    public:
+        void SetCurrentFrame(int frame);
+
+        // -------------------- Setter & Getter -------------------- //
 
         bool IsLoadSuccess() const;
-
-        void SetCurrentFrame(int frame);
 
         const string &GetFileName() const;
 
@@ -113,6 +113,10 @@ namespace bvh {
         const vector<glm::vec3> &GetCurrentFramePositions();
 
         const vector<glm::vec3> &GetCurrentFrameAngles();
+
+        float GetPositionScale() const ;
+
+        void SetPositionScale(float positionScale);
     };
 
     inline bool BVH::IsLoadSuccess() const { return is_load_success; }
@@ -159,6 +163,14 @@ namespace bvh {
 
     inline const vector<glm::vec3> &BVH::GetCurrentFrameAngles(){
         return current_frame_angles;
+    }
+
+    inline float BVH::GetPositionScale() const {
+        return position_scale;
+    }
+
+    inline void BVH::SetPositionScale(float positionScale) {
+        position_scale = positionScale;
     }
 } // namespace bvh
 

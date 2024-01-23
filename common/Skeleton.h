@@ -81,44 +81,6 @@ namespace skeleton {
         openglframework::Color objectColor = openglframework::Color(0.0f, 0.68f, 0.99f, 1.0f);
         openglframework::Color sleepingColor = openglframework::Color(1.0f, 0.0f, 0.0f, 1.0f);
 
-        Bone *mHipBone;
-
-        Bone *mHipLeftBone;
-
-        Bone *mHipRightBone;
-
-        Bone *mWaistBone;
-
-        Bone *mChestBone;
-
-        Bone *mChestLeftBone;
-
-        Bone *mChestRightBone;
-
-        Bone *mHeadBone;
-
-        Bone *mNeckBone;
-
-        Bone *mLeftShoulderBone;
-
-        Bone *mLeftUpperArmBone;
-
-        Bone *mLeftLowerArmBone;
-
-        Bone *mLeftUpperLegBone;
-
-        Bone *mLeftLowerLegBone;
-
-        Bone *mRightShoulderBone;
-
-        Bone *mRightUpperArmBone;
-
-        Bone *mRightLowerArmBone;
-
-        Bone *mRightUpperLegBone;
-
-        Bone *mRightLowerLegBone;
-
         std::map<const string, Bone *> bones;
 
         BVH *bvh;

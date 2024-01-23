@@ -42,19 +42,7 @@ void Bone::SetJointRotation_local(rp3d::decimal angleX, rp3d::decimal angleY, rp
 void Bone::UpdateChild(const rp3d::Quaternion &changedQuatern) {
     for (auto &[key, cBone]: children) {
         /// rotation
-        auto parentChanged_euler = AngleTool::QuaternionToEulerAngles(origin_quatern * init_quatern.getInverse());
-        auto changedQ_euler = AngleTool::QuaternionToEulerAngles(changedQuatern);
-        auto changedQ = rp3d::Quaternion::fromEulerAngles(changedQ_euler.x + parentChanged_euler.x,
-                                                          changedQ_euler.y + parentChanged_euler.y,
-                                                          changedQ_euler.z + parentChanged_euler.z);
-        auto new_origin_quatern = changedQ * cBone->GetInitQuaternion();
-        cBone->SetOriginQuaternion(new_origin_quatern);
-
-        auto new_local_coordinate_quatern = changedQ * cBone->GetInitLocalCoordinateQuatern();
-        cBone->SetLocalCoordinateQuatern(new_local_coordinate_quatern);
-
-        if (bvh_joint != nullptr)
-            cBone->SetJointRotation_bvh(cBone->GetLocalAngle(), bvh_joint);
+        // add later
 
         auto new_quatern = cBone->GetPhysicsObject()->getTransform().getOrientation();
 
