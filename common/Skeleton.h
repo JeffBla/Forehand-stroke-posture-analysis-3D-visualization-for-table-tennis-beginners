@@ -26,8 +26,12 @@
 #ifndef SKELETON_H
 #define SKELETON_H
 
-// Libraries
 #include <reactphysics3d/reactphysics3d.h>
+#include <algorithm>
+
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include "Bone.h"
 #include "Box.h"
@@ -37,6 +41,9 @@
 #include "BVH.h"
 #include "Event.h"
 
+#define SCALE 0.1f
+
+using namespace bvh;
 using namespace bone;
 using namespace event;
 
@@ -49,15 +56,24 @@ namespace skeleton {
     private:
         // -------------------- Attributes -------------------- //
 
+        /// Physics
         rp3d::PhysicsCommon &mPhysicsCommon;
         rp3d::PhysicsWorld *mPhysicsWorld;
         string &mMeshFolderPath;
         std::vector<PhysicsObject *> &mPhysicsObjects;
+        rp3d::Vector3 ragdollPosition;
+        rp3d::Vector3 defaultPosition;
 
+        float mHip_radius = 0.2f;
         const float linearDamping = 0.02f;
         const float angularDamping = 0.02f;
         const float frictionCoeff = 0.4f;
 
+        /// BVH
+        const std::vector<string> target_bone_names{"hip", "abdomen", "chest", "neck", "neck1", "head", "rCollar",
+                                                    "rShldr", "rForeArm", "rHand", "lCollar", "lShldr", "lForeArm",
+                                                    "lHand", "rButtock", "rThigh", "rShin", "rFoot", "lButtock",
+                                                    "lThigh", "lShin", "lFoot"};
         // -------------------- Methods -------------------- //
 
     protected:
@@ -65,68 +81,10 @@ namespace skeleton {
         openglframework::Color objectColor = openglframework::Color(0.0f, 0.68f, 0.99f, 1.0f);
         openglframework::Color sleepingColor = openglframework::Color(1.0f, 0.0f, 0.0f, 1.0f);
 
-        Bone *mHipBone;
+        std::map<const string, Bone *> bones;
 
-        Bone *mHipLeftBone;
-
-        Bone *mHipRightBone;
-
-        Bone *mWaistBone;
-
-        Bone *mChestBone;
-
-        Bone *mChestLeftBone;
-
-        Bone *mChestRightBone;
-
-        Bone *mHeadBone;
-
-        Bone *mNeckBone;
-
-        Bone *mLeftShoulderBone;
-
-        Bone *mLeftUpperArmBone;
-
-        Bone *mLeftLowerArmBone;
-
-        Bone *mLeftUpperLegBone;
-
-        Bone *mLeftLowerLegBone;
-
-        Bone *mRightShoulderBone;
-
-        Bone *mRightUpperArmBone;
-
-        Bone *mRightLowerArmBone;
-
-        Bone *mRightUpperLegBone;
-
-        Bone *mRightLowerLegBone;
-
-        std::map<std::string, Bone *> bones;
-
-        // Joint
-        rp3d::BallAndSocketJoint *mHeadChestJoint;
-
-        rp3d::BallAndSocketJoint *mChestLeftUpperArmJoint;
-
-        rp3d::HingeJoint *mLeftUpperLeftLowerArmJoint;
-
-        rp3d::FixedJoint *mChestWaistJoint;
-
-        rp3d::FixedJoint *mWaistHipsJoint;
-
-        rp3d::BallAndSocketJoint *mHipLeftUpperLegJoint;
-
-        rp3d::HingeJoint *mLeftUpperLeftLowerLegJoint;
-
-        rp3d::BallAndSocketJoint *mChestRightUpperArmJoint;
-
-        rp3d::HingeJoint *mRightUpperRightLowerArmJoint;
-
-        rp3d::BallAndSocketJoint *mHipRightUpperLegJoint;
-
-        rp3d::HingeJoint *mRightUpperRightLowerLegJoint;
+        BVH *bvh;
+        int bvh_frame;
 
         // -------------------- Methods -------------------- //
         void ConfigNewObject(PhysicsObject *new_object, const rp3d::Vector3 &pos, const rp3d::Quaternion &orientation);
@@ -143,11 +101,12 @@ namespace skeleton {
 
         /// Create a Bone with ConvexMesh
         Bone *CreateBone(const string &bone_name, Bone *parent, rp3d::Vector3 &pos, const rp3d::Quaternion &orientation,
-                         const openglframework::Vector3 &size, rp3d::decimal massDensity, const string &model_file);
+                         const openglframework::Vector3 &size, rp3d::decimal massDensity, const string &model_file,
+                         const rp3d::Quaternion &local_coordinate_quatern);
 
         /// Create a Bone with Sphere shape
         Bone *CreateBone(const string &bone_name, Bone *parent, rp3d::Vector3 &pos, const rp3d::Quaternion &orientation,
-                         float radius, rp3d::decimal massDensity);
+                         float radius, rp3d::decimal massDensity, const rp3d::Quaternion &local_coordinate_quatern);
 
 
     public:
@@ -158,23 +117,44 @@ namespace skeleton {
 
         /// Constructor
         Skeleton(rp3d::PhysicsCommon &mPhysicsCommon, rp3d::PhysicsWorld *mPhysicsWorld,
-                 vector<PhysicsObject *> &mPhysicsObjects, std::string &mMeshFolderPath,
-                 const bvh::Joint *joint);
+                 vector<PhysicsObject *> &mPhysicsObjects, std::string &mMeshFolderPath, BVH *bvh);
 
         /// Destructor
         ~Skeleton();
 
-        /// Initialize the bodies positions
-        void initBodiesPositions();
+        /** SetJointRotation
+         * @details rotate worldly & use Euler angle
+         * @param bone
+         * @param angle
+         */
+        void SetJointRotation(Bone *bone, rp3d::Vector3 &angle);
 
-        void SetLeftUpperLeftLowerArmJointRotation(rp3d::decimal angleX, rp3d::decimal angleY, rp3d::decimal angleZ);
+        void SetJointRotation(Bone *bone, rp3d::decimal angleX, rp3d::decimal angleY, rp3d::decimal angleZ);
+
+        /** SetJointRotation_local
+         * @details rotate locally & use Euler angle
+         * @param bone
+         * @param angle
+         */
+        void SetJointRotation_local(Bone *bone, rp3d::Vector3 &angle);
+
+        void SetJointRotation_local(Bone *bone, rp3d::decimal angleX, rp3d::decimal angleY, rp3d::decimal angleZ);
+
+        void RotateJoint(Bone *bone, rp3d::Vector3 &angle);
 
         void RotateJoint(Bone *bone, rp3d::decimal angleX, rp3d::decimal angleY, rp3d::decimal angleZ);
 
         Bone *FindBone(rp3d::RigidBody *body);
 
-        Bone *FindBone(const string &name);
+        Bone *FindBone(const string &target_name);
 
+        // -------------------- Motion -------------------- //
+
+        void NextBvhMotion();
+
+        void ApplyBvhMotion(const int frame);
+
+        void InitBvhMotion();
     };
 
 }  // namespace skeleton

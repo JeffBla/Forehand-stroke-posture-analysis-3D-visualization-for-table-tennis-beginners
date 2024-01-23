@@ -599,7 +599,7 @@ void Gui::createTestPanel() {
 
         // Panel setting
         new Label(mTestPanel, "Rotation", "sans-bold");
-        { // x
+        { // Rotate x
             mRotateSlider_x = new Slider(mTestPanel);
             mRotateSlider_x->set_value(0);
             mRotateSlider_x->set_range(std::pair(-180, 180));
@@ -608,23 +608,25 @@ void Gui::createTestPanel() {
             mRotateTextBox_x = new TextBox(mTestPanel);
             mRotateTextBox_x->set_fixed_size(Vector2i(60, 25));
             mRotateTextBox_x->set_value("0");
-            auto tmpApp = mApp;
-            auto textBox = mRotateTextBox_x;
-            mRotateSlider_x->set_callback([textBox, tmpApp](float value) {
+            mRotateSlider_x->set_callback([this](float value) {
                 auto euler_angle = AngleTool::DegreeToEulerAngles(value);
-                bvhscene::BvhScene *scene = ((bvhscene::BvhScene *) tmpApp->mCurrentScene);
-                scene->GetSkeleton()->RotateJoint(scene->GetRaycastedTarget_bone(), euler_angle, 0, 0);
+                auto mRotateSlider_y_angle = AngleTool::DegreeToEulerAngles(this->mRotateSlider_y->value());
+                auto mRotateSlider_z_angle = AngleTool::DegreeToEulerAngles(this->mRotateSlider_z->value());
+                bvhscene::BvhScene *scene = ((bvhscene::BvhScene *) this->mApp->mCurrentScene);
+                scene->GetSkeleton()->SetJointRotation(scene->GetRaycastedTarget_bone(), euler_angle,
+                                                       mRotateSlider_y_angle,
+                                                       mRotateSlider_z_angle);
                 char text[6];
                 snprintf(text, 6, "%.5f", value);
-                textBox->set_value(text);
+                this->mRotateTextBox_x->set_value(text);
             });
             mRotateSlider_x->set_final_callback([&](float value) {
                 std::cout << "Final slider value: " << value << std::endl;
             });
             mRotateTextBox_x->set_font_size(20);
             mRotateTextBox_x->set_alignment(TextBox::Alignment::Right);
-        }
-        { // y
+        } // Rotate x
+        { // Rotate y
             mRotateSlider_y = new Slider(mTestPanel);
             mRotateSlider_y->set_value(0);
             mRotateSlider_y->set_range(std::pair(-180, 180));
@@ -633,23 +635,25 @@ void Gui::createTestPanel() {
             mRotateTextBox_y = new TextBox(mTestPanel);
             mRotateTextBox_y->set_fixed_size(Vector2i(60, 25));
             mRotateTextBox_y->set_value("0");
-            auto tmpApp = mApp;
-            auto textBox = mRotateTextBox_y;
-            mRotateSlider_y->set_callback([textBox, tmpApp](float value) {
+            mRotateSlider_y->set_callback([this](float value) {
                 auto euler_angle = AngleTool::DegreeToEulerAngles(value);
-                bvhscene::BvhScene *scene = ((bvhscene::BvhScene *) tmpApp->mCurrentScene);
-                scene->GetSkeleton()->RotateJoint(scene->GetRaycastedTarget_bone(), 0, euler_angle, 0);
+                auto mRotateSlider_x_angle = AngleTool::DegreeToEulerAngles(this->mRotateSlider_x->value());
+                auto mRotateSlider_z_angle = AngleTool::DegreeToEulerAngles(this->mRotateSlider_z->value());
+                bvhscene::BvhScene *scene = ((bvhscene::BvhScene *) this->mApp->mCurrentScene);
+                scene->GetSkeleton()->SetJointRotation(scene->GetRaycastedTarget_bone(), mRotateSlider_x_angle,
+                                                       euler_angle,
+                                                       mRotateSlider_z_angle);
                 char text[6];
                 snprintf(text, 6, "%.5f", value);
-                textBox->set_value(text);
+                this->mRotateTextBox_y->set_value(text);
             });
             mRotateSlider_y->set_final_callback([&](float value) {
                 std::cout << "Final slider value: " << value << std::endl;
             });
             mRotateTextBox_y->set_font_size(20);
             mRotateTextBox_y->set_alignment(TextBox::Alignment::Right);
-        }
-        { // z
+        } // Rotate y
+        { // Rotate z
             mRotateSlider_z = new Slider(mTestPanel);
             mRotateSlider_z->set_value(0);
             mRotateSlider_z->set_range(std::pair(-180, 180));
@@ -658,22 +662,24 @@ void Gui::createTestPanel() {
             mRotateTextBox_z = new TextBox(mTestPanel);
             mRotateTextBox_z->set_fixed_size(Vector2i(60, 25));
             mRotateTextBox_z->set_value("0");
-            auto tmpApp = mApp;
-            auto textBox = mRotateTextBox_z;
-            mRotateSlider_z->set_callback([textBox, tmpApp](float value) {
+            mRotateSlider_z->set_callback([this](float value) {
                 auto euler_angle = AngleTool::DegreeToEulerAngles(value);
-                bvhscene::BvhScene *scene = ((bvhscene::BvhScene *) tmpApp->mCurrentScene);
-                scene->GetSkeleton()->RotateJoint(scene->GetRaycastedTarget_bone(), 0, 0, euler_angle);
+                auto mRotateSlider_x_angle = AngleTool::DegreeToEulerAngles(this->mRotateSlider_x->value());
+                auto mRotateSlider_y_angle = AngleTool::DegreeToEulerAngles(this->mRotateSlider_y->value());
+                bvhscene::BvhScene *scene = ((bvhscene::BvhScene *) this->mApp->mCurrentScene);
+                scene->GetSkeleton()->SetJointRotation(scene->GetRaycastedTarget_bone(), mRotateSlider_x_angle,
+                                                       mRotateSlider_y_angle,
+                                                       euler_angle);
                 char text[6];
                 snprintf(text, 6, "%.5f", value);
-                textBox->set_value(text);
+                this->mRotateTextBox_z->set_value(text);
             });
             mRotateSlider_z->set_final_callback([&](float value) {
                 std::cout << "Final slider value: " << value << std::endl;
             });
             mRotateTextBox_z->set_font_size(20);
             mRotateTextBox_z->set_alignment(TextBox::Alignment::Right);
-        }
+        } // Rotate z
 
         mRotateTitle = new Label(mTestPanel, "Rotate Info", "sans-bold");
         {
@@ -720,39 +726,49 @@ void Gui::onKeyboardEvent(int key, int scancode, int action, int modifiers) {
 void Gui::onChangeRaycastedTarget_bvhscene(Bone *target) {
     raycastedBone = target;
 
-    auto degrees = AngleTool::QuaternionToEulerAngles(
-            raycastedBone->GetPhysicsObject()->getTransform().getOrientation());
-    degrees = AngleTool::EulerAnglesToDegree(degrees);
-    mRotateSlider_x->set_value(degrees.x);
-    mRotateSlider_y->set_value(degrees.y);
-    mRotateSlider_z->set_value(degrees.z);
-
-    char text[6];
-    snprintf(text, 6, "%.5f", degrees.x);
-    mRotateTextBox_x->set_value(text);
-
-    snprintf(text, 6, "%.5f", degrees.y);
-    mRotateTextBox_y->set_value(text);
-
-    snprintf(text, 6, "%.5f", degrees.z);
-    mRotateTextBox_z->set_value(text);
+    onChangeBoneTransform_bvhscene(target);
 }
 
 void Gui::onChangeBoneTransform_bvhscene(Bone *target) {
-    auto angles = target->GetAngleWithNeighbor();
+    // Only change the info if the target is raycasted target
+    if (raycastedBone == target) {
+        /// Update Slider info
+        auto degrees = AngleTool::QuaternionToEulerAngles(
+                raycastedBone->GetPhysicsObject()->getTransform().getOrientation());
+        auto offset_degrees = AngleTool::QuaternionToEulerAngles(raycastedBone->GetOriginQuaternion());
+        degrees = AngleTool::EulerAnglesToDegree(degrees);
+        offset_degrees = AngleTool::EulerAnglesToDegree(offset_degrees);
+        auto result_deg = degrees-offset_degrees;
+        mRotateSlider_x->set_value(result_deg.x);
+        mRotateSlider_y->set_value(result_deg.y);
+        mRotateSlider_z->set_value(result_deg.z);
 
-    for (auto l: angleLabels) {
-        mTestPanel->remove_child(l);
+        char text[6];
+        snprintf(text, 6, "%.5f", result_deg.x);
+        mRotateTextBox_x->set_value(text);
+
+        snprintf(text, 6, "%.5f", result_deg.y);
+        mRotateTextBox_y->set_value(text);
+
+        snprintf(text, 6, "%.5f", result_deg.z);
+        mRotateTextBox_z->set_value(text);
+
+        /// Update AngleWithNeighbor
+        auto angles = target->GetAngleInfo();
+
+        for (auto l: angleLabels) {
+            mTestPanel->remove_child(l);
+        }
+        angleLabels.clear();
+        Label *angle_name, *angle_deg;
+        for (auto &[name, deg]: angles) {
+            angle_name = new Label(mTestPanel, name, "sans-bold");
+            angle_deg = new Label(mTestPanel, floatToString(deg, 1));
+            angleLabels.push_back(angle_name);
+            angleLabels.push_back(angle_deg);
+        }
+        mScreen->perform_layout();
     }
-    angleLabels.clear();
-    Label *angle_name, *angle_deg;
-    for (auto &[name, deg]: angles) {
-        angle_name = new Label(mTestPanel, name, "sans-bold");
-        angle_deg = new Label(mTestPanel, floatToString(deg, 1));
-        angleLabels.push_back(angle_name);
-        angleLabels.push_back(angle_deg);
-    }
-    mScreen->perform_layout();
 }
 
 void Gui::onCreateSkeleton_bvhscene() {

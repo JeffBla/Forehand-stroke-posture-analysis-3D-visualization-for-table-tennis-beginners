@@ -5,7 +5,12 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <queue>
+
+#include "BVH.h"
 #include "PhysicsObject.h"
+
+using namespace bvh;
 
 namespace bone {
 
@@ -21,27 +26,65 @@ namespace bone {
         const std::string bone_name;
         PhysicsObject *bone_object;
         rp3d::Vector3 position;
+        rp3d::Vector3 local_angle = {0, 0, 0};
+        const rp3d::Quaternion init_quatern;
+        rp3d::Quaternion origin_quatern;
+        const rp3d::Quaternion init_local_coordinate_quatern;
+        rp3d::Quaternion local_coordinate_quatern;
         Bone *parent;
         std::map<std::string, Bone *> children;
+        const Joint* bvh_joint = nullptr;
+
+        // -------------------- Methods -------------------- //
+        float AngleBetweenTwo(const rp3d::Vector3 &v1, const rp3d::Vector3 &v2);
+
     public:
         Bone(const std::string &bone_name, PhysicsObject *bone_object, BoneType boneType, rp3d::Vector3 &pos,
-             Bone *parent);
+             Bone *parent, rp3d::Quaternion &quatern, rp3d::Quaternion local_coordinate_quatern);
+
+        Bone(const std::string &bone_name, PhysicsObject *bone_object, BoneType boneType, rp3d::Vector3 &pos,
+             Bone *parent, const rp3d::Quaternion &quatern, rp3d::Quaternion local_coordinate_quatern);
 
         ~Bone();
 
         void AppendChild(Bone *child);
 
-        void UpdateChild();
+        void SetJointRotation_local(rp3d::Vector3 &angle);
+
+        void SetJointRotation_local( rp3d::decimal angleX, rp3d::decimal angleY, rp3d::decimal angleZ);
+
+        void UpdateChild(const rp3d::Quaternion &changedQuatern);
 
         std::map<std::string, float> GetAngleWithNeighbor();
 
+        map<string, float> GetSelfAngle();
+
+        map<string, float> GetAngleInfo();
+
+        // -------------------- Getter & Setter -------------------- //
         const std::string &GetBoneName();
 
         PhysicsObject *GetPhysicsObject();
 
         rp3d::Vector3 &GetPosition();
 
+        rp3d::Vector3 &GetLocalAngle();
+
+        const rp3d::Quaternion &GetInitQuaternion();
+
+        const rp3d::Quaternion &GetOriginQuaternion();
+
+        void SetOriginQuaternion(const rp3d::Quaternion &q);
+
+        const rp3d::Quaternion &GetInitLocalCoordinateQuatern();
+
+        const rp3d::Quaternion &GetLocalCoordinateQuatern();
+
+        void SetLocalCoordinateQuatern(const rp3d::Quaternion &q);
+
         void SetPosition(rp3d::Vector3 &pos);
+
+        void SetLocalAngle(rp3d::Vector3 &angle);
 
         BoneType GetBoneType() const;
     };
@@ -53,7 +96,6 @@ namespace bone {
     inline const std::string &Bone::GetBoneName() {
         return bone_name;
     }
-
 
     inline PhysicsObject *Bone::GetPhysicsObject() {
         return bone_object;
@@ -67,9 +109,44 @@ namespace bone {
         position = pos;
     }
 
-    inline BoneType Bone::GetBoneType() const{
+    inline const rp3d::Quaternion &Bone::GetInitQuaternion() {
+        return init_quatern;
+    }
+
+    inline const rp3d::Quaternion &Bone::GetOriginQuaternion() {
+        return origin_quatern;
+    }
+
+    inline void Bone::SetOriginQuaternion(const rp3d::Quaternion &q) {
+        origin_quatern = q;
+    }
+
+    inline const rp3d::Quaternion &Bone::GetInitLocalCoordinateQuatern(){
+        return init_local_coordinate_quatern;
+    }
+
+    inline const rp3d::Quaternion &Bone::GetLocalCoordinateQuatern() {
+        return local_coordinate_quatern;
+    }
+
+    inline void Bone::SetLocalCoordinateQuatern(const rp3d::Quaternion &q) {
+        local_coordinate_quatern = q;
+    }
+
+
+    inline BoneType Bone::GetBoneType() const {
         return boneType;
     }
+
+    inline rp3d::Vector3 &Bone::GetLocalAngle() {
+        return local_angle;
+    }
+
+    inline void Bone::SetLocalAngle(rp3d::Vector3 &angle) {
+        angle = local_angle;
+    }
+
+
 }
 
 

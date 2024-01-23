@@ -36,3 +36,40 @@ float angleTool::AngleTool::DegreeToEulerAngles(float degree_angle) {
     return degree_angle * (M_PI / 180);
 }
 
+rp3d::Quaternion angleTool::AngleTool::rotate_local(rp3d::decimal angleX, rp3d::decimal angleY, rp3d::decimal angleZ,
+                                                    const rp3d::Quaternion local_coordinate_quatern) {
+    auto v = rotate_local_euler(angleX, angleY, angleZ, local_coordinate_quatern);
+    return rp3d::Quaternion::fromEulerAngles(v.x, v.y, v.z);
+}
+
+rp3d::Vector3
+angleTool::AngleTool::rotate_local_euler(rp3d::decimal angleX, rp3d::decimal angleY, rp3d::decimal angleZ,
+                                         const rp3d::Quaternion local_coordinate_quatern) {
+    auto trans = glm::mat4(1.0f);
+
+    auto changedCoordinate_x = local_coordinate_quatern * default_axis_x;
+    auto changedCoordinate_y = local_coordinate_quatern * default_axis_y;
+    auto changedCoordinate_z = local_coordinate_quatern * default_axis_z;
+
+    auto rotate_mat_x = glm::rotate(trans, angleX,
+                                    glm::vec3(changedCoordinate_x.x, changedCoordinate_x.y, changedCoordinate_x.z));
+    auto rotate_mat_y = glm::rotate(trans, angleY,
+                                    glm::vec3(changedCoordinate_y.x, changedCoordinate_y.y, changedCoordinate_y.z));
+    auto rotate_mat_z = glm::rotate(trans, angleZ,
+                                    glm::vec3(changedCoordinate_z.x, changedCoordinate_z.y, changedCoordinate_z.z));
+
+    auto rotate_quatern_x = glm::quat_cast(rotate_mat_x);
+    auto rotate_quatern_y = glm::quat_cast(rotate_mat_y);
+    auto rotate_quatern_z = glm::quat_cast(rotate_mat_z);
+
+    auto angle_x = AngleTool::QuaternionToEulerAngles(
+            rp3d::Quaternion{rotate_quatern_x.x, rotate_quatern_x.y, rotate_quatern_x.z, rotate_quatern_x.w});
+    auto angle_y = AngleTool::QuaternionToEulerAngles(
+            rp3d::Quaternion{rotate_quatern_y.x, rotate_quatern_y.y, rotate_quatern_y.z, rotate_quatern_y.w});
+    auto angle_z = AngleTool::QuaternionToEulerAngles(
+            rp3d::Quaternion{rotate_quatern_z.x, rotate_quatern_z.y, rotate_quatern_z.z, rotate_quatern_z.w});
+
+    auto angle = angle_x + angle_y + angle_z;
+    return angle;
+}
+
