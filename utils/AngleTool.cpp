@@ -1,9 +1,5 @@
 #include "AngleTool.h"
 
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-
 rp3d::Vector3 angleTool::AngleTool::QuaternionToEulerAngles(const rp3d::Quaternion &q) {
     rp3d::Vector3 angles;
 

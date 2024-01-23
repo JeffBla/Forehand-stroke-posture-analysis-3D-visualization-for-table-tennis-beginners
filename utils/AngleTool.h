@@ -1,6 +1,9 @@
 #ifndef TESTBED_ANGLETOOL_H
 #define TESTBED_ANGLETOOL_H
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include <reactphysics3d/reactphysics3d.h>
 
 namespace angleTool {

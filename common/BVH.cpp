@@ -1,10 +1,8 @@
-
-#include "BVH.h"
-
 #include <cmath>
 #include <cstring>
-
 #include <fstream>
+
+#include "BVH.h"
 
 using namespace bvh;
 
@@ -46,6 +44,8 @@ void BVH::Clear() {
     num_frame = 0;
     interval = 0.0;
     motion = nullptr;
+
+    current_frame = 0;
 }
 
 void BVH::Load(const char *bvh_file_name) {
@@ -106,7 +106,10 @@ void BVH::Load(const char *bvh_file_name) {
             (strcmp(token, "JOINT") == 0)) {
             new_joint = new Joint();
             new_joint->index = joints.size();
-            new_joint->parent = joint;
+            if (joint != nullptr) {
+                new_joint->parents.assign(joint->parents.begin(), joint->parents.end());
+                new_joint->parents.push_back(joint);
+            }
             new_joint->has_site = false;
             new_joint->offset[0] = 0.0;
             new_joint->offset[1] = 0.0;
@@ -157,6 +160,7 @@ void BVH::Load(const char *bvh_file_name) {
             token = strtok(nullptr, separater);
             joint->channels.resize(token ? atoi(token) : 0);
 
+            rotationOrder.push_back(vector<ChannelEnum>());
             for (i = 0; i < joint->channels.size(); i++) {
                 Channel *channel = new Channel();
                 channel->joint = joint;
@@ -165,13 +169,16 @@ void BVH::Load(const char *bvh_file_name) {
                 joint->channels[i] = channel;
 
                 token = strtok(nullptr, separater);
-                if (strcmp(token, "Xrotation") == 0)
+                if (strcmp(token, "Xrotation") == 0) {
                     channel->type = X_ROTATION;
-                else if (strcmp(token, "Yrotation") == 0)
+                    rotationOrder.back().push_back(channel->type);
+                } else if (strcmp(token, "Yrotation") == 0) {
                     channel->type = Y_ROTATION;
-                else if (strcmp(token, "Zrotation") == 0)
+                    rotationOrder.back().push_back(channel->type);
+                } else if (strcmp(token, "Zrotation") == 0) {
                     channel->type = Z_ROTATION;
-                else if (strcmp(token, "Xposition") == 0)
+                    rotationOrder.back().push_back(channel->type);
+                } else if (strcmp(token, "Xposition") == 0)
                     channel->type = X_POSITION;
                 else if (strcmp(token, "Yposition") == 0)
                     channel->type = Y_POSITION;
@@ -224,4 +231,41 @@ void BVH::Load(const char *bvh_file_name) {
 
     bvh_error:
     file.close();
+}
+
+void BVH::SetCurrentFrame(int frame) {
+    current_frame = frame;
+
+    current_frame_positions.assign(this->GetNumJoint(), glm::vec3(0, 0, 0));
+    current_frame_angles.assign(this->GetNumJoint(), glm::vec3(0, 0, 0));
+    for (int i = 0; i < this->GetNumJoint(); i++) {
+        auto &pos = current_frame_positions[i];
+        auto &angle = current_frame_angles[i];
+        pos = {joints[i]->offset[0], joints[i]->offset[1], joints[i]->offset[2]};
+
+        auto bone_joint = joints[i];
+        for (auto channel: bone_joint->channels) {
+            switch (channel->type) {
+                case X_ROTATION:
+                    angle.x = this->GetMotion(frame, channel->index);
+                    break;
+                case Y_ROTATION:
+                    angle.y = this->GetMotion(frame, channel->index);
+                    break;
+                case Z_ROTATION:
+                    angle.z = this->GetMotion(frame, channel->index);
+                    break;
+                case X_POSITION:
+                    pos.x = this->GetMotion(frame, channel->index);
+                    break;
+                case Y_POSITION:
+                    pos.y = this->GetMotion(frame, channel->index);
+                    break;
+                case Z_POSITION:
+                    pos.z = this->GetMotion(frame, channel->index);
+                    break;
+            }
+        }
+        pos *= position_scale;
+    }
 }

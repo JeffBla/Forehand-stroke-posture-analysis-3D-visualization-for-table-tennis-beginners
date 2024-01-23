@@ -5,6 +5,10 @@
 #include <map>
 #include <string>
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 using namespace std;
 
 namespace bvh {
@@ -27,7 +31,7 @@ namespace bvh {
         string name;
         int index;
 
-        Joint *parent;
+        std::vector<Joint *> parents;
         vector<Joint *> children;
 
         double offset[3];
@@ -50,10 +54,15 @@ namespace bvh {
         vector<Channel *> channels;
         vector<Joint *> joints;
         map<string, Joint *> joint_index;
+        vector<vector<ChannelEnum>> rotationOrder;
 
         int num_frame;
         double interval;
         double *motion;
+        float position_scale = 0.1f;
+        int current_frame;
+        vector<glm::vec3> current_frame_positions;
+        vector<glm::vec3> current_frame_angles;
 
 
     public:
@@ -67,7 +76,9 @@ namespace bvh {
 
         void Load(const char *bvh_file_name);
 
-    public:
+        void SetCurrentFrame(int frame);
+
+        // -------------------- Setter & Getter -------------------- //
 
         bool IsLoadSuccess() const;
 
@@ -96,6 +107,16 @@ namespace bvh {
         double GetMotion(int f, int c) const;
 
         void SetMotion(int f, int c, double v);
+
+        const vector<ChannelEnum> &GetRotationOrder(int index);
+
+        const vector<glm::vec3> &GetCurrentFramePositions();
+
+        const vector<glm::vec3> &GetCurrentFrameAngles();
+
+        float GetPositionScale() const ;
+
+        void SetPositionScale(float positionScale);
     };
 
     inline bool BVH::IsLoadSuccess() const { return is_load_success; }
@@ -132,6 +153,25 @@ namespace bvh {
 
     inline void BVH::SetMotion(int f, int c, double v) { motion[f * num_channel + c] = v; }
 
+    inline const vector<ChannelEnum> &BVH::GetRotationOrder(int index) {
+        return rotationOrder[index];
+    }
+
+    inline const vector<glm::vec3> &BVH::GetCurrentFramePositions() {
+        return current_frame_positions;
+    }
+
+    inline const vector<glm::vec3> &BVH::GetCurrentFrameAngles(){
+        return current_frame_angles;
+    }
+
+    inline float BVH::GetPositionScale() const {
+        return position_scale;
+    }
+
+    inline void BVH::SetPositionScale(float positionScale) {
+        position_scale = positionScale;
+    }
 } // namespace bvh
 
 #endif // _BVH_H_
