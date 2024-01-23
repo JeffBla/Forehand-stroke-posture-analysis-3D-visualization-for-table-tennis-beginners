@@ -36,11 +36,7 @@ namespace bone {
         const Joint* bvh_joint = nullptr;
 
         // -------------------- Methods -------------------- //
-
-        rp3d::Quaternion
-        _SetJointRotation_bvh(rp3d::decimal angleX, rp3d::decimal angleY,
-                              rp3d::decimal angleZ,
-                              const bvh::Joint *bvh_joint);
+        float AngleBetweenTwo(const rp3d::Vector3 &v1, const rp3d::Vector3 &v2);
 
     public:
         Bone(const std::string &bone_name, PhysicsObject *bone_object, BoneType boneType, rp3d::Vector3 &pos,
@@ -57,15 +53,15 @@ namespace bone {
 
         void SetJointRotation_local( rp3d::decimal angleX, rp3d::decimal angleY, rp3d::decimal angleZ);
 
-        void SetJointRotation_bvh(rp3d::Vector3 &angle, const bvh::Joint *bvh_joint);
-
-        void SetJointRotation_bvh(rp3d::decimal angleX, rp3d::decimal angleY, rp3d::decimal angleZ,
-                                  const bvh::Joint *bvh_joint);
-
         void UpdateChild(const rp3d::Quaternion &changedQuatern);
 
         std::map<std::string, float> GetAngleWithNeighbor();
 
+        map<string, float> GetSelfAngle();
+
+        map<string, float> GetAngleInfo();
+
+        // -------------------- Getter & Setter -------------------- //
         const std::string &GetBoneName();
 
         PhysicsObject *GetPhysicsObject();

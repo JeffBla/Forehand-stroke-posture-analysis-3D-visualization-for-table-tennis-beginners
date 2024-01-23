@@ -242,7 +242,6 @@ void Skeleton::ApplyBvhMotion(const int frame) {
             translations[id] = glm::rotate(translations[id], glm::radians(180.0f),
                                            glm::vec3(0.0, 1.0, 0.0));
         }
-//        bone_transform_changed.fire(bones[joint_name]);
 
         // use result
         if (std::find(target_bone_names.begin(), target_bone_names.end(), joint_name) !=
@@ -253,8 +252,9 @@ void Skeleton::ApplyBvhMotion(const int frame) {
             bones[joint_name]->GetPhysicsObject()->setTransform(
                     {{result_pos.x, result_pos.y, result_pos.z},
                      rp3d::Quaternion(result_angle.x, result_angle.y, result_angle.z, result_angle.w)});
+
+            bone_transform_changed.fire(bones[joint_name]);
         }
     }
-
 }
 

@@ -599,7 +599,7 @@ void Gui::createTestPanel() {
 
         // Panel setting
         new Label(mTestPanel, "Rotation", "sans-bold");
-        { // x
+        { // Rotate x
             mRotateSlider_x = new Slider(mTestPanel);
             mRotateSlider_x->set_value(0);
             mRotateSlider_x->set_range(std::pair(-180, 180));
@@ -625,8 +625,8 @@ void Gui::createTestPanel() {
             });
             mRotateTextBox_x->set_font_size(20);
             mRotateTextBox_x->set_alignment(TextBox::Alignment::Right);
-        }
-        { // y
+        } // Rotate x
+        { // Rotate y
             mRotateSlider_y = new Slider(mTestPanel);
             mRotateSlider_y->set_value(0);
             mRotateSlider_y->set_range(std::pair(-180, 180));
@@ -652,8 +652,8 @@ void Gui::createTestPanel() {
             });
             mRotateTextBox_y->set_font_size(20);
             mRotateTextBox_y->set_alignment(TextBox::Alignment::Right);
-        }
-        { // z
+        } // Rotate y
+        { // Rotate z
             mRotateSlider_z = new Slider(mTestPanel);
             mRotateSlider_z->set_value(0);
             mRotateSlider_z->set_range(std::pair(-180, 180));
@@ -679,7 +679,7 @@ void Gui::createTestPanel() {
             });
             mRotateTextBox_z->set_font_size(20);
             mRotateTextBox_z->set_alignment(TextBox::Alignment::Right);
-        }
+        } // Rotate z
 
         mRotateTitle = new Label(mTestPanel, "Rotate Info", "sans-bold");
         {
@@ -754,7 +754,7 @@ void Gui::onChangeBoneTransform_bvhscene(Bone *target) {
         mRotateTextBox_z->set_value(text);
 
         /// Update AngleWithNeighbor
-        auto angles = target->GetAngleWithNeighbor();
+        auto angles = target->GetAngleInfo();
 
         for (auto l: angleLabels) {
             mTestPanel->remove_child(l);

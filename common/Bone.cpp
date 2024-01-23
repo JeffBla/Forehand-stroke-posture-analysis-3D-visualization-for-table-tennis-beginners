@@ -75,11 +75,37 @@ void Bone::UpdateChild(const rp3d::Quaternion &changedQuatern) {
     }
 }
 
+
+float Bone::AngleBetweenTwo(const rp3d::Vector3 &v1, const rp3d::Vector3 &v2) {
+    auto angle = acos(v1.dot(v2));
+    if (isnan(angle))
+        angle = 0;
+    return angle;
+}
+
+std::map<std::string, float> Bone::GetAngleInfo() {
+    auto angles = GetAngleWithNeighbor();
+    auto self_angles = GetSelfAngle();
+    for (const auto &angle: self_angles)
+        angles[angle.first] = angle.second;
+    return angles;
+}
+
+std::map<std::string, float> Bone::GetSelfAngle() {
+    std::map<std::string, float> angles;
+    auto mQuaternion = bone_object->getTransform().getOrientation();
+    auto mDeg = AngleTool::EulerAnglesToDegree(AngleTool::QuaternionToEulerAngles(mQuaternion));
+    angles["self x"] = mDeg.x;
+    angles["self y"] = mDeg.y;
+    angles["self z"] = mDeg.z;
+    return angles;
+}
+
 std::map<std::string, float> Bone::GetAngleWithNeighbor() {
     std::map<std::string, float> angles;
 
-    rp3d::Quaternion myQuaternion = bone_object->getTransform().getOrientation();
-    rp3d::Vector3 myOrientation = (myQuaternion * default_orientation).getUnit();
+    rp3d::Quaternion mQuaternion = bone_object->getTransform().getOrientation();
+    rp3d::Vector3 mOrientation = (mQuaternion * default_orientation).getUnit();
 
     rp3d::Quaternion otherQuatern;
     rp3d::Vector3 otherOrient;
@@ -87,13 +113,15 @@ std::map<std::string, float> Bone::GetAngleWithNeighbor() {
         otherQuatern = cBone->GetPhysicsObject()->getTransform().getOrientation();
         otherOrient = (otherQuatern * default_orientation).getUnit();
 
-        angles[name] = AngleTool::EulerAnglesToDegree(
-                acos(otherOrient.dot(myOrientation))); // since the orientation vectors are unit len.
+        auto angle_between_two = AngleBetweenTwo(otherOrient, mOrientation);
+        angles[name] = AngleTool::EulerAnglesToDegree(angle_between_two); // since the orientation vectors are unit len.
     }
     if (parent != nullptr) {// calculate angle between parent and itself
         otherQuatern = parent->GetPhysicsObject()->getTransform().getOrientation();
         otherOrient = (otherQuatern * default_orientation).getUnit();
-        angles["parent"] = AngleTool::EulerAnglesToDegree(acos(otherOrient.dot(myOrientation)));
+
+        auto angle_between_two = AngleBetweenTwo(otherOrient, mOrientation);
+        angles["parent"] = AngleTool::EulerAnglesToDegree(angle_between_two);
     }
     return angles;
 }

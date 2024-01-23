@@ -64,7 +64,6 @@ namespace bvh {
         vector<glm::vec3> current_frame_positions;
         vector<glm::vec3> current_frame_angles;
 
-
     public:
         BVH();
 
