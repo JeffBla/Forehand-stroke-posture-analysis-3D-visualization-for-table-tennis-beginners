@@ -39,50 +39,6 @@ void Bone::SetJointRotation_local(rp3d::decimal angleX, rp3d::decimal angleY, rp
     bone_object->setTransform({position, new_quatern});
 }
 
-
-rp3d::Quaternion
-Bone::_SetJointRotation_bvh(rp3d::decimal angleX, rp3d::decimal angleY, rp3d::decimal angleZ,
-                            const bvh::Joint *bvh_joint) {
-    auto result_local_coordinate_quatern = local_coordinate_quatern;
-    rp3d::Quaternion rotation_q;
-    auto bone_channel = bvh_joint->channels;
-    for (auto &channel: bone_channel) {
-        auto channel_type = channel->type;
-        switch (channel_type) {
-            case X_ROTATION:
-                rotation_q = AngleTool::rotate_local(angleX, 0, 0, result_local_coordinate_quatern);
-                result_local_coordinate_quatern = rotation_q * result_local_coordinate_quatern;
-                break;
-            case Y_ROTATION:
-                rotation_q = AngleTool::rotate_local(0, angleY, 0, result_local_coordinate_quatern);
-                result_local_coordinate_quatern = rotation_q * result_local_coordinate_quatern;
-                break;
-            case Z_ROTATION:
-                rotation_q = AngleTool::rotate_local(0, 0, angleZ, result_local_coordinate_quatern);
-                result_local_coordinate_quatern = rotation_q * result_local_coordinate_quatern;
-                break;
-            default:
-                break;
-        }
-    }
-    return rotation_q;
-}
-
-void Bone::SetJointRotation_bvh(rp3d::Vector3 &angle, const bvh::Joint *bvh_joint) {
-    SetJointRotation_bvh(angle.x, angle.y, angle.z, bvh_joint);
-}
-
-void Bone::SetJointRotation_bvh(rp3d::decimal angleX, rp3d::decimal angleY, rp3d::decimal angleZ,
-                                const bvh::Joint *bvh_joint) {
-    local_angle = {angleX, angleY, angleZ};
-    this->bvh_joint = bvh_joint;
-
-    auto result_q = _SetJointRotation_bvh(angleX, angleY, angleZ, bvh_joint);
-    auto new_quatern = result_q * origin_quatern;
-
-    bone_object->setTransform({position, new_quatern});
-}
-
 void Bone::UpdateChild(const rp3d::Quaternion &changedQuatern) {
     for (auto &[key, cBone]: children) {
         /// rotation

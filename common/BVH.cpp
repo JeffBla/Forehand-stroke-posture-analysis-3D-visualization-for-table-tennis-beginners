@@ -1,10 +1,8 @@
-
-#include "BVH.h"
-
 #include <cmath>
 #include <cstring>
-
 #include <fstream>
+
+#include "BVH.h"
 
 using namespace bvh;
 
@@ -46,6 +44,8 @@ void BVH::Clear() {
     num_frame = 0;
     interval = 0.0;
     motion = nullptr;
+
+    current_frame = 0;
 }
 
 void BVH::Load(const char *bvh_file_name) {
@@ -231,4 +231,40 @@ void BVH::Load(const char *bvh_file_name) {
 
     bvh_error:
     file.close();
+}
+
+void BVH::SetCurrentFrame(int frame) {
+    current_frame = frame;
+
+    current_frame_positions.assign(this->GetNumJoint(), glm::vec3(0, 0, 0));
+    current_frame_angles.assign(this->GetNumJoint(), glm::vec3(0, 0, 0));
+    for (int i = 0; i < this->GetNumJoint(); i++) {
+        auto &pos = current_frame_positions[i];
+        auto &angle = current_frame_angles[i];
+        pos = {joints[i]->offset[0], joints[i]->offset[1], joints[i]->offset[2]};
+
+        auto bone_joint = joints[i];
+        for (auto channel: bone_joint->channels) {
+            switch (channel->type) {
+                case X_ROTATION:
+                    angle.x = this->GetMotion(frame, channel->index);
+                    break;
+                case Y_ROTATION:
+                    angle.y = this->GetMotion(frame, channel->index);
+                    break;
+                case Z_ROTATION:
+                    angle.z = this->GetMotion(frame, channel->index);
+                    break;
+                case X_POSITION:
+                    pos.x = this->GetMotion(frame, channel->index);
+                    break;
+                case Y_POSITION:
+                    pos.y = this->GetMotion(frame, channel->index);
+                    break;
+                case Z_POSITION:
+                    pos.z = this->GetMotion(frame, channel->index);
+                    break;
+            }
+        }
+    }
 }

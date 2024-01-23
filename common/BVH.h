@@ -5,6 +5,10 @@
 #include <map>
 #include <string>
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 using namespace std;
 
 namespace bvh {
@@ -56,6 +60,10 @@ namespace bvh {
         double interval;
         double *motion;
 
+        int current_frame;
+        vector<glm::vec3> current_frame_positions;
+        vector<glm::vec3> current_frame_angles;
+
 
     public:
         BVH();
@@ -71,6 +79,8 @@ namespace bvh {
     public:
 
         bool IsLoadSuccess() const;
+
+        void SetCurrentFrame(int frame);
 
         const string &GetFileName() const;
 
@@ -100,6 +110,9 @@ namespace bvh {
 
         const vector<ChannelEnum> &GetRotationOrder(int index);
 
+        const vector<glm::vec3> &GetCurrentFramePositions();
+
+        const vector<glm::vec3> &GetCurrentFrameAngles();
     };
 
     inline bool BVH::IsLoadSuccess() const { return is_load_success; }
@@ -136,9 +149,16 @@ namespace bvh {
 
     inline void BVH::SetMotion(int f, int c, double v) { motion[f * num_channel + c] = v; }
 
-
     inline const vector<ChannelEnum> &BVH::GetRotationOrder(int index) {
         return rotationOrder[index];
+    }
+
+    inline const vector<glm::vec3> &BVH::GetCurrentFramePositions() {
+        return current_frame_positions;
+    }
+
+    inline const vector<glm::vec3> &BVH::GetCurrentFrameAngles(){
+        return current_frame_angles;
     }
 } // namespace bvh
 

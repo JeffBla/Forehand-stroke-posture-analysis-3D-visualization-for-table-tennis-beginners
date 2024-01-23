@@ -5,7 +5,6 @@ using namespace angleTool;
 using namespace skeleton;
 using namespace bone;
 
-
 Bone *Skeleton::CreateBone(const string &bone_name, Bone *parent, rp3d::Vector3 &pos,
                            const rp3d::Quaternion &orientation, const openglframework::Vector3 &size,
                            rp3d::decimal massDensity, const string &model_file,
@@ -78,38 +77,42 @@ Skeleton::Skeleton(rp3d::PhysicsCommon &mPhysicsCommon, rp3d::PhysicsWorld *mPhy
         : mPhysicsCommon(mPhysicsCommon), mPhysicsWorld(mPhysicsWorld), mPhysicsObjects(mPhysicsObjects),
           mMeshFolderPath(mMeshFolderPath), bvh(bvh) {
 
-    bvh_frame = 0;
+    InitBvhMotion();
 
     {
-        rp3d::Vector3 ragdollPosition(0, 0, 0);
-        rp3d::Vector3 defaultPosition(0, 0, 0);
-        float mHip_radius = 0.2f;
+        ragdollPosition.setAllValues(0, 0, 0);
+        defaultPosition.setAllValues(0, 0, 0);
 
         bones.clear();
-        bones.resize(bvh->GetNumJoint());
 
-        for (int id = 0; id < bvh->GetNumJoint(); id++) {
-            auto joint = bvh->GetJoint(id);
+        for (const auto &target_bone_name: target_bone_names) {
+            auto joint = bvh->GetJoint(target_bone_name);
+            Bone *bone;
             if (joint->parents.empty()) {
                 // Root Joint
-                bones[id] = CreateBone(joint->name, nullptr, ragdollPosition, rp3d::Quaternion::identity(),
-                                       mHip_radius, 20, rp3d::Quaternion::identity());
+                bone = CreateBone(joint->name, nullptr, ragdollPosition, rp3d::Quaternion::identity(),
+                                  mHip_radius, 20, rp3d::Quaternion::identity());
+                bones[joint->name] = bone;
             } else {
                 float length = glm::length(glm::vec3{joint->offset[0], joint->offset[1], joint->offset[2]});
                 if (length == 0) {
                     length = 0.1;
                 }
                 length *= SCALE;
-                bones[id] = CreateBone(joint->name, bones[joint->parents.back()->index], defaultPosition,
-                                       rp3d::Quaternion::identity(),
-                                       {0.15, length, 0.15}, 9, "cone_offset_down.obj",
-                                       rp3d::Quaternion::identity());
+                bone = CreateBone(joint->name, bones[joint->parents.back()->name], defaultPosition,
+                                  rp3d::Quaternion::identity(),
+                                  {0.15, length, 0.15}, 9, "cone_offset_down.obj",
+                                  rp3d::Quaternion::identity());
+                bones[joint->name] = bone;
             }
         }
     }// Physic
 }
 
 Skeleton::~Skeleton() {
+    for (auto &[name, bone]: bones) {
+        delete bone;
+    }
 }
 
 void Skeleton::SetJointRotation(Bone *bone, rp3d::Vector3 &angle) {
@@ -141,18 +144,9 @@ void Skeleton::SetJointRotation_local(Bone *bone, rp3d::decimal angleX, rp3d::de
     bone->UpdateChild(rp3d::Quaternion::fromEulerAngles(angleX, angleY, angleZ));
 }
 
-void Skeleton::SetJointRotation_bvh(Bone *bone, rp3d::decimal angleX, rp3d::decimal angleY, rp3d::decimal angleZ,
-                                    const bvh::Joint *bone_bvh) {
-    bone->SetJointRotation_bvh(angleX, angleY, angleZ, bone_bvh);
-
-    // Event occur!!!
-    bone_transform_changed.fire(bone);
-    bone->UpdateChild(rp3d::Quaternion::fromEulerAngles(angleX, angleY, angleZ));
-}
-
 Bone *Skeleton::FindBone(rp3d::RigidBody *body) {
     Bone *target = nullptr;
-    for (auto bone: bones) {
+    for (auto &[name, bone]: bones) {
         if (bone->GetPhysicsObject()->getRigidBody() == body) {
             target = bone;
             break;
@@ -161,10 +155,10 @@ Bone *Skeleton::FindBone(rp3d::RigidBody *body) {
     return target;
 }
 
-Bone *Skeleton::FindBone(const string &name) {
+Bone *Skeleton::FindBone(const string &target_name) {
     Bone *target;
-    for (auto bone: bones) {
-        if (bone->GetBoneName() == name) {
+    for (auto &[name, bone]: bones) {
+        if (name == target_name) {
             target = bone;
             break;
         }
@@ -172,51 +166,27 @@ Bone *Skeleton::FindBone(const string &name) {
     return target;
 }
 
-
 void Skeleton::NextBvhMotion() {
     bvh_frame = (bvh_frame + 1) % bvh->GetNumFrame();
-    ApplyBvhMotion(bvh_frame, bvh);
+    ApplyBvhMotion(bvh_frame);
 }
 
-void Skeleton::ApplyBvhMotion(const int frame, BVH *other_bvh) {
-    std::vector<rp3d::Vector3> positions(other_bvh->GetNumJoint());
-    std::vector<rp3d::Vector3> angles(other_bvh->GetNumJoint());
-    for (int i = 0; i < bones.size(); i++) {
-        auto &pos = positions[i];
-        auto &angle = angles[i];
-        pos.setAllValues(other_bvh->GetJoint(i)->offset[0], other_bvh->GetJoint(i)->offset[1],
-                         other_bvh->GetJoint(i)->offset[2]);
+void Skeleton::InitBvhMotion() {
+    bvh_frame = 0;
+    ApplyBvhMotion(bvh_frame);
+}
 
-        auto bone_joint = other_bvh->GetJoint(i);
-        for (auto channel: bone_joint->channels) {
-            switch (channel->type) {
-                case X_ROTATION:
-                    angle.x = other_bvh->GetMotion(frame, channel->index);
-                    break;
-                case Y_ROTATION:
-                    angle.y = other_bvh->GetMotion(frame, channel->index);
-                    break;
-                case Z_ROTATION:
-                    angle.z = other_bvh->GetMotion(frame, channel->index);
-                    break;
-                case X_POSITION:
-                    pos.x = other_bvh->GetMotion(frame, channel->index);
-                    break;
-                case Y_POSITION:
-                    pos.y = other_bvh->GetMotion(frame, channel->index);
-                    break;
-                case Z_POSITION:
-                    pos.z = other_bvh->GetMotion(frame, channel->index);
-                    break;
-            }
-        }
+void Skeleton::ApplyBvhMotion(const int frame) {
+    bvh->SetCurrentFrame(frame);
+    auto positions = bvh->GetCurrentFramePositions();
+    auto angles = bvh->GetCurrentFrameAngles();
 
-        pos *= SCALE;
-    }
-    std::vector<glm::mat4> translations(bvh->GetNumJoint(), glm::mat4(1.0)), rotations(bvh->GetNumJoint(), glm::mat4(1.0));
+    std::vector<glm::mat4> translations(bvh->GetNumJoint(), glm::mat4(1.0)), rotations(bvh->GetNumJoint(),
+                                                                                       glm::mat4(1.0));
 
     for (int id = 0; id < bvh->GetNumJoint(); id++) {
         auto joint = bvh->GetJoint(id);
+        auto joint_name = joint->name;
         auto &parents = joint->parents;
 
         for (size_t parentIdx = 0; parentIdx < parents.size(); parentIdx++) {
@@ -224,8 +194,7 @@ void Skeleton::ApplyBvhMotion(const int frame, BVH *other_bvh) {
             const auto &pos = positions[parent_joint->index];
             const auto &angle = angles[parent_joint->index];
             // Move to eachn parent's position
-            translations[id] =
-                    glm::translate(translations[id], glm::vec3{pos.x, pos.y, pos.z});
+            translations[id] = glm::translate(translations[id], pos);
 
             // Motion rotation
             const auto multiplyRotateMat = [&](ChannelEnum axis) {
@@ -248,12 +217,11 @@ void Skeleton::ApplyBvhMotion(const int frame, BVH *other_bvh) {
                 rotations[id] = glm::rotate(rotations[id], radians, axisVec3);
                 translations[id] = glm::rotate(translations[id], radians, axisVec3);;
             };
-            std::for_each(other_bvh->GetRotationOrder(parent_joint->index).begin(),
-                          other_bvh->GetRotationOrder(parent_joint->index).end(), multiplyRotateMat);
+            std::for_each(bvh->GetRotationOrder(parent_joint->index).begin(),
+                          bvh->GetRotationOrder(parent_joint->index).end(), multiplyRotateMat);
         }
 
-        glm::vec3 pos;
-        pos = glm::vec3{positions[id].x, positions[id].y, positions[id].z};
+        glm::vec3 pos(positions[id]);
 
         // Move to current joint's position
         translations[id] = glm::translate(translations[id], pos);
@@ -276,18 +244,12 @@ void Skeleton::ApplyBvhMotion(const int frame, BVH *other_bvh) {
 //        bone_transform_changed.fire(bones[id]);
 
         // use result
-        auto bone = bones[id];
-        if (bone->GetBoneName() == "head" || bone->GetBoneName() == "abdomen" || bone->GetBoneName() == "chest" ||
-            bone->GetBoneName() == "neck" || bone->GetBoneName() == "rCollar" || bone->GetBoneName() == "rShldr" ||
-            bone->GetBoneName() == "rForeArm" || bone->GetBoneName() == "rHand" || bone->GetBoneName() == "lCollar" ||
-            bone->GetBoneName() == "lShldr" || bone->GetBoneName() == "lForeArm" || bone->GetBoneName() == "lHand" ||
-            bone->GetBoneName() == "rButtock" || bone->GetBoneName() == "rThigh" || bone->GetBoneName() == "rShin" ||
-            bone->GetBoneName() == "rFoot" || bone->GetBoneName() == "lButtock" || bone->GetBoneName() == "lThigh" ||
-            bone->GetBoneName() == "lShin" || bone->GetBoneName() == "lFoot" || bone->GetBoneName() == "hip") {
+        if (std::find(target_bone_names.begin(), target_bone_names.end(), joint_name) !=
+            target_bone_names.end()) {
 
             glm::vec4 result_pos = translations[id] * glm::vec4(0.0, 0.0, 0.0, 1.0);
             glm::quat result_angle = glm::quat_cast(rotations[id]);
-            bone->GetPhysicsObject()->setTransform(
+            bones[joint_name]->GetPhysicsObject()->setTransform(
                     {{result_pos.x, result_pos.y, result_pos.z},
                      rp3d::Quaternion(result_angle.x, result_angle.y, result_angle.z, result_angle.w)});
         }
