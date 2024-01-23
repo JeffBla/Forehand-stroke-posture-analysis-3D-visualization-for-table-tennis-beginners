@@ -41,7 +41,7 @@
 #include "BVH.h"
 #include "Event.h"
 
-#define SCALE 0.2f
+#define SCALE 0.1f
 
 using namespace bvh;
 using namespace bone;

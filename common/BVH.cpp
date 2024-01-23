@@ -160,7 +160,7 @@ void BVH::Load(const char *bvh_file_name) {
             token = strtok(nullptr, separater);
             joint->channels.resize(token ? atoi(token) : 0);
 
-            rotationOrder.emplace_back(3);
+            rotationOrder.push_back(vector<ChannelEnum>());
             for (i = 0; i < joint->channels.size(); i++) {
                 Channel *channel = new Channel();
                 channel->joint = joint;

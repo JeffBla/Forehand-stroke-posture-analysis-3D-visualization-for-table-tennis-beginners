@@ -102,7 +102,7 @@ Skeleton::Skeleton(rp3d::PhysicsCommon &mPhysicsCommon, rp3d::PhysicsWorld *mPhy
                 length *= SCALE;
                 bones[id] = CreateBone(joint->name, bones[joint->parents.back()->index], defaultPosition,
                                        rp3d::Quaternion::identity(),
-                                       {0.15, length, 0.15}, 9, "cone_offset.obj",
+                                       {0.15, length, 0.15}, 9, "cone_offset_down.obj",
                                        rp3d::Quaternion::identity());
             }
         }
@@ -182,14 +182,12 @@ void Skeleton::ApplyBvhMotion(const int frame, BVH *other_bvh) {
     std::vector<rp3d::Vector3> positions(other_bvh->GetNumJoint());
     std::vector<rp3d::Vector3> angles(other_bvh->GetNumJoint());
     for (int i = 0; i < bones.size(); i++) {
-        auto name = bones[i]->GetBoneName();
         auto &pos = positions[i];
         auto &angle = angles[i];
         pos.setAllValues(other_bvh->GetJoint(i)->offset[0], other_bvh->GetJoint(i)->offset[1],
                          other_bvh->GetJoint(i)->offset[2]);
-        pos *= SCALE;
 
-        auto bone_joint = other_bvh->GetJoint(name);
+        auto bone_joint = other_bvh->GetJoint(i);
         for (auto channel: bone_joint->channels) {
             switch (channel->type) {
                 case X_ROTATION:
@@ -212,21 +210,20 @@ void Skeleton::ApplyBvhMotion(const int frame, BVH *other_bvh) {
                     break;
             }
         }
+
+        pos *= SCALE;
     }
-    std::vector<glm::mat4> translations(bvh->GetNumJoint()), rotations(bvh->GetNumJoint());
+    std::vector<glm::mat4> translations(bvh->GetNumJoint(), glm::mat4(1.0)), rotations(bvh->GetNumJoint(), glm::mat4(1.0));
 
     for (int id = 0; id < bvh->GetNumJoint(); id++) {
-        translations[id] = glm::mat4(1.0);
-        rotations[id] = glm::mat4(1.0);
-
         auto joint = bvh->GetJoint(id);
         auto &parents = joint->parents;
 
         for (size_t parentIdx = 0; parentIdx < parents.size(); parentIdx++) {
-            auto &pos = positions[parentIdx];
-            auto &angle = angles[parentIdx];
             auto parent_joint = parents[parentIdx];
-            // Move to each parent's position
+            const auto &pos = positions[parent_joint->index];
+            const auto &angle = angles[parent_joint->index];
+            // Move to eachn parent's position
             translations[id] =
                     glm::translate(translations[id], glm::vec3{pos.x, pos.y, pos.z});
 
@@ -263,9 +260,8 @@ void Skeleton::ApplyBvhMotion(const int frame, BVH *other_bvh) {
 
         // rotate current joint object to turn to parent
         pos = glm::normalize(pos);
-        glm::vec3 orig = glm::vec3(1.0, 0.0, 0.0);
+        glm::vec3 orig = glm::vec3(0.0, -1.0, 0.0);
         glm::vec3 cross = glm::normalize(glm::cross(pos, orig));
-        glm::mat<4, 4, float> rotate;
         if (glm::length(cross) > 0) {
             rotations[id] = glm::rotate(rotations[id],
                                         glm::pi<float>() - glm::acos(glm::dot(pos, orig)), cross);
