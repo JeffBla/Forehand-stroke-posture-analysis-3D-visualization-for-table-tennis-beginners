@@ -125,6 +125,10 @@ set(COMMON_SOURCES
 		common/BVH.cpp
         common/Bone.cpp
         common/Bone.h
+		common/Analysizer.cpp
+		common/Analysizer.h
+		common/Identifier.cpp
+		common/Identifier.h
 )
 
 # Scenes source files

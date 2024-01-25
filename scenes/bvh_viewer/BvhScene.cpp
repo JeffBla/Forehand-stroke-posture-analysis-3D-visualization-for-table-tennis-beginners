@@ -77,10 +77,13 @@ void BvhScene::createPhysicsWorld() {
     mFloor2->getRigidBody()->setType(rp3d::BodyType::STATIC);
     mPhysicsObjects.push_back(mFloor2);
 
-    // create my skeleton
+    // ------------------------- SKELETON ----------------------- //
+    // Create the skeleton with bvh
     bvh = new BVH("out.bvh");
     skeleton1 = new skeleton::Skeleton(mPhysicsCommon, mPhysicsWorld, mPhysicsObjects, mMeshFolderPath, bvh);
     skeleton_created.fire();
+    // Analysizer
+    analysizer1 = new analysizer::Analysizer(skeleton1);
 
     raycastedTarget_bone = skeleton1->FindBone("head");
     raycastedTarget_bone->GetPhysicsObject()->setColor(pickedColor);
@@ -175,6 +178,10 @@ bool BvhScene::keyboardEvent(int key, int scancode, int action, int mods) {
     }
     if (key == GLFW_KEY_T && action == GLFW_PRESS) {
         skeleton1->SetJointRotation_local(raycastedTarget_bone, 0, M_PI / 6, 0);
+        return true;
+    }
+    if(key==GLFW_KEY_A && action == GLFW_PRESS){
+        analysizer1->Analyse();
         return true;
     }
 

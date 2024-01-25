@@ -753,7 +753,7 @@ void Gui::onChangeBoneTransform_bvhscene(Bone *target) {
         snprintf(text, 6, "%.5f", result_deg.z);
         mRotateTextBox_z->set_value(text);
 
-        /// Update AngleWithNeighbor
+        /// Update the angle related ot raycasted target
         auto angles = target->GetAngleInfo();
 
         for (auto l: angleLabels) {

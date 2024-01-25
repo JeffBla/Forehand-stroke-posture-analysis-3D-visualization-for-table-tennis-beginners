@@ -74,8 +74,6 @@ namespace skeleton {
                                                     "rShldr", "rForeArm", "rHand", "lCollar", "lShldr", "lForeArm",
                                                     "lHand", "rButtock", "rThigh", "rShin", "rFoot", "lButtock",
                                                     "lThigh", "lShin", "lFoot"};
-        // -------------------- Methods -------------------- //
-
     protected:
 
         openglframework::Color objectColor = openglframework::Color(0.0f, 0.68f, 0.99f, 1.0f);
@@ -114,7 +112,6 @@ namespace skeleton {
         Event<Bone *> bone_transform_changed;
 
         // -------------------- Methods -------------------- //
-
         /// Constructor
         Skeleton(rp3d::PhysicsCommon &mPhysicsCommon, rp3d::PhysicsWorld *mPhysicsWorld,
                  vector<PhysicsObject *> &mPhysicsObjects, std::string &mMeshFolderPath, BVH *bvh);
@@ -149,12 +146,24 @@ namespace skeleton {
         Bone *FindBone(const string &target_name);
 
         // -------------------- Motion -------------------- //
-
         void NextBvhMotion();
 
         void ApplyBvhMotion(const int frame);
 
         void InitBvhMotion();
+
+        // -------------------- Getter & Setter -------------------- //
+        const BVH *GetBvh() const;
+
+        const std::vector<std::string> &GetTargetBoneNames() const;
+    };
+
+    inline const std::vector<std::string> &Skeleton::GetTargetBoneNames() const {
+        return target_bone_names;
+    }
+
+    inline const BVH *Skeleton::GetBvh() const {
+        return bvh;
     };
 
 }  // namespace skeleton

@@ -36,6 +36,7 @@
 #include "openglframework.h"
 #include "Skeleton.h"
 #include "Event.h"
+#include "Analysizer.h"
 
 using namespace event;
 
@@ -65,9 +66,6 @@ namespace bvhscene {
         Event<> skeleton_created;
 
     protected:
-        /// Box for the floor 2
-        Box *mFloor2;
-
         skeleton::Skeleton *skeleton1 = nullptr;
 
         // -------------------- Bvh -------------------- //
@@ -76,6 +74,12 @@ namespace bvhscene {
         double accumulatedTime = 0.0;
         double motionInverval = 0.1;
         BVH *bvh;
+
+        // -------------------- Analysizer -------------------- //
+        analysizer::Analysizer *analysizer1;
+
+        // -------------------- Physics -------------------- //
+        Box *mFloor2;
 
         /// World settings
         rp3d::PhysicsWorld::WorldSettings mWorldSettings;
@@ -87,6 +91,7 @@ namespace bvhscene {
         void RecordRaycastTarget(Bone *target);
 
         void MotionNext();
+
     public:
         // -------------------- Methods -------------------- //
 
