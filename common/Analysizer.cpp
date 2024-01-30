@@ -1,11 +1,13 @@
 #include "Analysizer.h"
 
-analysizer::Analysizer::Analysizer(Skeleton *skeleton) : Analysizer(skeleton,
-                                                                    {"whole_body", "foreArm_hand", "shin_foot",
-                                                                     "body_rotate"}) {}
+analysizer::Analysizer::Analysizer(Skeleton *skeleton, SceneDemo *scene) : Analysizer(skeleton,
+                                                                                      {"whole_body", "foreArm_hand",
+                                                                                       "shin_foot", "body_rotate"},
+                                                                                      scene) {}
 
-analysizer::Analysizer::Analysizer(Skeleton *target_skeleton, std::vector<std::string> identifier_name_list)
-        : target_skeleton(target_skeleton), identifier_name_list(identifier_name_list) {
+analysizer::Analysizer::Analysizer(Skeleton *target_skeleton, std::vector<std::string> identifier_name_list,
+                                   SceneDemo *scene)
+        : target_skeleton(target_skeleton), identifier_name_list(identifier_name_list), scene(scene) {
     for (int id = 0; id < identifier_name_list.size(); id++) {
         auto identifier_name = identifier_name_list[id];
         std::vector<std::string> target_list;

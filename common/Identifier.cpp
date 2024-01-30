@@ -8,7 +8,7 @@ identifier::Identifier::Identifier(int id, std::string &identifier_name, std::ve
 }
 
 void identifier::Identifier::Identify(int frame) {
-    result_list.clear();
+    result_list.resize(target_skeleton->GetBvh()->GetNumFrame());
 
     for (const auto &target_name: target_list) {
         auto target_bone = target_skeleton->FindBone(target_name);
@@ -43,7 +43,9 @@ void identifier::Identifier::WriteOutput() {
     output_file << std::endl;
 
     /// Write the data
+    int frame = 0;
     for (auto &angle_info_list: result_list) {
+        output_file << frame << ",";
         for (const auto &target_name: target_list) {
             output_file << angle_info_list[target_name]["self x"] << "," << angle_info_list[target_name]["self y"]
                         << "," << angle_info_list[target_name]["self z"] << ","
@@ -57,6 +59,7 @@ void identifier::Identifier::WriteOutput() {
             }
         }
         output_file << std::endl;
+        frame++;
     }
     output_file.close();
 }
