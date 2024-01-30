@@ -29,6 +29,7 @@
 // Libraries
 #include <nanogui/opengl.h>
 #include <nanogui/nanogui.h>
+#include <nanogui/common.h>
 #include "openglframework.h"
 #include "Bone.h"
 #include <sstream>
@@ -191,6 +192,9 @@ class Gui {
 
         void onKeyboardEvent(int key, int scancode, int action, int modifiers);
 
+        void onOpenFileButtonPressed(const vector<pair<string, string>> &valid, bool save);
+
+        // -------------------- Getter & Setter -------------------- //
         bool getIsDisplayed() const;
 
         void setIsDisplayed(bool isDisplayed);

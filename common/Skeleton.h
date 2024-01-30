@@ -28,6 +28,7 @@
 
 #include <reactphysics3d/reactphysics3d.h>
 #include <algorithm>
+#include <list>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -60,7 +61,7 @@ namespace skeleton {
         rp3d::PhysicsCommon &mPhysicsCommon;
         rp3d::PhysicsWorld *mPhysicsWorld;
         string &mMeshFolderPath;
-        std::vector<PhysicsObject *> &mPhysicsObjects;
+        std::list<PhysicsObject *> &mPhysicsObjects;
         rp3d::Vector3 ragdollPosition;
         rp3d::Vector3 defaultPosition;
 
@@ -114,7 +115,7 @@ namespace skeleton {
         // -------------------- Methods -------------------- //
         /// Constructor
         Skeleton(rp3d::PhysicsCommon &mPhysicsCommon, rp3d::PhysicsWorld *mPhysicsWorld,
-                 vector<PhysicsObject *> &mPhysicsObjects, std::string &mMeshFolderPath, BVH *bvh);
+                 list<PhysicsObject *> &mPhysicsObjects, std::string &mMeshFolderPath, BVH *bvh);
 
         /// Destructor
         ~Skeleton();

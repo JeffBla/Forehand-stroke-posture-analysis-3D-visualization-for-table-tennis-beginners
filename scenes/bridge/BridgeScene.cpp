@@ -214,7 +214,7 @@ void BridgeScene::destroyPhysicsWorld() {
     if (mPhysicsWorld != nullptr) {
 
         // Destroy all the physics objects of the scene
-        for (std::vector<PhysicsObject*>::iterator it = mPhysicsObjects.begin(); it != mPhysicsObjects.end(); ++it) {
+        for (auto it = mPhysicsObjects.begin(); it != mPhysicsObjects.end(); ++it) {
 
             // Destroy the object
             delete (*it);

@@ -1,29 +1,26 @@
 #include <queue>
 
-
 #include "Bone.h"
-#include "Sphere.h"
-#include "ConvexMesh.h"
-#include "AngleTool.h"
-#include "BVH.h"
 
 using namespace angleTool;
 using namespace bone;
 
 Bone::Bone(const std::string &bone_name, PhysicsObject *bone_object, BoneType boneType, rp3d::Vector3 &pos,
-           Bone *parent, rp3d::Quaternion &quatern, rp3d::Quaternion local_coordinate_quatern)
+           Bone *parent, rp3d::Quaternion &quatern, rp3d::Quaternion local_coordinate_quatern,
+           std::list<PhysicsObject *> &mPhysicObjects)
         : bone_name(bone_name), position(pos), parent(parent), bone_object(bone_object), boneType(boneType),
           origin_quatern(quatern), init_quatern(quatern), local_coordinate_quatern(local_coordinate_quatern),
-          init_local_coordinate_quatern(local_coordinate_quatern) {}
+          init_local_coordinate_quatern(local_coordinate_quatern), mPhysicsObjects(mPhysicObjects) {}
 
 Bone::Bone(const std::string &bone_name, PhysicsObject *bone_object, BoneType boneType, rp3d::Vector3 &pos,
-           Bone *parent, const rp3d::Quaternion &quatern, rp3d::Quaternion local_coordinate_quatern)
+           Bone *parent, const rp3d::Quaternion &quatern, rp3d::Quaternion local_coordinate_quatern,
+           std::list<PhysicsObject *> &mPhysicsObjects)
         : bone_name(bone_name), position(pos), parent(parent), bone_object(bone_object), boneType(boneType),
           origin_quatern(quatern), init_quatern(quatern), local_coordinate_quatern(local_coordinate_quatern),
-          init_local_coordinate_quatern(local_coordinate_quatern) {}
+          init_local_coordinate_quatern(local_coordinate_quatern), mPhysicsObjects(mPhysicsObjects) {}
 
 Bone::~Bone() {
-
+    delete bone_object;
 }
 
 

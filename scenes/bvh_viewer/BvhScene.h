@@ -41,7 +41,6 @@
 using namespace event;
 
 namespace bvhscene {
-
 // Constants
     const float SCENE_RADIUS = 45.0f;
     const openglframework::Vector3 FLOOR_2_SIZE(60, 0.5f, 82);  // Floor dimensions in meters
@@ -113,11 +112,16 @@ namespace bvhscene {
         /// Destroy the physics world
         void destroyPhysicsWorld();
 
+        Skeleton *CreateSkeleton(string &new_bvh);
+
+        void DestroySkeleton();
+        // -------------------- Events -------------------- //
         float notifyRaycastHit(const rp3d::RaycastInfo &raycastInfo) override;
 
         /// Called when a keyboard event occurs
         virtual bool keyboardEvent(int key, int scancode, int action, int mods) override;
 
+        // -------------------- Getter & Setter -------------------- //
         skeleton::Skeleton *GetSkeleton();
 
         Bone *GetRaycastedTarget_bone() const;
