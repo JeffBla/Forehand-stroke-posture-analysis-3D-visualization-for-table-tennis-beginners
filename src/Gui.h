@@ -27,13 +27,16 @@
 #define	GUI_H
 
 // Libraries
+#include <sstream>
+#include <iomanip>
+
 #include <nanogui/opengl.h>
 #include <nanogui/nanogui.h>
 #include <nanogui/common.h>
+
 #include "openglframework.h"
 #include "Bone.h"
-#include <sstream>
-#include <iomanip>
+#include "VideoToBvhConverter.h"
 
 using namespace openglframework;
 using namespace nanogui;
@@ -111,12 +114,11 @@ class Gui {
 
         std::vector<Label *> angleLabels;
 
+        TextBox *videoPath_textbox;
+        TextBox *bvhPath_textbox;
+
         /// True if the GUI is displayed
         bool mIsDisplayed;
-
-        // -------------------- Methods -------------------- //
-
-        static void resetScroll();
 
         /// Current time (in seconds) from last profiling time display
         static double mTimeSinceLastProfilingDisplay;
@@ -136,6 +138,9 @@ class Gui {
         // Current scene
         std::string mCurrentSceneName;
 
+        // -------------------- Converter -------------------- //
+        videoToBvhConverter::VideoToBvhConverter *mVideoToBvhConverter;
+
         // -------------------- Methods -------------------- //
 
         void createSimulationPanel();
@@ -149,6 +154,7 @@ class Gui {
         // Convert float value to string
         std::string floatToString(float value, int precision);
 
+        static void resetScroll();
     public :
 
         // -------------------- Methods -------------------- //
@@ -171,16 +177,19 @@ class Gui {
 
         void drawTearDown();
 
+        bool isFocus() const;
+
+        static void setScroll(double scrollX, double scrollY);
+
         /// Update the GUI values with the engine settings from the current scene
         void resetWithValuesFromCurrentScene();
 
+        // -------------------- Event -------------------- //
         void onChangeRaycastedTarget_bvhscene(bone::Bone *target);
 
         void onChangeBoneTransform_bvhscene(bone::Bone *target);
 
         void onCreateSkeleton_bvhscene();
-
-        static void setScroll(double scrollX, double scrollY);
 
         void onWindowResizeEvent(int width, int height);
 
@@ -190,7 +199,9 @@ class Gui {
 
         void onMouseButtonEvent(int button, int action, int modifiers);
 
-        void onKeyboardEvent(int key, int scancode, int action, int modifiers);
+        bool onKeyboardEvent(int key, int scancode, int action, int modifiers);
+
+        bool onCharacterEvent(unsigned int codepoint);
 
         void onOpenFileButtonPressed(const vector<pair<string, string>> &valid, bool save);
 

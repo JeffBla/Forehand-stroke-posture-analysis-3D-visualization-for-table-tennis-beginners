@@ -583,6 +583,8 @@ void Gui::createTestPanel() {
     mTestPanel->set_position(Vector2i(mScreen->width() - mTestPanel->fixed_width() - 15, 15));
 
     if (mCurrentSceneName == "BVH") {
+        mVideoToBvhConverter = new videoToBvhConverter::VideoToBvhConverter();
+
         // Event register
         auto scene = (bvhscene::BvhScene *) (mApp->getScenes()[0]);
         scene->raycastedTarget_changed.add_handler([this](Bone *target_bone) {
@@ -685,11 +687,28 @@ void Gui::createTestPanel() {
             angleLabels.push_back(new Label(mTestPanel, "..."));
         }
 
-        // File chooser
+        /// File chooser
         new Label(mTestPanel, "File Chooser", "sans-bold");
         auto open_file_button = new Button(mTestPanel, "Open File");
         open_file_button->set_callback([&]() {
             onOpenFileButtonPressed({{"bvh", "BioVision Motion Capture"}}, false);
+        });
+
+        /// Video to bvh Converter
+        new Label(mTestPanel, "Video to bvh", "sans-bold");
+        auto videoPath_label = new Label(mTestPanel, "Video File Path: ");
+        videoPath_textbox = new TextBox(mTestPanel, "");
+        videoPath_textbox->set_alignment(TextBox::Alignment::Left);
+        videoPath_textbox->set_editable(true);
+
+        auto bvhPath_label = new Label(mTestPanel, "BVH File Path: ");
+        bvhPath_textbox = new TextBox(mTestPanel, "");
+        bvhPath_textbox->set_alignment(TextBox::Alignment::Left);
+        bvhPath_textbox->set_editable(true);
+
+        auto video_to_bvh_button = new Button(mTestPanel, "Convert");
+        video_to_bvh_button->set_callback([&]() {
+            mVideoToBvhConverter->Convert(videoPath_textbox->value(), bvhPath_textbox->value());
         });
     }
     mTestPanel->set_visible(true);
@@ -736,8 +755,12 @@ void Gui::onMouseButtonEvent(int button, int action, int modifiers) {
     mScreen->mouse_button_callback_event(button, action, modifiers);
 }
 
-void Gui::onKeyboardEvent(int key, int scancode, int action, int modifiers) {
-    mScreen->key_callback_event(key, scancode, action, modifiers);
+bool Gui::onKeyboardEvent(int key, int scancode, int action, int modifiers) {
+    return mScreen->key_callback_event(key, scancode, action, modifiers);
+}
+
+bool Gui::onCharacterEvent(unsigned int codepoint) {
+    return mScreen->char_callback_event(codepoint);
 }
 
 void Gui::onChangeRaycastedTarget_bvhscene(Bone *target) {
@@ -795,3 +818,6 @@ void Gui::onCreateSkeleton_bvhscene() {
     });
 }
 
+bool Gui::isFocus() const {
+    return mScreen->has_focus();
+}

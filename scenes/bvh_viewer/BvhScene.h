@@ -37,6 +37,7 @@
 #include "Skeleton.h"
 #include "Event.h"
 #include "Analysizer.h"
+#include "VideoToBvhConverter.h"
 
 using namespace event;
 
