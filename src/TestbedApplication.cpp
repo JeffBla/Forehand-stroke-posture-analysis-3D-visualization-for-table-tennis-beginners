@@ -542,8 +542,9 @@ void TestbedApplication::notifyEngineSetttingsChanged() {
     mCurrentScene->updateEngineSettings();
 }
 
-void GLAPIENTRY TestbedApplication::onOpenGLError(GLenum /*source*/, GLenum type, GLuint /*id*/, GLenum /*severity*/, GLsizei /*length*/,
-                                                  const GLchar* /*message*/, const void* /*userParam*/) {
+void GLAPIENTRY TestbedApplication::onOpenGLError(GLenum /*source*/, GLenum type, GLuint /*id*/, GLenum /*severity*/,
+                                                 GLsizei /*length*/,
+                                                 const GLchar * /*message*/, const void * /*userParam*/) {
 #ifdef GL_DEBUG_OUTPUT
     if (type == GL_DEBUG_TYPE_ERROR) {
         /*
@@ -592,7 +593,7 @@ void TestbedApplication::keyboard_event(int key, int scancode, int action, int m
     mGui.onKeyboardEvent(key, scancode, action, modifiers);
     // Check if the GUI isn't in focus
     bool isInGui = mGui.isFocus();
-    if(isInGui)
+    if (isInGui)
         return;
 
     // Close application on escape key
@@ -627,11 +628,10 @@ void TestbedApplication::keyboard_event(int key, int scancode, int action, int m
     mCurrentScene->keyboardEvent(key, scancode, action, modifiers);
 }
 
-
 void TestbedApplication::text_in_event(unsigned int codepoint) {
     // Check if the GUI is in focus
     bool isInGui = mGui.isFocus();
-    if(!isInGui)
+    if (!isInGui)
         return;
 
     mGui.onCharacterEvent(codepoint);
