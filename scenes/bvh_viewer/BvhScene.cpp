@@ -25,13 +25,6 @@
 
 // Libraries
 #include "BvhScene.h"
-#include "Skeleton.h"
-#include "BVH.h"
-#include "AngleTool.h"
-#include <nanogui/opengl.h>
-#include <nanogui/nanogui.h>
-
-#include <cmath>
 
 // Namespaces
 using namespace openglframework;
@@ -213,4 +206,3 @@ void BvhScene::MotionNext() {
     if (skeleton1 != nullptr)
         skeleton1->NextBvhMotion();
 }
-

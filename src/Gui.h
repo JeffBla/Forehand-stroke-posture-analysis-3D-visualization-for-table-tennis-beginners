@@ -37,6 +37,7 @@
 #include "openglframework.h"
 #include "Bone.h"
 #include "VideoToBvhConverter.h"
+#include "VideoController.h"
 
 using namespace openglframework;
 using namespace nanogui;
@@ -48,7 +49,6 @@ class TestbedApplication;
 
 // Class Gui
 class Gui {
-
     protected :
 
         enum LeftPane {SCENES, PHYSICS, RENDERING, PROFILING, TESTING};
@@ -114,8 +114,15 @@ class Gui {
 
         std::vector<Label *> angleLabels;
 
+        std::string mBvhPath;
+        std::string mVideoPath;
         TextBox *videoPath_textbox;
         TextBox *bvhPath_textbox;
+
+        // -------------------- Image Viewer -------------------- //
+        Window *bvhImageWindow;
+        ImageView *bvhImageViewer;
+        videoLoader::VideoController *pVideoController;
 
         /// True if the GUI is displayed
         bool mIsDisplayed;
@@ -139,7 +146,7 @@ class Gui {
         std::string mCurrentSceneName;
 
         // -------------------- Converter -------------------- //
-        videoToBvhConverter::VideoToBvhConverter *mVideoToBvhConverter;
+        videoToBvhConverter::VideoToBvhConverter *pVideoToBvhConverter;
 
         // -------------------- Methods -------------------- //
 
@@ -203,7 +210,7 @@ class Gui {
 
         bool onCharacterEvent(unsigned int codepoint);
 
-        void onOpenFileButtonPressed(const vector<pair<string, string>> &valid, bool save);
+        std::string onOpenFileButtonPressed(const vector<pair<string, string>> &valid, bool save);
 
         // -------------------- Getter & Setter -------------------- //
         bool getIsDisplayed() const;

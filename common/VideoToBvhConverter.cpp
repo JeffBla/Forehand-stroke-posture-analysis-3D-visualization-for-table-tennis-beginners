@@ -9,6 +9,10 @@ VideoToBvhConverter::VideoToBvhConverter(const std::string &videoPath, const std
     this->bvhPath = bvhPath;
 }
 
+VideoToBvhConverter::~VideoToBvhConverter() {
+
+}
+
 void VideoToBvhConverter::sig_handler(int sig) {
     int status;
 

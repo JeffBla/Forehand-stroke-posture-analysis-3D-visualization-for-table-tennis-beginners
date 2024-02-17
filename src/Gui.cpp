@@ -47,13 +47,13 @@ double Gui::mCachedPhysicsStepTime = 0;
 Gui::Gui(TestbedApplication *app)
         : mApp(app), mSimulationPanel(nullptr), mSettingsPanel(nullptr), mPhysicsPanel(nullptr),
           mRenderingPanel(nullptr), mFPSLabel(nullptr), mFrameTimeLabel(nullptr), mTotalPhysicsTimeLabel(nullptr),
-          mPhysicsStepTimeLabel(nullptr), mIsDisplayed(true) {
-}
+          mPhysicsStepTimeLabel(nullptr), mIsDisplayed(true) {}
 
 // Destructor
 Gui::~Gui() {
+    delete pVideoToBvhConverter;
 
-
+    delete pVideoController;
 }
 
 /// Initialize the GUI
@@ -583,7 +583,8 @@ void Gui::createTestPanel() {
     mTestPanel->set_position(Vector2i(mScreen->width() - mTestPanel->fixed_width() - 15, 15));
 
     if (mCurrentSceneName == "BVH") {
-        mVideoToBvhConverter = new videoToBvhConverter::VideoToBvhConverter();
+        pVideoToBvhConverter = new videoToBvhConverter::VideoToBvhConverter();
+        pVideoController = new videoLoader::VideoController();
 
         // Event register
         auto scene = (bvhscene::BvhScene *) (mApp->getScenes()[0]);
@@ -687,11 +688,48 @@ void Gui::createTestPanel() {
             angleLabels.push_back(new Label(mTestPanel, "..."));
         }
 
+        /// Bvh Image viewer
+        // Window
+        bvhImageWindow = new Window(mScreen, "Bvh Frame");
+        bvhImageWindow->set_layout(new GroupLayout());
+        bvhImageWindow->set_visible(false);
+        bvhImageWindow->set_enabled(false);
+        bvhImageWindow->set_position(Vector2i(15, 638));
+        // Viewer
+        bvhImageViewer = new ImageView(bvhImageWindow);
+        bvhImageViewer->set_visible(false);
+        bvhImageViewer->set_enabled(false);
+
         /// File chooser
-        new Label(mTestPanel, "File Chooser", "sans-bold");
-        auto open_file_button = new Button(mTestPanel, "Open File");
-        open_file_button->set_callback([&]() {
-            onOpenFileButtonPressed({{"bvh", "BioVision Motion Capture"}}, false);
+        new Label(mTestPanel, "BVH File Chooser", "sans-bold");
+        auto open_bvh_button = new Button(mTestPanel, "Open File");
+        open_bvh_button->set_callback([&]() {
+            mBvhPath= onOpenFileButtonPressed({{"bvh", "BioVision Motion Capture"}}, true);
+        });
+
+        /// Video Controller
+        pVideoController->SetImageView(bvhImageViewer);
+        new Label(mTestPanel, "Converted Video", "sans-bold");
+        auto open_video_button = new Button(mTestPanel, "Open File");
+        open_video_button->set_callback([&]() {
+            mVideoPath = onOpenFileButtonPressed({{"mp4", "MPEG-4 Video"}}, true);
+        });
+
+        auto play_video_button = new Button(mTestPanel, "Play");
+        play_video_button->set_callback([&]() {
+            auto scene = (bvhscene::BvhScene *) this->mApp->mCurrentScene;
+
+            // Create skeleton
+            scene->CreateSkeleton(mBvhPath);
+
+            // Play video
+            pVideoController->Load(mVideoPath);
+
+            bvhImageWindow->set_visible(true);
+            bvhImageWindow->set_enabled(true);
+            bvhImageViewer->set_visible(true);
+            bvhImageViewer->set_enabled(true);
+            mScreen->perform_layout();
         });
 
         /// Video to bvh Converter
@@ -708,21 +746,17 @@ void Gui::createTestPanel() {
 
         auto video_to_bvh_button = new Button(mTestPanel, "Convert");
         video_to_bvh_button->set_callback([&]() {
-            mVideoToBvhConverter->Convert(videoPath_textbox->value(), bvhPath_textbox->value());
+            pVideoToBvhConverter->Convert(videoPath_textbox->value(), bvhPath_textbox->value());
         });
     }
     mTestPanel->set_visible(true);
 }
 
-void Gui::onOpenFileButtonPressed(const vector<pair<string, string>> &valid, bool save) {
+std::string Gui::onOpenFileButtonPressed(const vector<pair<string, string>> &valid, bool save) {
     auto filepath = file_dialog(valid, save);
-    if (filepath.empty()) {
-        return;
-    }
-    if (mCurrentSceneName == "BVH") {
-        auto scene = (bvhscene::BvhScene *) this->mApp->mCurrentScene;
-        scene->CreateSkeleton(filepath);
-    }
+    if (filepath.empty())
+        return "";
+    return filepath;
 }
 
 void Gui::onWindowResizeEvent(int width, int height) {
