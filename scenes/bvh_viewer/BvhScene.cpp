@@ -99,6 +99,8 @@ void BvhScene::update() {
             if (accumulatedTime > motionInverval) {
                 accumulatedTime = 0.0;
                 MotionNext();
+
+                motion_nexted.fire();
             }
         }
     }
@@ -188,6 +190,8 @@ bool BvhScene::keyboardEvent(int key, int scancode, int action, int mods) {
     }
     if (key == GLFW_KEY_N && action == GLFW_PRESS) {
         MotionNext();
+
+        motion_nexted.fire();
         return true;
     }
     if (key == GLFW_KEY_T && action == GLFW_PRESS) {

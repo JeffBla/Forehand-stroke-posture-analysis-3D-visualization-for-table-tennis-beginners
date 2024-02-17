@@ -704,7 +704,7 @@ void Gui::createTestPanel() {
         new Label(mTestPanel, "BVH File Chooser", "sans-bold");
         auto open_bvh_button = new Button(mTestPanel, "Open File");
         open_bvh_button->set_callback([&]() {
-            mBvhPath= onOpenFileButtonPressed({{"bvh", "BioVision Motion Capture"}}, true);
+            mBvhPath = onOpenFileButtonPressed({{"bvh", "BioVision Motion Capture"}}, true);
         });
 
         /// Video Controller
@@ -724,6 +724,10 @@ void Gui::createTestPanel() {
 
             // Play video
             pVideoController->Load(mVideoPath);
+
+            scene->motion_nexted.add_handler([this]() {
+                onMotionNext();
+            });
 
             bvhImageWindow->set_visible(true);
             bvhImageWindow->set_enabled(true);
@@ -854,4 +858,11 @@ void Gui::onCreateSkeleton_bvhscene() {
 
 bool Gui::isFocus() const {
     return mScreen->has_focus();
+}
+
+void Gui::onMotionNext() {
+    if (!pVideoController->GetVideoPath().empty()) {
+        pVideoController->Next();
+        mScreen->perform_layout();
+    }
 }

@@ -212,6 +212,8 @@ class Gui {
 
         std::string onOpenFileButtonPressed(const vector<pair<string, string>> &valid, bool save);
 
+        void onMotionNext();
+
         // -------------------- Getter & Setter -------------------- //
         bool getIsDisplayed() const;
 

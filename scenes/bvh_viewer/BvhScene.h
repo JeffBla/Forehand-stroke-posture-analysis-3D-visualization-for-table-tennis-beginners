@@ -95,6 +95,9 @@ namespace bvhscene {
         void MotionNext();
 
     public:
+        // -------------------- Event -------------------- //
+        Event<> motion_nexted;
+
         // -------------------- Methods -------------------- //
 
         /// Constructor
