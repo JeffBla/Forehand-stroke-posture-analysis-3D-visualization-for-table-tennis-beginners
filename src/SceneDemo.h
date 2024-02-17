@@ -27,6 +27,8 @@
 #define SCENEDEMO_H
 
 // Libraries
+#include <list>
+
 #include "Scene.h"
 #include "VisualContactPoint.h"
 #include <reactphysics3d/reactphysics3d.h>
@@ -119,7 +121,7 @@ class SceneDemo : public Scene, protected rp3d::RaycastCallback {
 
         rp3d::PhysicsCommon& mPhysicsCommon;
 
-		std::vector<PhysicsObject*> mPhysicsObjects;
+		std::list<PhysicsObject*> mPhysicsObjects;
 
         rp3d::PhysicsWorld* mPhysicsWorld;
 

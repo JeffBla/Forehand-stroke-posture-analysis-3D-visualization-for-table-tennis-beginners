@@ -12,7 +12,7 @@ Bone *Skeleton::CreateBone(const string &bone_name, Bone *parent, rp3d::Vector3 
     PhysicsObject *boneObject = CreateBonePhysics(pos, orientation, size, massDensity, model_file);
 
     auto new_bone = new Bone(bone_name, boneObject, BoneType::CONE, pos, parent, orientation,
-                             local_coordinate_quatern);
+                             local_coordinate_quatern, mPhysicsObjects);
     if (parent != nullptr) {
         parent->AppendChild(new_bone);
     }
@@ -25,7 +25,7 @@ Bone *Skeleton::CreateBone(const string &bone_name, Bone *parent, rp3d::Vector3 
     PhysicsObject *boneObject = CreateBonePhysics(pos, orientation, radius, massDensity);
 
     auto new_bone = new Bone(bone_name, boneObject, BoneType::SPHERE, pos, parent, orientation,
-                             local_coordinate_quatern);
+                             local_coordinate_quatern, mPhysicsObjects);
 
     if (parent != nullptr) {
         parent->AppendChild(new_bone);
@@ -73,7 +73,7 @@ Sphere *Skeleton::CreateBonePhysics(const rp3d::Vector3 &pos, const rp3d::Quater
 }
 
 Skeleton::Skeleton(rp3d::PhysicsCommon &mPhysicsCommon, rp3d::PhysicsWorld *mPhysicsWorld,
-                   vector<PhysicsObject *> &mPhysicsObjects, std::string &mMeshFolderPath, BVH *bvh)
+                   list<PhysicsObject *> &mPhysicsObjects, std::string &mMeshFolderPath, BVH *bvh)
         : mPhysicsCommon(mPhysicsCommon), mPhysicsWorld(mPhysicsWorld), mPhysicsObjects(mPhysicsObjects),
           mMeshFolderPath(mMeshFolderPath), bvh(bvh) {
     {
@@ -111,6 +111,7 @@ Skeleton::Skeleton(rp3d::PhysicsCommon &mPhysicsCommon, rp3d::PhysicsWorld *mPhy
 
 Skeleton::~Skeleton() {
     for (auto &[name, bone]: bones) {
+        mPhysicsObjects.remove(bone->GetPhysicsObject());
         delete bone;
     }
 }

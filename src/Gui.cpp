@@ -161,9 +161,6 @@ void Gui::update() {
     mPhysicsStepTimeLabel->set_caption(
             std::string("Physics step time : ") + floatToString(mCachedPhysicsStepTime * 1000.0, 1) +
             std::string(" ms"));
-
-    // Get current scene
-
 }
 
 void Gui::createSimulationPanel() {
@@ -586,11 +583,15 @@ void Gui::createTestPanel() {
     mTestPanel->set_position(Vector2i(mScreen->width() - mTestPanel->fixed_width() - 15, 15));
 
     if (mCurrentSceneName == "BVH") {
+        mVideoToBvhConverter = new videoToBvhConverter::VideoToBvhConverter();
+
         // Event register
         auto scene = (bvhscene::BvhScene *) (mApp->getScenes()[0]);
         scene->raycastedTarget_changed.add_handler([this](Bone *target_bone) {
-            onChangeRaycastedTarget_bvhscene(target_bone);
-            onChangeBoneTransform_bvhscene(target_bone);
+            if (target_bone != nullptr) {
+                onChangeRaycastedTarget_bvhscene(target_bone);
+                onChangeBoneTransform_bvhscene(target_bone);
+            }
         });
 
         scene->skeleton_created.add_handler([this]() {
@@ -685,8 +686,43 @@ void Gui::createTestPanel() {
         {
             angleLabels.push_back(new Label(mTestPanel, "..."));
         }
+
+        /// File chooser
+        new Label(mTestPanel, "File Chooser", "sans-bold");
+        auto open_file_button = new Button(mTestPanel, "Open File");
+        open_file_button->set_callback([&]() {
+            onOpenFileButtonPressed({{"bvh", "BioVision Motion Capture"}}, false);
+        });
+
+        /// Video to bvh Converter
+        new Label(mTestPanel, "Video to bvh", "sans-bold");
+        auto videoPath_label = new Label(mTestPanel, "Video File Path: ");
+        videoPath_textbox = new TextBox(mTestPanel, "");
+        videoPath_textbox->set_alignment(TextBox::Alignment::Left);
+        videoPath_textbox->set_editable(true);
+
+        auto bvhPath_label = new Label(mTestPanel, "BVH File Path: ");
+        bvhPath_textbox = new TextBox(mTestPanel, "");
+        bvhPath_textbox->set_alignment(TextBox::Alignment::Left);
+        bvhPath_textbox->set_editable(true);
+
+        auto video_to_bvh_button = new Button(mTestPanel, "Convert");
+        video_to_bvh_button->set_callback([&]() {
+            mVideoToBvhConverter->Convert(videoPath_textbox->value(), bvhPath_textbox->value());
+        });
     }
     mTestPanel->set_visible(true);
+}
+
+void Gui::onOpenFileButtonPressed(const vector<pair<string, string>> &valid, bool save) {
+    auto filepath = file_dialog(valid, save);
+    if (filepath.empty()) {
+        return;
+    }
+    if (mCurrentSceneName == "BVH") {
+        auto scene = (bvhscene::BvhScene *) this->mApp->mCurrentScene;
+        scene->CreateSkeleton(filepath);
+    }
 }
 
 void Gui::onWindowResizeEvent(int width, int height) {
@@ -719,8 +755,12 @@ void Gui::onMouseButtonEvent(int button, int action, int modifiers) {
     mScreen->mouse_button_callback_event(button, action, modifiers);
 }
 
-void Gui::onKeyboardEvent(int key, int scancode, int action, int modifiers) {
-    mScreen->key_callback_event(key, scancode, action, modifiers);
+bool Gui::onKeyboardEvent(int key, int scancode, int action, int modifiers) {
+    return mScreen->key_callback_event(key, scancode, action, modifiers);
+}
+
+bool Gui::onCharacterEvent(unsigned int codepoint) {
+    return mScreen->char_callback_event(codepoint);
 }
 
 void Gui::onChangeRaycastedTarget_bvhscene(Bone *target) {
@@ -738,7 +778,7 @@ void Gui::onChangeBoneTransform_bvhscene(Bone *target) {
         auto offset_degrees = AngleTool::QuaternionToEulerAngles(raycastedBone->GetOriginQuaternion());
         degrees = AngleTool::EulerAnglesToDegree(degrees);
         offset_degrees = AngleTool::EulerAnglesToDegree(offset_degrees);
-        auto result_deg = degrees-offset_degrees;
+        auto result_deg = degrees - offset_degrees;
         mRotateSlider_x->set_value(result_deg.x);
         mRotateSlider_y->set_value(result_deg.y);
         mRotateSlider_z->set_value(result_deg.z);
@@ -778,3 +818,6 @@ void Gui::onCreateSkeleton_bvhscene() {
     });
 }
 
+bool Gui::isFocus() const {
+    return mScreen->has_focus();
+}

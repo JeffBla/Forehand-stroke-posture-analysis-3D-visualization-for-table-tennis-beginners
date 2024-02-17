@@ -38,11 +38,9 @@ namespace identifier {
         const string &GetIdentifierName() const;
     };
 
-    inline const string &Identifier::GetIdentifierName() const{
+    inline const string &Identifier::GetIdentifierName() const {
         return identifier_name;
     }
-
-
 }
 
 #endif //TESTBED_IDENTIFIER_H

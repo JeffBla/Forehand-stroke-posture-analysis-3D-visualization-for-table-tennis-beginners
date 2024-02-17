@@ -1,13 +1,19 @@
 #include "Identifier.h"
 
-identifier::Identifier::Identifier(int id, std::string &identifier_name, std::vector<std::string> &target_list,
-                                   Skeleton *target_skeleton)
+using namespace identifier;
+
+Identifier::Identifier(int id, std::string &identifier_name, std::vector<std::string> &target_list,
+                       Skeleton *target_skeleton)
         : identifier_id(id), identifier_name(identifier_name), target_list(target_list),
           target_skeleton(target_skeleton) {
     result_list.resize(target_skeleton->GetBvh()->GetNumFrame());
 }
 
-void identifier::Identifier::Identify(int frame) {
+Identifier::~Identifier() {
+    result_list.clear();
+}
+
+void Identifier::Identify(int frame) {
     result_list.resize(target_skeleton->GetBvh()->GetNumFrame());
 
     for (const auto &target_name: target_list) {
@@ -19,7 +25,7 @@ void identifier::Identifier::Identify(int frame) {
     }
 }
 
-void identifier::Identifier::WriteOutput() {
+void Identifier::WriteOutput() {
     std::ofstream output_file;
     output_file.open("output/" + identifier_name + ".csv");
     if (!output_file.is_open()) {

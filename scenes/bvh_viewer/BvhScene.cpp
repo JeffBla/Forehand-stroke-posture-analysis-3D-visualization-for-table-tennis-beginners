@@ -51,6 +51,8 @@ BvhScene::BvhScene(const std::string &name, EngineSettings &settings, reactphysi
     resetCameraToViewAll();
 
     mWorldSettings.worldName = name;
+
+    raycastedTarget_bone = nullptr;
 }
 
 // Destructor
@@ -76,18 +78,6 @@ void BvhScene::createPhysicsWorld() {
     mFloor2->setSleepingColor(mFloorColorDemo);
     mFloor2->getRigidBody()->setType(rp3d::BodyType::STATIC);
     mPhysicsObjects.push_back(mFloor2);
-
-    // ------------------------- SKELETON ----------------------- //
-    // Create the skeleton with bvh
-    bvh = new BVH("out.bvh");
-    skeleton1 = new skeleton::Skeleton(mPhysicsCommon, mPhysicsWorld, mPhysicsObjects, mMeshFolderPath, bvh);
-    skeleton_created.fire();
-    // Analysizer
-    analysizer1 = new analysizer::Analysizer(skeleton1);
-
-    raycastedTarget_bone = skeleton1->FindBone("head");
-    raycastedTarget_bone->GetPhysicsObject()->setColor(pickedColor);
-    raycastedTarget_bone->GetPhysicsObject()->setSleepingColor(pickedColor);
 }
 
 // Destroy the physics world
@@ -130,6 +120,37 @@ void BvhScene::reset() {
     createPhysicsWorld();
 
     isMotionStart = false;
+}
+
+skeleton::Skeleton *BvhScene::CreateSkeleton(string &new_bvh) {
+    DestroySkeleton();
+
+    // Create the skeleton with bvh
+    bvh = new BVH(new_bvh.c_str());
+    skeleton1 = new skeleton::Skeleton(mPhysicsCommon, mPhysicsWorld, mPhysicsObjects, mMeshFolderPath, bvh);
+    skeleton_created.fire();
+    // Analysizer
+    analysizer1 = new analysizer::Analysizer(skeleton1, this);
+
+    raycastedTarget_bone = skeleton1->FindBone("head");
+    raycastedTarget_bone->GetPhysicsObject()->setColor(pickedColor);
+    raycastedTarget_bone->GetPhysicsObject()->setSleepingColor(pickedColor);
+    return skeleton1;
+}
+
+void BvhScene::DestroySkeleton() {
+    if (skeleton1 != nullptr) {
+        delete skeleton1;
+        skeleton1 = nullptr;
+
+        delete bvh;
+        bvh = nullptr;
+
+        delete analysizer1;
+        analysizer1 = nullptr;
+
+        raycastedTarget_bone = nullptr;
+    }
 }
 
 skeleton::Skeleton *BvhScene::GetSkeleton() {
@@ -180,7 +201,7 @@ bool BvhScene::keyboardEvent(int key, int scancode, int action, int mods) {
         skeleton1->SetJointRotation_local(raycastedTarget_bone, 0, M_PI / 6, 0);
         return true;
     }
-    if(key==GLFW_KEY_A && action == GLFW_PRESS){
+    if (key == GLFW_KEY_A && action == GLFW_PRESS) {
         analysizer1->Analyse();
         return true;
     }
@@ -189,6 +210,7 @@ bool BvhScene::keyboardEvent(int key, int scancode, int action, int mods) {
 }
 
 void BvhScene::MotionNext() {
-    skeleton1->NextBvhMotion();
+    if (skeleton1 != nullptr)
+        skeleton1->NextBvhMotion();
 }
 

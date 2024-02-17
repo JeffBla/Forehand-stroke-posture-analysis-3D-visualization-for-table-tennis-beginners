@@ -232,6 +232,9 @@ public:
         this->perform_layout(m_nvg_context);
     }
 
+    /// To see if focus on a widget right now
+    bool has_focus() const;
+
 public:
     /********* API for applications which manage GLFW themselves *********/
 
@@ -255,8 +258,8 @@ public:
     /* Event handlers */
     void cursor_pos_callback_event(double x, double y);
     void mouse_button_callback_event(int button, int action, int modifiers);
-    void key_callback_event(int key, int scancode, int action, int mods);
-    void char_callback_event(unsigned int codepoint);
+    bool key_callback_event(int key, int scancode, int action, int mods);
+    bool char_callback_event(unsigned int codepoint);
     void drop_callback_event(int count, const char **filenames);
     void scroll_callback_event(double x, double y);
     void resize_callback_event(int width, int height);

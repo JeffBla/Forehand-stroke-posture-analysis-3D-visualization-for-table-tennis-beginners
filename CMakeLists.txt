@@ -129,6 +129,8 @@ set(COMMON_SOURCES
 		common/Analysizer.h
 		common/Identifier.cpp
 		common/Identifier.h
+		common/VideoToBvhConverter.cpp
+		common/VideoToBvhConverter.h
 )
 
 # Scenes source files

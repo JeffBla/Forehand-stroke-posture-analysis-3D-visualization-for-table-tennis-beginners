@@ -205,6 +205,9 @@ class TestbedApplication {
         /// Default keyboard event handler
         void keyboard_event(int key, int scancode, int action, int modifiers);
 
+        /// Default character event handler
+        void text_in_event(unsigned int codepoint);
+
         /// Handle a mouse button event (default implementation: propagate to children)
         void mouse_button_event(int button, int action, int modifiers);
 

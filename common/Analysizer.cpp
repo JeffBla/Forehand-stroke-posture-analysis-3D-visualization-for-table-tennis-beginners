@@ -46,6 +46,11 @@ void analysizer::Analysizer::_Analyse(map<string, Identifier *> &identifier_list
     cout << "Analyse done" << endl;
 }
 
+
+analysizer::Analysizer::~Analysizer() {
+    identifiers.clear();
+}
+
 void analysizer::Analysizer::Analyse() {
     target_skeleton->ApplyBvhMotion(0);
     _Analyse(identifiers);
@@ -56,4 +61,3 @@ void analysizer::Analysizer::Analyse(Identifier *identifier) {
     map<string, Identifier *> identifier_list = {{identifier->GetIdentifierName(), identifier}};
     _Analyse(identifier_list);
 }
-
