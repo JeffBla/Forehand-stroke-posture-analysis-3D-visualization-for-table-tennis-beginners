@@ -721,9 +721,9 @@ void Gui::createTestPanel() {
 
             // Create skeleton
             scene->CreateSkeleton(mBvhPath);
-
+            int num_frame = scene->GetSkeleton()->GetBvh()->GetNumFrame();
             // Play video
-            pVideoController->Load(mVideoPath);
+            pVideoController->Load(mVideoPath, num_frame);
 
             scene->motion_nexted.add_handler([this]() {
                 onMotionNext();

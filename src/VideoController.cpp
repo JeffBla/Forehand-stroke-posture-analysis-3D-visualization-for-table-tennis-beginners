@@ -7,10 +7,9 @@ VideoController::VideoController(const std::string &videoPath, nanogui::ImageVie
           currentFrameIdx(0), imageView(imageView) {}
 
 VideoController::~VideoController() {
-    delete pVideoCapture;
 }
 
-void VideoController::Load() {
+void VideoController::Load(int num_frame) {
     pVideoCapture = new cv::VideoCapture(videoPath);
     if (!pVideoCapture->isOpened()) {
         throw std::runtime_error("VideoController::Load: Video not found");
@@ -24,7 +23,9 @@ void VideoController::Load() {
 
     imgDisplaySize = {(int32_t) (imageWidth * SCALE), (int32_t) (imageHeight * SCALE)};
 
-    while (pVideoCapture->read(frame)) {
+    currentFrameIdx = 0;
+    frames.clear();
+    while (pVideoCapture->read(frame) && frames.size() < num_frame) {
         cv::cvtColor(frame, frame, cv::COLOR_BGR2RGB);
         cv::resize(frame, resized_frame, cv::Size(imgDisplaySize.x(), imgDisplaySize.y()), 0, 0,
         cv::INTER_LINEAR);
@@ -36,12 +37,18 @@ void VideoController::Load() {
         frames.emplace_back(flat.data, flat.data + flat.total());
     }
 
+    while(frames.size() != num_frame) {
+        frames.push_back(frames.back());
+    }
+
+    delete pVideoCapture;
+
     Show();
 }
 
-void VideoController::Load(const std::string &videoPath) {
+void VideoController::Load(const std::string &videoPath, int num_fame) {
     this->videoPath = videoPath;
-    Load();
+    Load(num_fame);
 }
 
 void VideoController::Show() {

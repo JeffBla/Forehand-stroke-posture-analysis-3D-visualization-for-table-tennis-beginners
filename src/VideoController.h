@@ -32,9 +32,9 @@ namespace videoLoader {
 
         ~VideoController();
 
-        void Load();
+        void Load(int num_frame);
 
-        void Load(const std::string &videoPath);
+        void Load(const std::string &videoPath, int num_fame);
 
         void Show();
 
