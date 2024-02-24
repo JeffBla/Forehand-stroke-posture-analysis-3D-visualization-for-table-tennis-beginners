@@ -4,6 +4,10 @@ cmake_minimum_required(VERSION 3.8)
 # Project configuration
 project(Testbed)
 
+# OpenCV configuration
+find_package( OpenCV REQUIRED )
+include_directories( ${OpenCV_INCLUDE_DIRS} )
+
 # Disable building extras of nanogui we won't need (pure C++ project)
 set(NANOGUI_BUILD_EXAMPLES OFF CACHE BOOL " " FORCE)
 set(NANOGUI_BUILD_PYTHON  OFF CACHE BOOL " " FORCE)
@@ -93,6 +97,8 @@ set(TESTBED_SOURCES
     src/Timer.h
     src/TestbedLogger.h
     src/TestbedLogger.cpp
+		src/VideoController.cpp
+		src/VideoController.h
 )
 
 # Common source files
@@ -212,5 +218,5 @@ target_compile_features(testbed PUBLIC cxx_std_17)
 set_target_properties(testbed PROPERTIES CXX_EXTENSIONS OFF)
 
 # Link with libraries
-target_link_libraries(testbed reactphysics3d nanogui ${NANOGUI_EXTRA_LIBS})
+target_link_libraries(testbed reactphysics3d nanogui ${NANOGUI_EXTRA_LIBS} ${OpenCV_LIBS})
 

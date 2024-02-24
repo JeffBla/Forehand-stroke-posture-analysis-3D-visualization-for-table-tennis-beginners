@@ -27,6 +27,7 @@
 #define BVH_SCENE_H
 
 // Libraries
+#include <cmath>
 #include <reactphysics3d/reactphysics3d.h>
 
 #include "Box.h"
@@ -38,6 +39,8 @@
 #include "Event.h"
 #include "Analysizer.h"
 #include "VideoToBvhConverter.h"
+#include "BVH.h"
+#include "AngleTool.h"
 
 using namespace event;
 
@@ -48,7 +51,6 @@ namespace bvhscene {
 
     class BvhScene : public SceneDemo {
     protected:
-        // -------------------- Attributes -------------------- //
         /** raycasted target & info
          * the default is the head
          */
@@ -93,6 +95,9 @@ namespace bvhscene {
         void MotionNext();
 
     public:
+        // -------------------- Event -------------------- //
+        Event<> motion_nexted;
+
         // -------------------- Methods -------------------- //
 
         /// Constructor
@@ -116,6 +121,7 @@ namespace bvhscene {
         Skeleton *CreateSkeleton(string &new_bvh);
 
         void DestroySkeleton();
+
         // -------------------- Events -------------------- //
         float notifyRaycastHit(const rp3d::RaycastInfo &raycastInfo) override;
 
