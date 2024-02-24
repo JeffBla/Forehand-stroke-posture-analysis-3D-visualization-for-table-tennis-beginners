@@ -101,11 +101,12 @@ namespace skeleton {
         /// Create a Bone with ConvexMesh
         Bone *CreateBone(const string &bone_name, Bone *parent, rp3d::Vector3 &pos, const rp3d::Quaternion &orientation,
                          const openglframework::Vector3 &size, rp3d::decimal massDensity, const string &model_file,
-                         const rp3d::Quaternion &local_coordinate_quatern);
+                         const rp3d::Quaternion &local_coordinate_quatern, const Joint *joint);
 
         /// Create a Bone with Sphere shape
         Bone *CreateBone(const string &bone_name, Bone *parent, rp3d::Vector3 &pos, const rp3d::Quaternion &orientation,
-                         float radius, rp3d::decimal massDensity, const rp3d::Quaternion &local_coordinate_quatern);
+                         float radius, rp3d::decimal massDensity, const rp3d::Quaternion &local_coordinate_quatern,
+                         const Joint *joint);
 
 
     public:

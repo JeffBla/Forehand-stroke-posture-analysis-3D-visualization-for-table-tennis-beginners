@@ -40,17 +40,17 @@ namespace bone {
 
         std::list<PhysicsObject *> &mPhysicsObjects;
 
+        // -------------------- BVH -------------------- //
+        BVH *bvh;
+        const Joint *joint;
+
         // -------------------- Methods -------------------- //
         float AngleBetweenTwo(const rp3d::Vector3 &v1, const rp3d::Vector3 &v2);
 
     public:
         Bone(const std::string &bone_name, PhysicsObject *bone_object, BoneType boneType, rp3d::Vector3 &pos,
-             Bone *parent, rp3d::Quaternion &quatern, rp3d::Quaternion local_coordinate_quatern,
-             std::list<PhysicsObject *> &mPhysicsObjects);
-
-        Bone(const std::string &bone_name, PhysicsObject *bone_object, BoneType boneType, rp3d::Vector3 &pos,
              Bone *parent, const rp3d::Quaternion &quatern, rp3d::Quaternion local_coordinate_quatern,
-             std::list<PhysicsObject *> &mPhysicsObjects);
+             std::list<PhysicsObject *> &mPhysicsObjects, BVH *bvh, const Joint *joint);
 
         ~Bone();
 
@@ -64,7 +64,11 @@ namespace bone {
 
         std::map<std::string, float> GetAngleWithNeighbor();
 
+        /// The info is the global angle of the bone
         map<string, float> GetSelfAngle();
+
+        /// The info is the local angle of the bone
+        map<string, float> GetSelfAngle(int frame);
 
         map<string, float> GetAngleInfo();
 

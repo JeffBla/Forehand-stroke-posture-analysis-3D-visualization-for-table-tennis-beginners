@@ -6,18 +6,12 @@ using namespace angleTool;
 using namespace bone;
 
 Bone::Bone(const std::string &bone_name, PhysicsObject *bone_object, BoneType boneType, rp3d::Vector3 &pos,
-           Bone *parent, rp3d::Quaternion &quatern, rp3d::Quaternion local_coordinate_quatern,
-           std::list<PhysicsObject *> &mPhysicObjects)
-        : bone_name(bone_name), position(pos), parent(parent), bone_object(bone_object), boneType(boneType),
-          origin_quatern(quatern), init_quatern(quatern), local_coordinate_quatern(local_coordinate_quatern),
-          init_local_coordinate_quatern(local_coordinate_quatern), mPhysicsObjects(mPhysicObjects) {}
-
-Bone::Bone(const std::string &bone_name, PhysicsObject *bone_object, BoneType boneType, rp3d::Vector3 &pos,
            Bone *parent, const rp3d::Quaternion &quatern, rp3d::Quaternion local_coordinate_quatern,
-           std::list<PhysicsObject *> &mPhysicsObjects)
+           std::list<PhysicsObject *> &mPhysicsObjects, BVH *bvh, const Joint *joint)
         : bone_name(bone_name), position(pos), parent(parent), bone_object(bone_object), boneType(boneType),
           origin_quatern(quatern), init_quatern(quatern), local_coordinate_quatern(local_coordinate_quatern),
-          init_local_coordinate_quatern(local_coordinate_quatern), mPhysicsObjects(mPhysicsObjects) {}
+          init_local_coordinate_quatern(local_coordinate_quatern), mPhysicsObjects(mPhysicsObjects), bvh(bvh),
+          joint(joint) {}
 
 Bone::~Bone() {
     delete bone_object;
@@ -97,6 +91,27 @@ std::map<std::string, float> Bone::GetSelfAngle() {
     angles["self z"] = mDeg.z;
     return angles;
 }
+
+map<string, float> Bone::GetSelfAngle(int frame) {
+    std::map<std::string, float> angles;
+    for (auto channel: joint->channels) {
+        switch (channel->type) {
+            case X_ROTATION:
+                angles["self x"] = bvh->GetMotion(frame, channel->index);
+                break;
+            case Y_ROTATION:
+                angles["self y"] = bvh->GetMotion(frame, channel->index);
+                break;
+            case Z_ROTATION:
+                angles["self z"] = bvh->GetMotion(frame, channel->index);
+                break;
+            default:
+                break;
+        }
+    }
+    return angles;
+}
+
 
 std::map<std::string, float> Bone::GetAngleWithNeighbor() {
     std::map<std::string, float> angles;

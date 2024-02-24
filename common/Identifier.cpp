@@ -19,7 +19,10 @@ void Identifier::Identify(int frame) {
     for (const auto &target_name: target_list) {
         auto target_bone = target_skeleton->FindBone(target_name);
 
-        auto angle_info = target_bone->GetAngleInfo();
+        auto angle_info = target_bone->GetAngleWithNeighbor();
+        auto angle_info_local = target_bone->GetSelfAngle(frame);
+        for (const auto &angle: angle_info_local)
+            angle_info[angle.first] = angle.second;
 
         result_list[frame][target_name] = angle_info;
     }

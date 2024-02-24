@@ -5,27 +5,28 @@ using namespace angleTool;
 using namespace skeleton;
 using namespace bone;
 
-Bone *Skeleton::CreateBone(const string &bone_name, Bone *parent, rp3d::Vector3 &pos,
-                           const rp3d::Quaternion &orientation, const openglframework::Vector3 &size,
-                           rp3d::decimal massDensity, const string &model_file,
-                           const rp3d::Quaternion &local_coordinate_quatern) {
+Bone *
+Skeleton::CreateBone(const string &bone_name, Bone *parent, rp3d::Vector3 &pos, const rp3d::Quaternion &orientation,
+                     const openglframework::Vector3 &size, rp3d::decimal massDensity, const string &model_file,
+                     const rp3d::Quaternion &local_coordinate_quatern, const Joint *joint) {
     PhysicsObject *boneObject = CreateBonePhysics(pos, orientation, size, massDensity, model_file);
 
     auto new_bone = new Bone(bone_name, boneObject, BoneType::CONE, pos, parent, orientation,
-                             local_coordinate_quatern, mPhysicsObjects);
+                             local_coordinate_quatern, mPhysicsObjects, bvh, joint);
     if (parent != nullptr) {
         parent->AppendChild(new_bone);
     }
     return new_bone;
 }
 
-Bone *Skeleton::CreateBone(const string &bone_name, Bone *parent, rp3d::Vector3 &pos,
-                           const rp3d::Quaternion &orientation, float radius, rp3d::decimal massDensity,
-                           const rp3d::Quaternion &local_coordinate_quatern) {
+Bone *
+Skeleton::CreateBone(const string &bone_name, Bone *parent, rp3d::Vector3 &pos, const rp3d::Quaternion &orientation,
+                     float radius, rp3d::decimal massDensity, const rp3d::Quaternion &local_coordinate_quatern,
+                     const Joint *joint) {
     PhysicsObject *boneObject = CreateBonePhysics(pos, orientation, radius, massDensity);
 
     auto new_bone = new Bone(bone_name, boneObject, BoneType::SPHERE, pos, parent, orientation,
-                             local_coordinate_quatern, mPhysicsObjects);
+                             local_coordinate_quatern, mPhysicsObjects, bvh, joint);
 
     if (parent != nullptr) {
         parent->AppendChild(new_bone);
@@ -88,7 +89,7 @@ Skeleton::Skeleton(rp3d::PhysicsCommon &mPhysicsCommon, rp3d::PhysicsWorld *mPhy
             if (joint->parents.empty()) {
                 // Root Joint
                 bone = CreateBone(joint->name, nullptr, ragdollPosition, rp3d::Quaternion::identity(),
-                                  mHip_radius, 20, rp3d::Quaternion::identity());
+                                  mHip_radius, 20, rp3d::Quaternion::identity(), joint);
                 bones[joint->name] = bone;
             } else {
                 float length = glm::length(glm::vec3{joint->offset[0], joint->offset[1], joint->offset[2]});
@@ -97,9 +98,8 @@ Skeleton::Skeleton(rp3d::PhysicsCommon &mPhysicsCommon, rp3d::PhysicsWorld *mPhy
                 }
                 length *= SCALE;
                 bone = CreateBone(joint->name, bones[joint->parents.back()->name], defaultPosition,
-                                  rp3d::Quaternion::identity(),
-                                  {0.15, length, 0.15}, 9, "cone_offset.obj",
-                                  rp3d::Quaternion::identity());
+                                  rp3d::Quaternion::identity(), {0.15, length, 0.15}, 9,
+                                  "cone_offset.obj", rp3d::Quaternion::identity(), joint);
                 bones[joint->name] = bone;
             }
         }
