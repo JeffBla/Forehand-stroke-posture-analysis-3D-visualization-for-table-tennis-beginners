@@ -145,6 +145,8 @@ void BvhScene::DestroySkeleton() {
         analysizer1 = nullptr;
 
         raycastedTarget_bone = nullptr;
+
+        motion_nexted.clear();
     }
 }
 
