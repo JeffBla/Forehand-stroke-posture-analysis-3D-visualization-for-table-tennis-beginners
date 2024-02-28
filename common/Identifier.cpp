@@ -30,7 +30,8 @@ void Identifier::Identify(int frame) {
 
 void Identifier::WriteOutput() {
     std::ofstream output_file;
-    output_file.open("output/" + identifier_name + ".csv");
+    output_file_name = "output/" + identifier_name + ".csv";
+    output_file.open(output_file_name);
     if (!output_file.is_open()) {
         cout << "CANNOT OPEN" << endl;
         exit(1);
@@ -71,4 +72,14 @@ void Identifier::WriteOutput() {
         frame++;
     }
     output_file.close();
+}
+
+void Identifier::Py_SimilarityScore(const string &target_name, const string &reference_name) {
+    py::scoped_interpreter guard{};
+
+    py::print("Hello, World!");
+}
+
+void Identifier::Py_SimilarityScore(const string &reference_name) {
+    Py_SimilarityScore(output_file_name, reference_name);
 }

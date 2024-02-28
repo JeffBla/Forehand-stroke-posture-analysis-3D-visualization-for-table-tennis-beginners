@@ -14,6 +14,9 @@ set(NANOGUI_BUILD_PYTHON  OFF CACHE BOOL " " FORCE)
 set(NANOGUI_INSTALL       OFF CACHE BOOL " " FORCE)
 set(NANOGUI_BACKEND       OpenGL CACHE BOOL " " FORCE)
 
+# Disable building extras of pybind11 we won't need (pure C++ project)
+set(PYBIND11_INSTALL OFF CACHE BOOL " " FORCE)
+
 # ---- Make sure to recursively clone all the git submodules for external libraries (nanogui) --- #
 find_package(Git QUIET)
 if(GIT_FOUND)
@@ -42,6 +45,9 @@ SET(NANOGUI_BUILD_SHARED OFF CACHE BOOL "Build Nanogui with static libraries" FO
 
 # Add the configurations from nanogui
 add_subdirectory(extern/nanogui)
+
+# Add the configurations from pybind11
+add_subdirectory(extern/pybind11)
 
 # Copy the shaders used for the demo into the build directory
 file(COPY "shaders/" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/shaders/")
@@ -218,5 +224,5 @@ target_compile_features(testbed PUBLIC cxx_std_17)
 set_target_properties(testbed PROPERTIES CXX_EXTENSIONS OFF)
 
 # Link with libraries
-target_link_libraries(testbed reactphysics3d nanogui ${NANOGUI_EXTRA_LIBS} ${OpenCV_LIBS})
+target_link_libraries(testbed reactphysics3d nanogui ${NANOGUI_EXTRA_LIBS} ${OpenCV_LIBS} pybind11::embed)
 

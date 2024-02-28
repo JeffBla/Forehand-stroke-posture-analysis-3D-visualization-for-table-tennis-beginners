@@ -5,9 +5,12 @@
 #include <string>
 #include <map>
 
+#include <pybind11/embed.h>
+
 #include "Skeleton.h"
 
 using namespace skeleton;
+namespace py = pybind11;
 
 namespace identifier {
 
@@ -15,6 +18,7 @@ namespace identifier {
     private:
         int identifier_id;
         std::string identifier_name;
+        std::string output_file_name;
         std::vector<std::string> target_list;
         std::vector<std::map<std::string, std::map<std::string, float>>> result_list;
         bool isWriteToFile = false;
@@ -33,6 +37,10 @@ namespace identifier {
          * frame, target_name_x, target_name_y, target_name_z, target_name_parent, target_name_child1, target_name_child2, ...
          */
         void WriteOutput();
+
+        void Py_SimilarityScore(const string &reference_name);
+
+        void Py_SimilarityScore(const string &target_name, const string &reference_name);
 
         // ------------------------- Getters & Setter ----------------------- //
         const string &GetIdentifierName() const;

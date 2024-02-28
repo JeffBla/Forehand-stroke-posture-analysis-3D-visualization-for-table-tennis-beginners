@@ -8,7 +8,7 @@ namespace videoToBvhConverter {
 
     class VideoToBvhConverter {
     private:
-        std::string MocapNETPath = "/home/jeffbla/SoftWare/MocapNET4";
+        std::string MocapNETPath = "/home/jeffbla/SoftWare/MocapNET4_accuracy";
 
         std::string videoPath;
         std::string bvhPath;

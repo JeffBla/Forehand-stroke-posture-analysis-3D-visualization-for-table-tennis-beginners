@@ -41,6 +41,8 @@ void analysizer::Analysizer::_Analyse(map<string, Identifier *> &identifier_list
     // Write the output
     for_each(identifier_list.begin(), identifier_list.end(), [](pair<string, Identifier *> element) {
         element.second->WriteOutput();
+
+        element.second->Py_SimilarityScore("rForeArm");
     });
 
     cout << "Analyse done" << endl;
