@@ -6,6 +6,7 @@
 #include <map>
 
 #include <pybind11/embed.h>
+#include <pybind11/stl.h>
 
 #include "Skeleton.h"
 
@@ -18,11 +19,15 @@ namespace identifier {
     private:
         int identifier_id;
         std::string identifier_name;
-        std::string output_file_name;
+        std::string output_filename;
+        std::string ref_filename = "output/me/whole_body.csv";
+        std::string openpose_target_filename = "output/openposeTest.csv";
+        std::string openpose_ref_filename = "output/openposeRef.csv";
         std::vector<std::string> target_list;
         std::vector<std::map<std::string, std::map<std::string, float>>> result_list;
         bool isWriteToFile = false;
         Skeleton *target_skeleton;
+
     public:
         Identifier(int id, std::string &identifier_name, std::vector<std::string> &target_list,
                    Skeleton *target_skeleton);
@@ -38,9 +43,10 @@ namespace identifier {
          */
         void WriteOutput();
 
-        void Py_SimilarityScore(const string &reference_name);
+        void Py_SimilarityScore();
 
-        void Py_SimilarityScore(const string &target_name, const string &reference_name);
+        void Py_SimilarityScore(const string &target_filename, const string &ref_filename, const string &openpose_target_filename,
+                                const string &openpose_ref_filename);
 
         // ------------------------- Getters & Setter ----------------------- //
         const string &GetIdentifierName() const;

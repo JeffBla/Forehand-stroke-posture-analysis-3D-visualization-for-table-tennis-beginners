@@ -30,8 +30,8 @@ void Identifier::Identify(int frame) {
 
 void Identifier::WriteOutput() {
     std::ofstream output_file;
-    output_file_name = "output/" + identifier_name + ".csv";
-    output_file.open(output_file_name);
+    output_filename = "output/" + identifier_name + ".csv";
+    output_file.open(output_filename);
     if (!output_file.is_open()) {
         cout << "CANNOT OPEN" << endl;
         exit(1);
@@ -74,12 +74,27 @@ void Identifier::WriteOutput() {
     output_file.close();
 }
 
-void Identifier::Py_SimilarityScore(const string &target_name, const string &reference_name) {
-    py::scoped_interpreter guard{};
+void
+Identifier::Py_SimilarityScore(const string &target_filename, const string &ref_filename,
+                               const string &openpose_target_filename,
+                               const string &openpose_ref_filename) {
+    py::module_ PyAnalysizer = py::module_::import("Py_package.PyAnalysizer.Analysize");
+    if (std::find(target_list.begin(), target_list.end(), "hip") != target_list.end()) {
+        py::object rotation_sim = PyAnalysizer.attr("OpenPoseAnalysize_Waist")(openpose_target_filename,
+                                                                               openpose_ref_filename);
 
-    py::print("Hello, World!");
+        cout << "Rotation Similarity Score: " << py::str(rotation_sim).cast<string>() << endl;
+    }
+
+    for (const auto &target_name: target_list) {
+        py::object similarity_scores = PyAnalysizer.attr("BvhAnalysize")(target_filename, ref_filename, target_name);
+
+        auto similarity_scores_list = similarity_scores.cast<std::map<string, float>>();
+        for (const auto &[key, similarity_score]: similarity_scores_list)
+            cout << key << " Similarity Score: " << similarity_score << endl;
+    }
 }
 
-void Identifier::Py_SimilarityScore(const string &reference_name) {
-    Py_SimilarityScore(output_file_name, reference_name);
+void Identifier::Py_SimilarityScore() {
+    Py_SimilarityScore(output_filename, ref_filename, openpose_target_filename, openpose_ref_filename);
 }

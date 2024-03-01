@@ -226,3 +226,8 @@ set_target_properties(testbed PROPERTIES CXX_EXTENSIONS OFF)
 # Link with libraries
 target_link_libraries(testbed reactphysics3d nanogui ${NANOGUI_EXTRA_LIBS} ${OpenCV_LIBS} pybind11::embed)
 
+# Copy the python packages into the build directory
+add_custom_target(copy_python_packages ALL
+		COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/Py_package ${CMAKE_CURRENT_BINARY_DIR}/Py_package
+		DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/Py_package)
+add_dependencies(testbed copy_python_packages)
