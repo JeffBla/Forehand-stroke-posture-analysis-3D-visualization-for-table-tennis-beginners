@@ -200,10 +200,10 @@ bool BvhScene::keyboardEvent(int key, int scancode, int action, int mods) {
         skeleton1->SetJointRotation_local(raycastedTarget_bone, 0, M_PI / 6, 0);
         return true;
     }
-    if (key == GLFW_KEY_A && action == GLFW_PRESS) {
-        analysizer1->Analyse();
-        return true;
-    }
+//    if (key == GLFW_KEY_A && action == GLFW_PRESS) {
+//        Analyze(<#initializer#>);
+//        return true;
+//    }
 
     return false;
 }
@@ -211,4 +211,9 @@ bool BvhScene::keyboardEvent(int key, int scancode, int action, int mods) {
 void BvhScene::MotionNext() {
     if (skeleton1 != nullptr)
         skeleton1->NextBvhMotion();
+}
+
+void BvhScene::Analyze(const std::string &openposePath) {
+    if (skeleton1 != nullptr)
+        analysizer1->Analyze(openposePath);
 }

@@ -95,6 +95,10 @@ Identifier::Py_SimilarityScore(const string &target_filename, const string &ref_
     }
 }
 
+void Identifier::Py_SimilarityScore(const std::string &openpose_target_filename) {
+    Py_SimilarityScore(output_filename, ref_filename, openpose_target_filename, openpose_ref_filename);
+}
+
 void Identifier::Py_SimilarityScore() {
     Py_SimilarityScore(output_filename, ref_filename, openpose_target_filename, openpose_ref_filename);
 }
