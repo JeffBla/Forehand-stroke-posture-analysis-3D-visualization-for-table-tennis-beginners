@@ -28,6 +28,7 @@
 
 #include <reactphysics3d/reactphysics3d.h>
 #include <algorithm>
+#include <list>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -60,7 +61,7 @@ namespace skeleton {
         rp3d::PhysicsCommon &mPhysicsCommon;
         rp3d::PhysicsWorld *mPhysicsWorld;
         string &mMeshFolderPath;
-        std::vector<PhysicsObject *> &mPhysicsObjects;
+        std::list<PhysicsObject *> &mPhysicsObjects;
         rp3d::Vector3 ragdollPosition;
         rp3d::Vector3 defaultPosition;
 
@@ -74,8 +75,6 @@ namespace skeleton {
                                                     "rShldr", "rForeArm", "rHand", "lCollar", "lShldr", "lForeArm",
                                                     "lHand", "rButtock", "rThigh", "rShin", "rFoot", "lButtock",
                                                     "lThigh", "lShin", "lFoot"};
-        // -------------------- Methods -------------------- //
-
     protected:
 
         openglframework::Color objectColor = openglframework::Color(0.0f, 0.68f, 0.99f, 1.0f);
@@ -102,11 +101,12 @@ namespace skeleton {
         /// Create a Bone with ConvexMesh
         Bone *CreateBone(const string &bone_name, Bone *parent, rp3d::Vector3 &pos, const rp3d::Quaternion &orientation,
                          const openglframework::Vector3 &size, rp3d::decimal massDensity, const string &model_file,
-                         const rp3d::Quaternion &local_coordinate_quatern);
+                         const rp3d::Quaternion &local_coordinate_quatern, const Joint *joint);
 
         /// Create a Bone with Sphere shape
         Bone *CreateBone(const string &bone_name, Bone *parent, rp3d::Vector3 &pos, const rp3d::Quaternion &orientation,
-                         float radius, rp3d::decimal massDensity, const rp3d::Quaternion &local_coordinate_quatern);
+                         float radius, rp3d::decimal massDensity, const rp3d::Quaternion &local_coordinate_quatern,
+                         const Joint *joint);
 
 
     public:
@@ -114,10 +114,9 @@ namespace skeleton {
         Event<Bone *> bone_transform_changed;
 
         // -------------------- Methods -------------------- //
-
         /// Constructor
         Skeleton(rp3d::PhysicsCommon &mPhysicsCommon, rp3d::PhysicsWorld *mPhysicsWorld,
-                 vector<PhysicsObject *> &mPhysicsObjects, std::string &mMeshFolderPath, BVH *bvh);
+                 list<PhysicsObject *> &mPhysicsObjects, std::string &mMeshFolderPath, BVH *bvh);
 
         /// Destructor
         ~Skeleton();
@@ -149,12 +148,24 @@ namespace skeleton {
         Bone *FindBone(const string &target_name);
 
         // -------------------- Motion -------------------- //
-
         void NextBvhMotion();
 
         void ApplyBvhMotion(const int frame);
 
         void InitBvhMotion();
+
+        // -------------------- Getter & Setter -------------------- //
+        const BVH *GetBvh() const;
+
+        const std::vector<std::string> &GetTargetBoneNames() const;
+    };
+
+    inline const std::vector<std::string> &Skeleton::GetTargetBoneNames() const {
+        return target_bone_names;
+    }
+
+    inline const BVH *Skeleton::GetBvh() const {
+        return bvh;
     };
 
 }  // namespace skeleton

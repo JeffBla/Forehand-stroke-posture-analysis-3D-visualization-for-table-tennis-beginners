@@ -47,13 +47,13 @@ double Gui::mCachedPhysicsStepTime = 0;
 Gui::Gui(TestbedApplication *app)
         : mApp(app), mSimulationPanel(nullptr), mSettingsPanel(nullptr), mPhysicsPanel(nullptr),
           mRenderingPanel(nullptr), mFPSLabel(nullptr), mFrameTimeLabel(nullptr), mTotalPhysicsTimeLabel(nullptr),
-          mPhysicsStepTimeLabel(nullptr), mIsDisplayed(true) {
-}
+          mPhysicsStepTimeLabel(nullptr), mIsDisplayed(true) {}
 
 // Destructor
 Gui::~Gui() {
+    delete pVideoToBvhConverter;
 
-
+    delete pVideoController;
 }
 
 /// Initialize the GUI
@@ -161,9 +161,6 @@ void Gui::update() {
     mPhysicsStepTimeLabel->set_caption(
             std::string("Physics step time : ") + floatToString(mCachedPhysicsStepTime * 1000.0, 1) +
             std::string(" ms"));
-
-    // Get current scene
-
 }
 
 void Gui::createSimulationPanel() {
@@ -586,11 +583,16 @@ void Gui::createTestPanel() {
     mTestPanel->set_position(Vector2i(mScreen->width() - mTestPanel->fixed_width() - 15, 15));
 
     if (mCurrentSceneName == "BVH") {
+        pVideoToBvhConverter = new videoToBvhConverter::VideoToBvhConverter();
+        pVideoController = new videoLoader::VideoController();
+
         // Event register
         auto scene = (bvhscene::BvhScene *) (mApp->getScenes()[0]);
         scene->raycastedTarget_changed.add_handler([this](Bone *target_bone) {
-            onChangeRaycastedTarget_bvhscene(target_bone);
-            onChangeBoneTransform_bvhscene(target_bone);
+            if (target_bone != nullptr) {
+                onChangeRaycastedTarget_bvhscene(target_bone);
+                onChangeBoneTransform_bvhscene(target_bone);
+            }
         });
 
         scene->skeleton_created.add_handler([this]() {
@@ -685,8 +687,80 @@ void Gui::createTestPanel() {
         {
             angleLabels.push_back(new Label(mTestPanel, "..."));
         }
+
+        /// Bvh Image viewer
+        // Window
+        bvhImageWindow = new Window(mScreen, "Bvh Frame");
+        bvhImageWindow->set_layout(new GroupLayout());
+        bvhImageWindow->set_visible(false);
+        bvhImageWindow->set_enabled(false);
+        bvhImageWindow->set_position(Vector2i(15, 638));
+        // Viewer
+        bvhImageViewer = new ImageView(bvhImageWindow);
+        bvhImageViewer->set_visible(false);
+        bvhImageViewer->set_enabled(false);
+
+        /// File chooser
+        new Label(mTestPanel, "BVH File Chooser", "sans-bold");
+        auto open_bvh_button = new Button(mTestPanel, "Open File");
+        open_bvh_button->set_callback([&]() {
+            mBvhPath = onOpenFileButtonPressed({{"bvh", "BioVision Motion Capture"}}, true);
+        });
+
+        /// Video Controller
+        pVideoController->SetImageView(bvhImageViewer);
+        new Label(mTestPanel, "Converted Video", "sans-bold");
+        auto open_video_button = new Button(mTestPanel, "Open File");
+        open_video_button->set_callback([&]() {
+            mVideoPath = onOpenFileButtonPressed({{"mp4", "MPEG-4 Video"}}, true);
+        });
+
+        auto play_video_button = new Button(mTestPanel, "Play");
+        play_video_button->set_callback([&]() {
+            auto scene = (bvhscene::BvhScene *) this->mApp->mCurrentScene;
+
+            // Create skeleton
+            scene->CreateSkeleton(mBvhPath);
+            int num_frame = scene->GetSkeleton()->GetBvh()->GetNumFrame();
+            // Play video
+            pVideoController->Load(mVideoPath, num_frame);
+
+            scene->motion_nexted.add_handler([this]() {
+                onMotionNext();
+            });
+
+            bvhImageWindow->set_visible(true);
+            bvhImageWindow->set_enabled(true);
+            bvhImageViewer->set_visible(true);
+            bvhImageViewer->set_enabled(true);
+            mScreen->perform_layout();
+        });
+
+        /// Video to bvh Converter
+        new Label(mTestPanel, "Video to bvh", "sans-bold");
+        auto videoPath_label = new Label(mTestPanel, "Video File Path: ");
+        videoPath_textbox = new TextBox(mTestPanel, "");
+        videoPath_textbox->set_alignment(TextBox::Alignment::Left);
+        videoPath_textbox->set_editable(true);
+
+        auto bvhPath_label = new Label(mTestPanel, "BVH File Path: ");
+        bvhPath_textbox = new TextBox(mTestPanel, "");
+        bvhPath_textbox->set_alignment(TextBox::Alignment::Left);
+        bvhPath_textbox->set_editable(true);
+
+        auto video_to_bvh_button = new Button(mTestPanel, "Convert");
+        video_to_bvh_button->set_callback([&]() {
+            pVideoToBvhConverter->Convert(videoPath_textbox->value(), bvhPath_textbox->value());
+        });
     }
     mTestPanel->set_visible(true);
+}
+
+std::string Gui::onOpenFileButtonPressed(const vector<pair<string, string>> &valid, bool save) {
+    auto filepath = file_dialog(valid, save);
+    if (filepath.empty())
+        return "";
+    return filepath;
 }
 
 void Gui::onWindowResizeEvent(int width, int height) {
@@ -719,8 +793,12 @@ void Gui::onMouseButtonEvent(int button, int action, int modifiers) {
     mScreen->mouse_button_callback_event(button, action, modifiers);
 }
 
-void Gui::onKeyboardEvent(int key, int scancode, int action, int modifiers) {
-    mScreen->key_callback_event(key, scancode, action, modifiers);
+bool Gui::onKeyboardEvent(int key, int scancode, int action, int modifiers) {
+    return mScreen->key_callback_event(key, scancode, action, modifiers);
+}
+
+bool Gui::onCharacterEvent(unsigned int codepoint) {
+    return mScreen->char_callback_event(codepoint);
 }
 
 void Gui::onChangeRaycastedTarget_bvhscene(Bone *target) {
@@ -738,7 +816,7 @@ void Gui::onChangeBoneTransform_bvhscene(Bone *target) {
         auto offset_degrees = AngleTool::QuaternionToEulerAngles(raycastedBone->GetOriginQuaternion());
         degrees = AngleTool::EulerAnglesToDegree(degrees);
         offset_degrees = AngleTool::EulerAnglesToDegree(offset_degrees);
-        auto result_deg = degrees-offset_degrees;
+        auto result_deg = degrees - offset_degrees;
         mRotateSlider_x->set_value(result_deg.x);
         mRotateSlider_y->set_value(result_deg.y);
         mRotateSlider_z->set_value(result_deg.z);
@@ -753,7 +831,7 @@ void Gui::onChangeBoneTransform_bvhscene(Bone *target) {
         snprintf(text, 6, "%.5f", result_deg.z);
         mRotateTextBox_z->set_value(text);
 
-        /// Update AngleWithNeighbor
+        /// Update the angle related ot raycasted target
         auto angles = target->GetAngleInfo();
 
         for (auto l: angleLabels) {
@@ -778,3 +856,13 @@ void Gui::onCreateSkeleton_bvhscene() {
     });
 }
 
+bool Gui::isFocus() const {
+    return mScreen->has_focus();
+}
+
+void Gui::onMotionNext() {
+    if (!pVideoController->GetVideoPath().empty()) {
+        pVideoController->Next();
+        mScreen->perform_layout();
+    }
+}

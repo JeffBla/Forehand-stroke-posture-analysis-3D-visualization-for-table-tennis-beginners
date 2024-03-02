@@ -27,6 +27,7 @@
 #define BVH_SCENE_H
 
 // Libraries
+#include <cmath>
 #include <reactphysics3d/reactphysics3d.h>
 
 #include "Box.h"
@@ -36,18 +37,20 @@
 #include "openglframework.h"
 #include "Skeleton.h"
 #include "Event.h"
+#include "Analysizer.h"
+#include "VideoToBvhConverter.h"
+#include "BVH.h"
+#include "AngleTool.h"
 
 using namespace event;
 
 namespace bvhscene {
-
 // Constants
     const float SCENE_RADIUS = 45.0f;
     const openglframework::Vector3 FLOOR_2_SIZE(60, 0.5f, 82);  // Floor dimensions in meters
 
     class BvhScene : public SceneDemo {
     protected:
-        // -------------------- Attributes -------------------- //
         /** raycasted target & info
          * the default is the head
          */
@@ -65,9 +68,6 @@ namespace bvhscene {
         Event<> skeleton_created;
 
     protected:
-        /// Box for the floor 2
-        Box *mFloor2;
-
         skeleton::Skeleton *skeleton1 = nullptr;
 
         // -------------------- Bvh -------------------- //
@@ -76,6 +76,12 @@ namespace bvhscene {
         double accumulatedTime = 0.0;
         double motionInverval = 0.1;
         BVH *bvh;
+
+        // -------------------- Analysizer -------------------- //
+        analysizer::Analysizer *analysizer1;
+
+        // -------------------- Physics -------------------- //
+        Box *mFloor2;
 
         /// World settings
         rp3d::PhysicsWorld::WorldSettings mWorldSettings;
@@ -87,7 +93,11 @@ namespace bvhscene {
         void RecordRaycastTarget(Bone *target);
 
         void MotionNext();
+
     public:
+        // -------------------- Event -------------------- //
+        Event<> motion_nexted;
+
         // -------------------- Methods -------------------- //
 
         /// Constructor
@@ -108,11 +118,17 @@ namespace bvhscene {
         /// Destroy the physics world
         void destroyPhysicsWorld();
 
+        Skeleton *CreateSkeleton(string &new_bvh);
+
+        void DestroySkeleton();
+
+        // -------------------- Events -------------------- //
         float notifyRaycastHit(const rp3d::RaycastInfo &raycastInfo) override;
 
         /// Called when a keyboard event occurs
         virtual bool keyboardEvent(int key, int scancode, int action, int mods) override;
 
+        // -------------------- Getter & Setter -------------------- //
         skeleton::Skeleton *GetSkeleton();
 
         Bone *GetRaycastedTarget_bone() const;

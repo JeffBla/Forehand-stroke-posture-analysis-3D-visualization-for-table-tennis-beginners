@@ -140,7 +140,7 @@ void SceneDemo::update() {
     updateSnapshotContactPoints();
 
 	// Update the position and orientation of the physics objects
-	for (std::vector<PhysicsObject*>::iterator it = mPhysicsObjects.begin(); it != mPhysicsObjects.end(); ++it) {
+	for (std::list<PhysicsObject*>::iterator it = mPhysicsObjects.begin(); it != mPhysicsObjects.end(); ++it) {
 
 		// Update the transform used for the rendering
 		(*it)->updateTransform(mInterpolationFactor);
@@ -319,7 +319,7 @@ void SceneDemo::renderSinglePass(openglframework::Shader& shader, const openglfr
 	shader.bind();
 
 	// Render all the physics objects of the scene
-	for (std::vector<PhysicsObject*>::iterator it = mPhysicsObjects.begin(); it != mPhysicsObjects.end(); ++it) {
+	for (std::list<PhysicsObject*>::iterator it = mPhysicsObjects.begin(); it != mPhysicsObjects.end(); ++it) {
         (*it)->render(mIsWireframeEnabled ? mColorShader : shader, worldToCameraMatrix);
 	}
 

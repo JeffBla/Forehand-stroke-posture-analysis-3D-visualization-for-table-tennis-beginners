@@ -28,6 +28,10 @@
 #include "nanogui/nanogui.h"
 #include <GLFW/glfw3.h>
 
+#include <pybind11/embed.h>
+
+namespace py = pybind11;
+
 using namespace nanogui;
 
 // GLFW
@@ -52,9 +56,16 @@ using namespace nanogui;
 // Main function
 int main(int /*argc*/, char** /*argv*/) {
 
+
+    // Initialize the Python interpreter
+    py::initialize_interpreter();
+
     // Create and start the testbed application
     TestbedApplication application;
     application.start();
+
+    // Shutdown the Python interpreter
+    py::finalize_interpreter();
 
     return 0;
 }

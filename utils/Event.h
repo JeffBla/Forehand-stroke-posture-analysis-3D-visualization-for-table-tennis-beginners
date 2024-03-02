@@ -24,6 +24,10 @@ namespace event{
             }
         }
 
+        inline void clear() {
+            handlers.clear();
+        }
+
     private:
         std::vector<EventHandler> handlers;
     };

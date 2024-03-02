@@ -4,11 +4,18 @@ cmake_minimum_required(VERSION 3.8)
 # Project configuration
 project(Testbed)
 
+# OpenCV configuration
+find_package( OpenCV REQUIRED )
+include_directories( ${OpenCV_INCLUDE_DIRS} )
+
 # Disable building extras of nanogui we won't need (pure C++ project)
 set(NANOGUI_BUILD_EXAMPLES OFF CACHE BOOL " " FORCE)
 set(NANOGUI_BUILD_PYTHON  OFF CACHE BOOL " " FORCE)
 set(NANOGUI_INSTALL       OFF CACHE BOOL " " FORCE)
 set(NANOGUI_BACKEND       OpenGL CACHE BOOL " " FORCE)
+
+# Disable building extras of pybind11 we won't need (pure C++ project)
+set(PYBIND11_INSTALL OFF CACHE BOOL " " FORCE)
 
 # ---- Make sure to recursively clone all the git submodules for external libraries (nanogui) --- #
 find_package(Git QUIET)
@@ -38,6 +45,9 @@ SET(NANOGUI_BUILD_SHARED OFF CACHE BOOL "Build Nanogui with static libraries" FO
 
 # Add the configurations from nanogui
 add_subdirectory(extern/nanogui)
+
+# Add the configurations from pybind11
+add_subdirectory(extern/pybind11)
 
 # Copy the shaders used for the demo into the build directory
 file(COPY "shaders/" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/shaders/")
@@ -93,6 +103,8 @@ set(TESTBED_SOURCES
     src/Timer.h
     src/TestbedLogger.h
     src/TestbedLogger.cpp
+		src/VideoController.cpp
+		src/VideoController.h
 )
 
 # Common source files
@@ -125,6 +137,12 @@ set(COMMON_SOURCES
 		common/BVH.cpp
         common/Bone.cpp
         common/Bone.h
+		common/Analysizer.cpp
+		common/Analysizer.h
+		common/Identifier.cpp
+		common/Identifier.h
+		common/VideoToBvhConverter.cpp
+		common/VideoToBvhConverter.h
 )
 
 # Scenes source files
@@ -206,5 +224,10 @@ target_compile_features(testbed PUBLIC cxx_std_17)
 set_target_properties(testbed PROPERTIES CXX_EXTENSIONS OFF)
 
 # Link with libraries
-target_link_libraries(testbed reactphysics3d nanogui ${NANOGUI_EXTRA_LIBS})
+target_link_libraries(testbed reactphysics3d nanogui ${NANOGUI_EXTRA_LIBS} ${OpenCV_LIBS} pybind11::embed)
 
+# Copy the python packages into the build directory
+add_custom_target(copy_python_packages ALL
+		COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/Py_package ${CMAKE_CURRENT_BINARY_DIR}/Py_package
+		DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/Py_package)
+add_dependencies(testbed copy_python_packages)

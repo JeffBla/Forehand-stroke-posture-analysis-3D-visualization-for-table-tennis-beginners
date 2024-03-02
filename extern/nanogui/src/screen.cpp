@@ -813,22 +813,28 @@ void Screen::mouse_button_callback_event(int button, int action, int modifiers) 
     }
 }
 
-void Screen::key_callback_event(int key, int scancode, int action, int mods) {
+bool Screen::key_callback_event(int key, int scancode, int action, int mods) {
     m_last_interaction = glfwGetTime();
+    bool key_handled = false;
     try {
-        m_redraw |= keyboard_event(key, scancode, action, mods);
+        key_handled = keyboard_event(key, scancode, action, mods);
+        m_redraw |= key_handled;
     } catch (const std::exception &e) {
-        std::cerr << "Caught exception in event handler: " << e.what() << std::endl;
+        std::cerr << "NanoGUI:Screen:key_callback_event:Caught exception in event handler: " << e.what() << std::endl;
     }
+    return key_handled;
 }
 
-void Screen::char_callback_event(unsigned int codepoint) {
+bool Screen::char_callback_event(unsigned int codepoint) {
     m_last_interaction = glfwGetTime();
+    bool key_handled = false;
     try {
-        m_redraw |= keyboard_character_event(codepoint);
+        key_handled = keyboard_character_event(codepoint);
+        m_redraw |= key_handled;
     } catch (const std::exception &e) {
-        std::cerr << "Caught exception in event handler: " << e.what() << std::endl;
+        std::cerr << "NanoGUI:Screen:char_callback_event:Caught exception in event handler: " << e.what() << std::endl;
     }
+    return key_handled;
 }
 
 void Screen::drop_callback_event(int count, const char **filenames) {
@@ -967,6 +973,16 @@ Texture::ComponentFormat Screen::component_format() const {
         return Texture::ComponentFormat::Float16;
     else
         return Texture::ComponentFormat::UInt8;
+}
+
+bool Screen::has_focus() const {
+    if (m_focus_path.size() > 0) {
+        for (auto it = m_focus_path.rbegin() + 1; it != m_focus_path.rend(); ++it)
+            if ((*it)->focused())
+                return true;
+    }
+
+    return false;
 }
 
 #if defined(NANOGUI_USE_METAL)

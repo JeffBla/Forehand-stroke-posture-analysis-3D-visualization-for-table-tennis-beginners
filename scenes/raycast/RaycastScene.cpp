@@ -199,7 +199,7 @@ void RaycastScene::reset() {
     SceneDemo::reset();
 
     std::vector<PhysicsObject*>::iterator it;
-    for (it = mPhysicsObjects.begin(); it != mPhysicsObjects.end(); ++it) {
+    for ( auto it = mPhysicsObjects.begin(); it != mPhysicsObjects.end(); ++it) {
         (*it)->setTransform(rp3d::Transform(rp3d::Vector3::zero(), rp3d::Quaternion::identity()));
     }
 }
@@ -311,7 +311,7 @@ void RaycastScene::renderSinglePass(openglframework::Shader& shader, const openg
 	shader.bind();
 
 	// Render all the physics objects of the scene
-	for (std::vector<PhysicsObject*>::iterator it = mPhysicsObjects.begin(); it != mPhysicsObjects.end(); ++it) {
+	for (auto it = mPhysicsObjects.begin(); it != mPhysicsObjects.end(); ++it) {
 		if ((*it)->getCollisionBody()->isActive()) {
             (*it)->render(shader, worldToCameraMatrix);
 		}
