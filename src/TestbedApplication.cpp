@@ -642,6 +642,11 @@ void TestbedApplication::text_in_event(unsigned int codepoint) {
 void TestbedApplication::mouse_button_event(int button, int action, int modifiers) {
     mGui.onMouseButtonEvent(button, action, modifiers);
 
+    // Check if the GUI isn't in focus
+    bool isInGui = mGui.isFocus();
+    if (isInGui)
+        return;
+
     // Get the mouse cursor position
     double x, y;
     glfwGetCursorPos(mWindow, &x, &y);
@@ -654,6 +659,11 @@ void TestbedApplication::mouse_button_event(int button, int action, int modifier
 // Handle a mouse motion event (default implementation: propagate to children)
 void TestbedApplication::mouse_motion_event(double x, double y) {
     mGui.onMouseMotionEvent(x, y);
+
+    // Check if the GUI isn't in focus
+    bool isInGui = mGui.isFocus();
+    if (isInGui)
+        return;
 
     int leftButtonState = glfwGetMouseButton(mWindow, GLFW_MOUSE_BUTTON_LEFT);
     int rightButtonState = glfwGetMouseButton(mWindow, GLFW_MOUSE_BUTTON_RIGHT);

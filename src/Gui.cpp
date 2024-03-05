@@ -787,10 +787,16 @@ void Gui::createAnalyzePanel() {
             mOpenposePath = onOpenFileButtonPressed({{"csv", "Comma-Separated Values"}}, true);
         });
 
+        new Label(mAnalyzePanel, "Choose Whole Body Data File");
+        auto whole_body_data_button = new Button(mAnalyzePanel, "Open File");
+        whole_body_data_button->set_callback([&]() {
+            mWholeBodyDataPath = onOpenFileButtonPressed({{"csv", "Comma-Separated Values"}}, true);
+        });
+
         auto analyze_button = new Button(mAnalyzePanel, "Analyze");
         analyze_button->set_callback([&]() {
             auto scene = (bvhscene::BvhScene *) this->mApp->mCurrentScene;
-            scene->Analyze(mOpenposePath);
+            scene->Analyze(mOpenposePath, mWholeBodyDataPath);
         });
 
         mAnalyzePanel->set_visible(true);
@@ -917,4 +923,11 @@ void Gui::onMotionNext() {
         pVideoController->Next();
         mScreen->perform_layout();
     }
+}
+
+int Gui::createMessageDialog(const string &title, const string &message, MessageDialog::Type type,
+                             const std::function<void(int)>& callback) {
+    auto dig = new MessageDialog(mScreen, type, title, message);
+    dig->set_callback(callback);
+    return 0;
 }
