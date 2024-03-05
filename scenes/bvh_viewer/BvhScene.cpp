@@ -123,13 +123,13 @@ skeleton::Skeleton *BvhScene::CreateSkeleton(string &new_bvh) {
     // Create the skeleton with bvh
     bvh = new BVH(new_bvh.c_str());
     skeleton1 = new skeleton::Skeleton(mPhysicsCommon, mPhysicsWorld, mPhysicsObjects, mMeshFolderPath, bvh);
-    skeleton_created.fire();
     // Analysizer
-    analysizer1 = new analysizer::Analysizer(skeleton1, this);
+    forehand_stroke_analysizer = new analysizer::Analysizer(skeleton1, "forehand_stroke");
+
+    skeleton_created.fire();
 
     raycastedTarget_bone = skeleton1->FindBone("head");
-    raycastedTarget_bone->GetPhysicsObject()->setColor(pickedColor);
-    raycastedTarget_bone->GetPhysicsObject()->setSleepingColor(pickedColor);
+    RecordRaycastTarget(raycastedTarget_bone);
     return skeleton1;
 }
 
@@ -141,8 +141,8 @@ void BvhScene::DestroySkeleton() {
         delete bvh;
         bvh = nullptr;
 
-        delete analysizer1;
-        analysizer1 = nullptr;
+        delete forehand_stroke_analysizer;
+        forehand_stroke_analysizer = nullptr;
 
         raycastedTarget_bone = nullptr;
 
@@ -178,9 +178,9 @@ void BvhScene::RecordRaycastTarget(Bone *target) {
 
     raycastedTarget_bone_Transform = target->GetPhysicsObject()->getTransform();
     /// Debug
-    cout << raycastedTarget_bone_Transform.getPosition().to_string() << endl;
-    rp3d::Vector3 tmp = AngleTool::QuaternionToEulerAngles(raycastedTarget_bone_Transform.getOrientation());
-    cout << AngleTool::EulerAnglesToDegree(tmp).to_string() << endl;
+//    cout << raycastedTarget_bone_Transform.getPosition().to_string() << endl;
+//    rp3d::Vector3 tmp = AngleTool::QuaternionToEulerAngles(raycastedTarget_bone_Transform.getOrientation());
+//    cout << AngleTool::EulerAnglesToDegree(tmp).to_string() << endl;
 }
 
 bool BvhScene::keyboardEvent(int key, int scancode, int action, int mods) {
@@ -200,10 +200,10 @@ bool BvhScene::keyboardEvent(int key, int scancode, int action, int mods) {
         skeleton1->SetJointRotation_local(raycastedTarget_bone, 0, M_PI / 6, 0);
         return true;
     }
-    if (key == GLFW_KEY_A && action == GLFW_PRESS) {
-        analysizer1->Analyse();
-        return true;
-    }
+//    if (key == GLFW_KEY_A && action == GLFW_PRESS) {
+//        ForearmStrokeAnalyze(<#initializer#>);
+//        return true;
+//    }
 
     return false;
 }
@@ -211,4 +211,15 @@ bool BvhScene::keyboardEvent(int key, int scancode, int action, int mods) {
 void BvhScene::MotionNext() {
     if (skeleton1 != nullptr)
         skeleton1->NextBvhMotion();
+}
+
+void BvhScene::ForearmStrokeAnalyze(const std::string &openposePath) {
+    forehand_stroke_analysizer->Analyze(openposePath);
+}
+
+string BvhScene::GetForearmStrokeAnalyzeSuggestions() {
+    if (forehand_stroke_analysizer != nullptr) {
+        return forehand_stroke_analysizer->Suggest_str();
+    }
+    return "No skeleton to analyze.";
 }

@@ -2,10 +2,12 @@
 #define TESTBED_ANALYSIZER_H
 
 #include <map>
+#include <vector>
 
 #include "Identifier.h"
 #include "Skeleton.h"
 #include "SceneDemo.h"
+#include "Event.h"
 
 using namespace identifier;
 using namespace skeleton;
@@ -13,42 +15,58 @@ using namespace skeleton;
 namespace analysizer {
     class Analysizer {
     private:
+        // ------------------------- Constants ----------------------- //
+        const std::map<std::string, std::map<std::string, std::vector<std::string>>> identifier_target_list = {
+                {"forehand_stroke", {{"rotation", {"hip"}}, {"fore_arm", {"rForeArm"}}}},
+        };
+
+        const std::map<std::string, std::map<std::string, std::string>> identifier_notPass_suggestions = {
+                {"forehand_stroke",
+                 {{"rotation", "Twist your waist correctly."}, {"fore_arm", "Wave your arm correctly."}}},
+        };
+
         // ------------------------- Attributes ----------------------- //
-        SceneDemo *scene;
+        std::string analysizer_name;
 
         Skeleton *target_skeleton;
 
         std::map<std::string, Identifier *> identifiers;
 
+        Identifier *output_identifier;
+
+        std::string output_filename;
+
         std::vector<std::string> identifier_name_list;
 
+        std::map<std::string, bool> identifier_pass_list;
+
         // ------------------------- Methods ----------------------- //
-        void _Analyse(map<string, Identifier *> &identifier_list);
-
+        void _Analyse(map<string, Identifier *> &identifier_list, const string &openposePath);
     public:
-        Analysizer(Skeleton *skeleton, SceneDemo *scene);
+        // ------------------------- Events ----------------------- //
+        event::Event<> analysize_done;
 
-        Analysizer(Skeleton *target_skeleton, std::vector<std::string> identifier_name_list,
-                   SceneDemo *scene);
+        // ------------------------- Methods ----------------------- //
+        Analysizer(Skeleton *skeleton);
+
+        Analysizer(Skeleton *target_skeleton, const std::string &analysizer_name);
 
         ~Analysizer();
 
         /**
-         * Analyse the skeleton with all the identifiers
+         * Analyze the skeleton with all the identifiers
          */
-        void Analyse();
+        void Analyze(const string &openposePath);
 
         /**
-         * Analyse the skeleton with the given identifier
+         * Analyze the skeleton with the given identifier
          * @param identifier
          */
-        void Analyse(Identifier *identifier);
+        void Analyze(Identifier *identifier, const string &openposePath);
 
-        void WriteOutput(int identitier_id);
+        string Suggest_str(const string &identifier_name);
 
-        void WriteOutput(std::string identifier_name);
-
-        void WriteOutput();
+        string Suggest_str();
     };
 
 }

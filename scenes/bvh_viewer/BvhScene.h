@@ -60,14 +60,6 @@ namespace bvhscene {
         /// info
         rp3d::Transform raycastedTarget_bone_Transform;
 
-    public:
-        /// Event for raycasted target
-        Event<Bone *> raycastedTarget_changed;
-
-        /// Event for create skeleton
-        Event<> skeleton_created;
-
-    protected:
         skeleton::Skeleton *skeleton1 = nullptr;
 
         // -------------------- Bvh -------------------- //
@@ -78,7 +70,7 @@ namespace bvhscene {
         BVH *bvh;
 
         // -------------------- Analysizer -------------------- //
-        analysizer::Analysizer *analysizer1;
+        analysizer::Analysizer *forehand_stroke_analysizer;
 
         // -------------------- Physics -------------------- //
         Box *mFloor2;
@@ -96,6 +88,12 @@ namespace bvhscene {
 
     public:
         // -------------------- Event -------------------- //
+        /// Event for raycasted target
+        Event<Bone *> raycastedTarget_changed;
+
+        /// Event for create skeleton
+        Event<> skeleton_created;
+
         Event<> motion_nexted;
 
         // -------------------- Methods -------------------- //
@@ -122,6 +120,10 @@ namespace bvhscene {
 
         void DestroySkeleton();
 
+        void ForearmStrokeAnalyze(const std::string &openposePath);
+
+        string GetForearmStrokeAnalyzeSuggestions();
+
         // -------------------- Events -------------------- //
         float notifyRaycastHit(const rp3d::RaycastInfo &raycastInfo) override;
 
@@ -132,10 +134,16 @@ namespace bvhscene {
         skeleton::Skeleton *GetSkeleton();
 
         Bone *GetRaycastedTarget_bone() const;
+
+        analysizer::Analysizer *GetForehandStrokeAnalysizer() const;
     };
 
     inline Bone *BvhScene::GetRaycastedTarget_bone() const {
         return raycastedTarget_bone;
+    }
+
+    inline analysizer::Analysizer *BvhScene::GetForehandStrokeAnalysizer() const {
+        return forehand_stroke_analysizer;
     }
 }  // namespace bvhscene
 

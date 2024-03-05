@@ -2,7 +2,7 @@
 
 using namespace identifier;
 
-Identifier::Identifier(int id, std::string &identifier_name, std::vector<std::string> &target_list,
+Identifier::Identifier(int id, const std::string &identifier_name, const std::vector<std::string> &target_list,
                        Skeleton *target_skeleton)
         : identifier_id(id), identifier_name(identifier_name), target_list(target_list),
           target_skeleton(target_skeleton) {
@@ -28,9 +28,9 @@ void Identifier::Identify(int frame) {
     }
 }
 
-void Identifier::WriteOutput() {
+void Identifier::WriteOutput(const string &output_filename) {
     std::ofstream output_file;
-    output_filename = "output/" + identifier_name + ".csv";
+    this->output_filename = output_filename;
     output_file.open(output_filename);
     if (!output_file.is_open()) {
         cout << "CANNOT OPEN" << endl;
@@ -74,27 +74,38 @@ void Identifier::WriteOutput() {
     output_file.close();
 }
 
-void
+void Identifier::WriteOutput() {
+    output_filename = "output/" + identifier_name + ".csv";
+    WriteOutput(output_filename);
+}
+
+bool
 Identifier::Py_SimilarityScore(const string &target_filename, const string &ref_filename,
                                const string &openpose_target_filename,
                                const string &openpose_ref_filename) {
     py::module_ PyAnalysizer = py::module_::import("Py_package.PyAnalysizer.Analysize");
-    if (std::find(target_list.begin(), target_list.end(), "hip") != target_list.end()) {
-        py::object rotation_sim = PyAnalysizer.attr("OpenPoseAnalysize_Waist")(openpose_target_filename,
-                                                                               openpose_ref_filename);
-
-        cout << "Rotation Similarity Score: " << py::str(rotation_sim).cast<string>() << endl;
+    if (identifier_name == "rotation" || identifier_name == "fore_arm") {
+        bool isPass = true;
+        for (auto &target_name: target_list) {
+            py::object result = PyAnalysizer.attr("ForehandStrokeAnalysis")(openpose_target_filename,
+                                                                            openpose_ref_filename,
+                                                                            target_filename, ref_filename,
+                                                                            target_name);
+            // Output pass or not
+            isPass &= result.cast<bool>();
+        }
+        return isPass;
     }
 
-    for (const auto &target_name: target_list) {
-        py::object similarity_scores = PyAnalysizer.attr("BvhAnalysize")(target_filename, ref_filename, target_name);
-
-        auto similarity_scores_list = similarity_scores.cast<std::map<string, float>>();
-        for (const auto &[key, similarity_score]: similarity_scores_list)
-            cout << key << " Similarity Score: " << similarity_score << endl;
-    }
+    std::cout << "No such identifier" << std::endl;
+    return true;
 }
 
-void Identifier::Py_SimilarityScore() {
-    Py_SimilarityScore(output_filename, ref_filename, openpose_target_filename, openpose_ref_filename);
+bool Identifier::Py_SimilarityScore(const string &output_filename, const string &openpose_target_filename) {
+    this->output_filename = output_filename;
+    return Py_SimilarityScore(output_filename, ref_filename, openpose_target_filename, openpose_ref_filename);
+}
+
+bool Identifier::Py_SimilarityScore() {
+    return Py_SimilarityScore(output_filename, ref_filename, openpose_target_filename, openpose_ref_filename);
 }
