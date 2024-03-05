@@ -122,6 +122,8 @@ namespace bvhscene {
 
         void DestroySkeleton();
 
+        void Analyze(const std::string &openposePath);
+
         // -------------------- Events -------------------- //
         float notifyRaycastHit(const rp3d::RaycastInfo &raycastInfo) override;
 

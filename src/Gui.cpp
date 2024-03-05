@@ -72,8 +72,17 @@ void Gui::init(GLFWwindow *window) {
     // Create the Profiling panel
     createProfilingPanel();
 
-    // Create the Test panel
-    createTestPanel();
+    // Create the Rotation panel
+    createRotationPanel();
+
+    // Create the Utils panel
+    createUtilsPanel();
+
+    // Create the Analyze panel
+    createAnalyzePanel();
+
+    // Adjust the panels
+    adjustRotationUtilsAnalyzePanel();
 
     mScreen->set_visible(true);
     mScreen->perform_layout();
@@ -164,7 +173,6 @@ void Gui::update() {
 }
 
 void Gui::createSimulationPanel() {
-
     mSimulationPanel = new Window(mScreen, "Simulation");
     mSimulationPanel->set_position(Vector2i(15, 15));
     mSimulationPanel->set_layout(new GroupLayout(10, 5, 10, 20));
@@ -213,7 +221,6 @@ void Gui::createSimulationPanel() {
 }
 
 void Gui::createSettingsPanel() {
-
     mSettingsPanel = new Window(mScreen, "Settings");
     mSettingsPanel->set_position(Vector2i(15, 180));
     mSettingsPanel->set_layout(new BoxLayout(Orientation::Vertical, Alignment::Middle, 10, 5));
@@ -548,44 +555,40 @@ void Gui::createSettingsPanel() {
 }
 
 void Gui::createProfilingPanel() {
-
-    Widget *profilingPanel = new Window(mScreen, "Profiling");
-    profilingPanel->set_position(Vector2i(15, 505));
-    profilingPanel->set_layout(new BoxLayout(Orientation::Vertical, Alignment::Fill, 10, 5));
+    mProfilingPanel = new Window(mScreen, "Profiling");
+    mProfilingPanel->set_position(Vector2i(15, 505));
+    mProfilingPanel->set_layout(new BoxLayout(Orientation::Vertical, Alignment::Fill, 10, 5));
     //profilingPanel->setId("SettingsPanel");
-    profilingPanel->set_fixed_width(220);
+    mProfilingPanel->set_fixed_width(220);
 
     // Framerate (FPS)
-    mFPSLabel = new Label(profilingPanel, std::string("FPS : ") + floatToString(mCachedFPS, 0), "sans-bold");
+    mFPSLabel = new Label(mProfilingPanel, std::string("FPS : ") + floatToString(mCachedFPS, 0), "sans-bold");
 
     // Update time
-    mFrameTimeLabel = new Label(profilingPanel,
+    mFrameTimeLabel = new Label(mProfilingPanel,
                                 std::string("Frame time : ") + floatToString(mCachedUpdateTime * 1000.0, 1) +
                                 std::string(" ms"), "sans-bold");
 
     // Total physics time
-    mTotalPhysicsTimeLabel = new Label(profilingPanel, std::string("Total physics time : ") +
-                                                       floatToString(mCachedTotalPhysicsUpdateTime * 1000.0, 1) +
-                                                       std::string(" ms"), "sans-bold");
+    mTotalPhysicsTimeLabel = new Label(mProfilingPanel, std::string("Total physics time : ") +
+                                                        floatToString(mCachedTotalPhysicsUpdateTime * 1000.0, 1) +
+                                                        std::string(" ms"), "sans-bold");
 
     // Physics step time
-    mPhysicsStepTimeLabel = new Label(profilingPanel, std::string("Physics step time : ") +
-                                                      floatToString(mCachedPhysicsStepTime * 1000.0, 1) +
-                                                      std::string(" ms"), "sans-bold");
+    mPhysicsStepTimeLabel = new Label(mProfilingPanel, std::string("Physics step time : ") +
+                                                       floatToString(mCachedPhysicsStepTime * 1000.0, 1) +
+                                                       std::string(" ms"), "sans-bold");
 
-    profilingPanel->set_visible(true);
+    mProfilingPanel->set_visible(true);
 }
 
-void Gui::createTestPanel() {
-    mTestPanel = new Window(mScreen, "Test");
-    mTestPanel->set_fixed_width(220);
-    mTestPanel->set_layout((new BoxLayout(Orientation::Vertical, Alignment::Fill, 10, 5)));
-    mTestPanel->set_position(Vector2i(mScreen->width() - mTestPanel->fixed_width() - 15, 15));
+void Gui::createRotationPanel() {
+    mRotationPanel = new Window(mScreen, "Rotation");
+    mRotationPanel->set_fixed_width(220);
+    mRotationPanel->set_layout((new BoxLayout(Orientation::Vertical, Alignment::Fill, 10, 5)));
+    mRotationPanel->set_position(Vector2i(mScreen->width() - mRotationPanel->fixed_width() - 15, 15));
 
     if (mCurrentSceneName == "BVH") {
-        pVideoToBvhConverter = new videoToBvhConverter::VideoToBvhConverter();
-        pVideoController = new videoLoader::VideoController();
-
         // Event register
         auto scene = (bvhscene::BvhScene *) (mApp->getScenes()[0]);
         scene->raycastedTarget_changed.add_handler([this](Bone *target_bone) {
@@ -600,14 +603,15 @@ void Gui::createTestPanel() {
         });
 
         // Panel setting
-        new Label(mTestPanel, "Rotation", "sans-bold");
+        // -------------------- Rotation -------------------- //
+        new Label(mRotationPanel, "Rotation", "sans-bold");
         { // Rotate x
-            mRotateSlider_x = new Slider(mTestPanel);
+            mRotateSlider_x = new Slider(mRotationPanel);
             mRotateSlider_x->set_value(0);
             mRotateSlider_x->set_range(std::pair(-180, 180));
             mRotateSlider_x->set_fixed_width(200);
 
-            mRotateTextBox_x = new TextBox(mTestPanel);
+            mRotateTextBox_x = new TextBox(mRotationPanel);
             mRotateTextBox_x->set_fixed_size(Vector2i(60, 25));
             mRotateTextBox_x->set_value("0");
             mRotateSlider_x->set_callback([this](float value) {
@@ -629,12 +633,12 @@ void Gui::createTestPanel() {
             mRotateTextBox_x->set_alignment(TextBox::Alignment::Right);
         } // Rotate x
         { // Rotate y
-            mRotateSlider_y = new Slider(mTestPanel);
+            mRotateSlider_y = new Slider(mRotationPanel);
             mRotateSlider_y->set_value(0);
             mRotateSlider_y->set_range(std::pair(-180, 180));
             mRotateSlider_y->set_fixed_width(200);
 
-            mRotateTextBox_y = new TextBox(mTestPanel);
+            mRotateTextBox_y = new TextBox(mRotationPanel);
             mRotateTextBox_y->set_fixed_size(Vector2i(60, 25));
             mRotateTextBox_y->set_value("0");
             mRotateSlider_y->set_callback([this](float value) {
@@ -656,12 +660,12 @@ void Gui::createTestPanel() {
             mRotateTextBox_y->set_alignment(TextBox::Alignment::Right);
         } // Rotate y
         { // Rotate z
-            mRotateSlider_z = new Slider(mTestPanel);
+            mRotateSlider_z = new Slider(mRotationPanel);
             mRotateSlider_z->set_value(0);
             mRotateSlider_z->set_range(std::pair(-180, 180));
             mRotateSlider_z->set_fixed_width(200);
 
-            mRotateTextBox_z = new TextBox(mTestPanel);
+            mRotateTextBox_z = new TextBox(mRotationPanel);
             mRotateTextBox_z->set_fixed_size(Vector2i(60, 25));
             mRotateTextBox_z->set_value("0");
             mRotateSlider_z->set_callback([this](float value) {
@@ -683,12 +687,25 @@ void Gui::createTestPanel() {
             mRotateTextBox_z->set_alignment(TextBox::Alignment::Right);
         } // Rotate z
 
-        mRotateTitle = new Label(mTestPanel, "Rotate Info", "sans-bold");
-        {
-            angleLabels.push_back(new Label(mTestPanel, "..."));
-        }
+        // -------------------- Rotation Info -------------------- //
+        new Label(mRotationPanel, "Rotation Info", "sans-bold");
+        angleLabels.push_back(new Label(mRotationPanel, "..."));
 
-        /// Bvh Image viewer
+        mRotationPanel->set_visible(true);
+    }
+}
+
+void Gui::createUtilsPanel() {
+    mUtilsPanel = new Window(mScreen, "Utils");
+    mUtilsPanel->set_fixed_width(220);
+    mUtilsPanel->set_layout((new BoxLayout(Orientation::Vertical, Alignment::Fill, 10, 5)));
+    mUtilsPanel->set_position(Vector2i(mScreen->width() - mUtilsPanel->fixed_width() - 15, 15));
+
+    if (mCurrentSceneName == "BVH") {
+        pVideoToBvhConverter = new videoToBvhConverter::VideoToBvhConverter();
+        pVideoController = new videoLoader::VideoController();
+
+        // -------------------- Bvh Image viewer -------------------- //
         // Window
         bvhImageWindow = new Window(mScreen, "Bvh Frame");
         bvhImageWindow->set_layout(new GroupLayout());
@@ -700,22 +717,22 @@ void Gui::createTestPanel() {
         bvhImageViewer->set_visible(false);
         bvhImageViewer->set_enabled(false);
 
-        /// File chooser
-        new Label(mTestPanel, "BVH File Chooser", "sans-bold");
-        auto open_bvh_button = new Button(mTestPanel, "Open File");
+        // -------------------- File chooser -------------------- //
+        new Label(mUtilsPanel, "Choose BVH file");
+        auto open_bvh_button = new Button(mUtilsPanel, "Open File");
         open_bvh_button->set_callback([&]() {
             mBvhPath = onOpenFileButtonPressed({{"bvh", "BioVision Motion Capture"}}, true);
         });
 
-        /// Video Controller
+        // -------------------- Video viewer -------------------- //
         pVideoController->SetImageView(bvhImageViewer);
-        new Label(mTestPanel, "Converted Video", "sans-bold");
-        auto open_video_button = new Button(mTestPanel, "Open File");
+        new Label(mUtilsPanel, "Choose Target Video");
+        auto open_video_button = new Button(mUtilsPanel, "Open File");
         open_video_button->set_callback([&]() {
             mVideoPath = onOpenFileButtonPressed({{"mp4", "MPEG-4 Video"}}, true);
         });
 
-        auto play_video_button = new Button(mTestPanel, "Play");
+        auto play_video_button = new Button(mUtilsPanel, "Play");
         play_video_button->set_callback([&]() {
             auto scene = (bvhscene::BvhScene *) this->mApp->mCurrentScene;
 
@@ -736,24 +753,64 @@ void Gui::createTestPanel() {
             mScreen->perform_layout();
         });
 
-        /// Video to bvh Converter
-        new Label(mTestPanel, "Video to bvh", "sans-bold");
-        auto videoPath_label = new Label(mTestPanel, "Video File Path: ");
-        videoPath_textbox = new TextBox(mTestPanel, "");
+        // -------------------- Video to bvh -------------------- //
+        new Label(mUtilsPanel, "Video to bvh", "sans-bold");
+        new Label(mUtilsPanel, "Video File Path: ");
+        videoPath_textbox = new TextBox(mUtilsPanel, "");
         videoPath_textbox->set_alignment(TextBox::Alignment::Left);
         videoPath_textbox->set_editable(true);
 
-        auto bvhPath_label = new Label(mTestPanel, "BVH File Path: ");
-        bvhPath_textbox = new TextBox(mTestPanel, "");
+        new Label(mUtilsPanel, "BVH File Path: ");
+        bvhPath_textbox = new TextBox(mUtilsPanel, "");
         bvhPath_textbox->set_alignment(TextBox::Alignment::Left);
         bvhPath_textbox->set_editable(true);
 
-        auto video_to_bvh_button = new Button(mTestPanel, "Convert");
+        auto video_to_bvh_button = new Button(mUtilsPanel, "Convert");
         video_to_bvh_button->set_callback([&]() {
             pVideoToBvhConverter->Convert(videoPath_textbox->value(), bvhPath_textbox->value());
         });
+
+        mUtilsPanel->set_visible(true);
     }
-    mTestPanel->set_visible(true);
+}
+
+void Gui::createAnalyzePanel() {
+    mAnalyzePanel = new Window(mScreen, "Analyze");
+    mAnalyzePanel->set_fixed_width(220);
+    mAnalyzePanel->set_layout((new BoxLayout(Orientation::Vertical, Alignment::Fill, 10, 5)));
+    mAnalyzePanel->set_position(Vector2i(mScreen->width() - mAnalyzePanel->fixed_width() - 15, 15));
+
+    if (mCurrentSceneName == "BVH") {
+        new Label(mAnalyzePanel, "Choose Openpsoe File");
+        auto open_openpose_button = new Button(mAnalyzePanel, "Open File");
+        open_openpose_button->set_callback([&]() {
+            mOpenposePath = onOpenFileButtonPressed({{"csv", "Comma-Separated Values"}}, true);
+        });
+
+        new Label(mAnalyzePanel, "Choose Whole Body Data File");
+        auto whole_body_data_button = new Button(mAnalyzePanel, "Open File");
+        whole_body_data_button->set_callback([&]() {
+            mWholeBodyDataPath = onOpenFileButtonPressed({{"csv", "Comma-Separated Values"}}, true);
+        });
+
+        auto analyze_button = new Button(mAnalyzePanel, "Analyze");
+        analyze_button->set_callback([&]() {
+            auto scene = (bvhscene::BvhScene *) this->mApp->mCurrentScene;
+            scene->Analyze(mOpenposePath, mWholeBodyDataPath);
+        });
+
+        mAnalyzePanel->set_visible(true);
+    }
+}
+
+void Gui::adjustRotationUtilsAnalyzePanel() {
+    mRotationPanel->set_position(Vector2i(mScreen->width() - mRotationPanel->fixed_width() - 15, 15));
+    mUtilsPanel->set_position(
+            Vector2i(mRotationPanel->position().x(),
+                     mRotationPanel->position().y() + mRotationPanel->height() + distanceBetweenWidgets));
+    mAnalyzePanel->set_position(
+            Vector2i(mUtilsPanel->position().x(),
+                     mUtilsPanel->position().y() + mUtilsPanel->height() + distanceBetweenWidgets));
 }
 
 std::string Gui::onOpenFileButtonPressed(const vector<pair<string, string>> &valid, bool save) {
@@ -766,7 +823,7 @@ std::string Gui::onOpenFileButtonPressed(const vector<pair<string, string>> &val
 void Gui::onWindowResizeEvent(int width, int height) {
     mScreen->resize_callback_event(width, height);
 
-    mTestPanel->set_position(Vector2i(mScreen->width() - mTestPanel->fixed_width() - 15, 15));
+    adjustRotationUtilsAnalyzePanel();
 }
 
 void Gui::onMouseMotionEvent(double x, double y) {
@@ -835,16 +892,17 @@ void Gui::onChangeBoneTransform_bvhscene(Bone *target) {
         auto angles = target->GetAngleInfo();
 
         for (auto l: angleLabels) {
-            mTestPanel->remove_child(l);
+            mRotationPanel->remove_child(l);
         }
         angleLabels.clear();
         Label *angle_name, *angle_deg;
         for (auto &[name, deg]: angles) {
-            angle_name = new Label(mTestPanel, name, "sans-bold");
-            angle_deg = new Label(mTestPanel, floatToString(deg, 1));
+            angle_name = new Label(mRotationPanel, name, "sans-bold");
+            angle_deg = new Label(mRotationPanel, floatToString(deg, 1));
             angleLabels.push_back(angle_name);
             angleLabels.push_back(angle_deg);
         }
+        adjustRotationUtilsAnalyzePanel();
         mScreen->perform_layout();
     }
 }
@@ -865,4 +923,11 @@ void Gui::onMotionNext() {
         pVideoController->Next();
         mScreen->perform_layout();
     }
+}
+
+int Gui::createMessageDialog(const string &title, const string &message, MessageDialog::Type type,
+                             const std::function<void(int)>& callback) {
+    auto dig = new MessageDialog(mScreen, type, title, message);
+    dig->set_callback(callback);
+    return 0;
 }

@@ -45,6 +45,8 @@ namespace identifier {
 
         void Py_SimilarityScore();
 
+        void Py_SimilarityScore(const string &openpose_target_filename);
+
         void Py_SimilarityScore(const string &target_filename, const string &ref_filename, const string &openpose_target_filename,
                                 const string &openpose_ref_filename);
 

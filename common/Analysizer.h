@@ -23,7 +23,7 @@ namespace analysizer {
         std::vector<std::string> identifier_name_list;
 
         // ------------------------- Methods ----------------------- //
-        void _Analyse(map<string, Identifier *> &identifier_list);
+        void _Analyse(map<string, Identifier *> &identifier_list, const string &openposePath);
 
     public:
         Analysizer(Skeleton *skeleton, SceneDemo *scene);
@@ -34,15 +34,15 @@ namespace analysizer {
         ~Analysizer();
 
         /**
-         * Analyse the skeleton with all the identifiers
+         * Analyze the skeleton with all the identifiers
          */
-        void Analyse();
+        void Analyze(const string &openposePath);
 
         /**
-         * Analyse the skeleton with the given identifier
+         * Analyze the skeleton with the given identifier
          * @param identifier
          */
-        void Analyse(Identifier *identifier);
+        void Analyze(Identifier *identifier, const string &openposePath);
 
         void WriteOutput(int identitier_id);
 

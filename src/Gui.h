@@ -54,7 +54,7 @@ class Gui {
         enum LeftPane {SCENES, PHYSICS, RENDERING, PROFILING, TESTING};
 
         // -------------------- Constants -------------------- //
-
+        int distanceBetweenWidgets = 10;
 
         // -------------------- Attributes -------------------- //
 
@@ -75,9 +75,9 @@ class Gui {
         Widget* mSettingsPanel;
         Widget* mPhysicsPanel;
         Widget* mRenderingPanel;
-        Widget* mTestPanel;
 
         // Profiling panel
+        Widget* mProfilingPanel;
         Label* mFPSLabel;
         Label* mFrameTimeLabel;
         Label* mTotalPhysicsTimeLabel;
@@ -98,7 +98,8 @@ class Gui {
         std::vector<CheckBox*> mCheckboxesScenes;
         ComboBox* mComboBoxScenes;
 
-        // Test panel
+        // Rotation panel
+        Widget *mRotationPanel;
         TextBox *mRotateTextBox_x;
         Slider *mRotateSlider_x;
 
@@ -110,10 +111,10 @@ class Gui {
 
         bone::Bone *raycastedBone;
 
-        Label *mRotateTitle;
-
         std::vector<Label *> angleLabels;
 
+        // Utils panel
+        Widget *mUtilsPanel;
         std::string mBvhPath;
         std::string mVideoPath;
         TextBox *videoPath_textbox;
@@ -123,6 +124,11 @@ class Gui {
         Window *bvhImageWindow;
         ImageView *bvhImageViewer;
         videoLoader::VideoController *pVideoController;
+
+        // Analyze panel
+        Widget *mAnalyzePanel;
+        std::string mOpenposePath;
+        std::string mWholeBodyDataPath;
 
         /// True if the GUI is displayed
         bool mIsDisplayed;
@@ -156,12 +162,18 @@ class Gui {
 
         void createProfilingPanel();
 
-        void createTestPanel();
+        void createRotationPanel();
+
+        void createUtilsPanel();
+
+        void createAnalyzePanel();
 
         // Convert float value to string
         std::string floatToString(float value, int precision);
 
         static void resetScroll();
+
+        void adjustRotationUtilsAnalyzePanel();
     public :
 
         // -------------------- Methods -------------------- //
@@ -187,6 +199,8 @@ class Gui {
         bool isFocus() const;
 
         static void setScroll(double scrollX, double scrollY);
+
+        int createMessageDialog(const string &title, const string &message, MessageDialog::Type type, const std::function<void(int)>& callback);
 
         /// Update the GUI values with the engine settings from the current scene
         void resetWithValuesFromCurrentScene();

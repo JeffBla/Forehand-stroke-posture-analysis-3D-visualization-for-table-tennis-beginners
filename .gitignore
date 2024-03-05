@@ -9,3 +9,6 @@ build
 
 # cmake
 cmake-build-debug
+
+# tmp static
+static

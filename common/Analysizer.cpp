@@ -1,11 +1,13 @@
 #include "Analysizer.h"
 
-analysizer::Analysizer::Analysizer(Skeleton *skeleton, SceneDemo *scene) : Analysizer(skeleton,
+using namespace analysizer;
+
+Analysizer::Analysizer(Skeleton *skeleton, SceneDemo *scene) : Analysizer(skeleton,
                                                                                       {"whole_body", "foreArm_hand",
                                                                                        "shin_foot", "body_rotate"},
                                                                                       scene) {}
 
-analysizer::Analysizer::Analysizer(Skeleton *target_skeleton, std::vector<std::string> identifier_name_list,
+Analysizer::Analysizer(Skeleton *target_skeleton, std::vector<std::string> identifier_name_list,
                                    SceneDemo *scene)
         : target_skeleton(target_skeleton), identifier_name_list(identifier_name_list), scene(scene) {
     for (int id = 0; id < identifier_name_list.size(); id++) {
@@ -30,8 +32,8 @@ analysizer::Analysizer::Analysizer(Skeleton *target_skeleton, std::vector<std::s
     }
 }
 
-void analysizer::Analysizer::_Analyse(map<string, Identifier *> &identifier_list) {
-    // Analyse the skeleton
+void Analysizer::_Analyse(map<string, Identifier *> &identifier_list, const string &openposePath) {
+    // Analyze the skeleton
     for (int curr_frame = 0; curr_frame < target_skeleton->GetBvh()->GetNumFrame(); curr_frame++) {
         for_each(identifier_list.begin(), identifier_list.end(), [curr_frame](pair<string, Identifier *> element) {
             element.second->Identify(curr_frame);
@@ -39,27 +41,27 @@ void analysizer::Analysizer::_Analyse(map<string, Identifier *> &identifier_list
         target_skeleton->NextBvhMotion();
     }
     // Write the output
-    for_each(identifier_list.begin(), identifier_list.end(), [](pair<string, Identifier *> element) {
+    for_each(identifier_list.begin(), identifier_list.end(), [openposePath](pair<string, Identifier *> element) {
         element.second->WriteOutput();
 
-        element.second->Py_SimilarityScore();
+        element.second->Py_SimilarityScore(openposePath);
     });
 
-    cout << "Analyse done" << endl;
+    cout << "Analyze done" << endl;
 }
 
 
-analysizer::Analysizer::~Analysizer() {
+Analysizer::~Analysizer() {
     identifiers.clear();
 }
 
-void analysizer::Analysizer::Analyse() {
+void Analysizer::Analyze(const string &openposePath) {
     target_skeleton->ApplyBvhMotion(0);
-    _Analyse(identifiers);
+    _Analyse(identifiers, openposePath);
 }
 
-void analysizer::Analysizer::Analyse(Identifier *identifier) {
+void Analysizer::Analyze(Identifier *identifier, const string &openposePath) {
     target_skeleton->ApplyBvhMotion(0);
     map<string, Identifier *> identifier_list = {{identifier->GetIdentifierName(), identifier}};
-    _Analyse(identifier_list);
+    _Analyse(identifier_list, openposePath);
 }
