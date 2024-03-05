@@ -16,8 +16,7 @@ Analysizer::Analysizer(Skeleton *target_skeleton, const std::string &analysizer_
     }
 }
 
-void Analysizer::_Analyse(map<string, Identifier *> &identifier_list, const string &openposePath,
-                          const string &whole_body_dataPath) {
+void Analysizer::_Analyse(map<string, Identifier *> &identifier_list, const string &openposePath) {
     // Analyze the skeleton
     for (int curr_frame = 0; curr_frame < target_skeleton->GetBvh()->GetNumFrame(); curr_frame++) {
         for_each(identifier_list.begin(), identifier_list.end(), [curr_frame](pair<string, Identifier *> element) {
@@ -26,14 +25,16 @@ void Analysizer::_Analyse(map<string, Identifier *> &identifier_list, const stri
         target_skeleton->NextBvhMotion();
     }
     // Write the output & analyze
-    output_identifier->WriteOutput();
+    output_filename = "output/" + analysizer_name + ".csv";
+    output_identifier->WriteOutput(output_filename);
     for_each(identifier_list.begin(), identifier_list.end(),
              [&](pair<string, Identifier *> element) {
-                 identifier_pass_list[element.first] = element.second->Py_SimilarityScore(openposePath,
-                                                                                          whole_body_dataPath);
+                 identifier_pass_list[element.first] = element.second->Py_SimilarityScore(
+                         output_filename, openposePath);
              });
 
     cout << "Analyze done" << endl;
+    analysize_done.fire();
 }
 
 
@@ -41,15 +42,15 @@ Analysizer::~Analysizer() {
     identifiers.clear();
 }
 
-void Analysizer::Analyze(const string &openposePath, const string &whole_body_dataPath) {
+void Analysizer::Analyze(const string &openposePath) {
     target_skeleton->ApplyBvhMotion(0);
-    _Analyse(identifiers, openposePath, whole_body_dataPath);
+    _Analyse(identifiers, openposePath);
 }
 
-void Analysizer::Analyze(Identifier *identifier, const string &openposePath, const string &whole_body_dataPath) {
+void Analysizer::Analyze(Identifier *identifier, const string &openposePath) {
     target_skeleton->ApplyBvhMotion(0);
     map<string, Identifier *> identifier_list = {{identifier->GetIdentifierName(), identifier}};
-    _Analyse(identifier_list, openposePath, whole_body_dataPath);
+    _Analyse(identifier_list, openposePath);
 }
 
 string Analysizer::Suggest_str(const string &identifier_name) {

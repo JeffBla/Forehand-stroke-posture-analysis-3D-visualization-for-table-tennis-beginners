@@ -128,7 +128,6 @@ class Gui {
         // Analyze panel
         Widget *mAnalyzePanel;
         std::string mOpenposePath;
-        std::string mWholeBodyDataPath;
 
         /// True if the GUI is displayed
         bool mIsDisplayed;
@@ -200,7 +199,9 @@ class Gui {
 
         static void setScroll(double scrollX, double scrollY);
 
-        int createMessageDialog(const string &title, const string &message, MessageDialog::Type type, const std::function<void(int)>& callback);
+        void createMessageDialog(const string &title, const string &message, MessageDialog::Type type, const std::function<void(int)>& callback);
+
+        void createMessageDialog(const string &title, const string &message, MessageDialog::Type type);
 
         /// Update the GUI values with the engine settings from the current scene
         void resetWithValuesFromCurrentScene();
@@ -227,6 +228,8 @@ class Gui {
         std::string onOpenFileButtonPressed(const vector<pair<string, string>> &valid, bool save);
 
         void onMotionNext();
+
+        void onForearmStrokeAnalyzeDone();
 
         // -------------------- Getter & Setter -------------------- //
         bool getIsDisplayed() const;

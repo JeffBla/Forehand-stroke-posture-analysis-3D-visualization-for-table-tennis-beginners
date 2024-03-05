@@ -123,9 +123,10 @@ skeleton::Skeleton *BvhScene::CreateSkeleton(string &new_bvh) {
     // Create the skeleton with bvh
     bvh = new BVH(new_bvh.c_str());
     skeleton1 = new skeleton::Skeleton(mPhysicsCommon, mPhysicsWorld, mPhysicsObjects, mMeshFolderPath, bvh);
-    skeleton_created.fire();
     // Analysizer
     forehand_stroke_analysizer = new analysizer::Analysizer(skeleton1, "forehand_stroke");
+
+    skeleton_created.fire();
 
     raycastedTarget_bone = skeleton1->FindBone("head");
     RecordRaycastTarget(raycastedTarget_bone);
@@ -200,7 +201,7 @@ bool BvhScene::keyboardEvent(int key, int scancode, int action, int mods) {
         return true;
     }
 //    if (key == GLFW_KEY_A && action == GLFW_PRESS) {
-//        Analyze(<#initializer#>);
+//        ForearmStrokeAnalyze(<#initializer#>);
 //        return true;
 //    }
 
@@ -212,7 +213,13 @@ void BvhScene::MotionNext() {
         skeleton1->NextBvhMotion();
 }
 
-void BvhScene::Analyze(const std::string &openposePath, const std::string &whole_body_dataPath) {
-    if (skeleton1 != nullptr)
-        forehand_stroke_analysizer->Analyze(openposePath, whole_body_dataPath);
+void BvhScene::ForearmStrokeAnalyze(const std::string &openposePath) {
+    forehand_stroke_analysizer->Analyze(openposePath);
+}
+
+string BvhScene::GetForearmStrokeAnalyzeSuggestions() {
+    if (forehand_stroke_analysizer != nullptr) {
+        return forehand_stroke_analysizer->Suggest_str();
+    }
+    return "No skeleton to analyze.";
 }

@@ -63,8 +63,8 @@ def OpenPoseAnalysize_Waist(target_filename: str, ref_filename: str):
     return OpenPoseAnalysize_Waist(df_target, df_ref)
 
 
-@dispatch(pd.DataFrame, pd.DataFrame)
-def OpenPoseAnalysize_Waist(df_target: pd.DataFrame, df_ref: pd.DataFrame):
+@dispatch(np.ndarray, np.ndarray)
+def OpenPoseAnalysize_Waist(df_target: np.ndarray, df_ref: np.ndarray):
     dataset = np.concatenate([df_target, df_ref])
 
     # Compute the LCSS
@@ -218,5 +218,4 @@ if __name__ == "__main__":
     ForehandStrokeAnalysis("cmake-build-debug/output/openposeTest.csv",
                            "cmake-build-debug/output/openposeRef.csv",
                            "cmake-build-debug/output/whole_body.csv",
-                           "cmake-build-debug/output/me/whole_body.csv",
-                           "rForeArm")
+                           "cmake-build-debug/output/me/whole_body.csv", "hip")

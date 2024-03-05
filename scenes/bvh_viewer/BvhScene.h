@@ -120,7 +120,9 @@ namespace bvhscene {
 
         void DestroySkeleton();
 
-        void Analyze(const std::string &openposePath, const std::string &whole_body_dataPath);
+        void ForearmStrokeAnalyze(const std::string &openposePath);
+
+        string GetForearmStrokeAnalyzeSuggestions();
 
         // -------------------- Events -------------------- //
         float notifyRaycastHit(const rp3d::RaycastInfo &raycastInfo) override;
@@ -132,10 +134,16 @@ namespace bvhscene {
         skeleton::Skeleton *GetSkeleton();
 
         Bone *GetRaycastedTarget_bone() const;
+
+        analysizer::Analysizer *GetForehandStrokeAnalysizer() const;
     };
 
     inline Bone *BvhScene::GetRaycastedTarget_bone() const {
         return raycastedTarget_bone;
+    }
+
+    inline analysizer::Analysizer *BvhScene::GetForehandStrokeAnalysizer() const {
+        return forehand_stroke_analysizer;
     }
 }  // namespace bvhscene
 

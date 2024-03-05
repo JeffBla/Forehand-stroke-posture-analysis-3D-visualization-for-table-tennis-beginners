@@ -43,9 +43,11 @@ namespace identifier {
          */
         void WriteOutput();
 
+        void WriteOutput(const std::string &output_filename);
+
         bool Py_SimilarityScore();
 
-        bool Py_SimilarityScore(const string &openpose_target_filename, const string &whole_body_dataPath);
+        bool Py_SimilarityScore(const string &output_filename, const string &openpose_target_filename);
 
         bool Py_SimilarityScore(const string &target_filename, const string &ref_filename, const string &openpose_target_filename,
                                 const string &openpose_ref_filename);

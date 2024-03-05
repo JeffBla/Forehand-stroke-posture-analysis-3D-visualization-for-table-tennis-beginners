@@ -28,9 +28,9 @@ void Identifier::Identify(int frame) {
     }
 }
 
-void Identifier::WriteOutput() {
+void Identifier::WriteOutput(const string &output_filename) {
     std::ofstream output_file;
-    output_filename = "output/" + identifier_name + ".csv";
+    this->output_filename = output_filename;
     output_file.open(output_filename);
     if (!output_file.is_open()) {
         cout << "CANNOT OPEN" << endl;
@@ -74,6 +74,11 @@ void Identifier::WriteOutput() {
     output_file.close();
 }
 
+void Identifier::WriteOutput() {
+    output_filename = "output/" + identifier_name + ".csv";
+    WriteOutput(output_filename);
+}
+
 bool
 Identifier::Py_SimilarityScore(const string &target_filename, const string &ref_filename,
                                const string &openpose_target_filename,
@@ -96,8 +101,9 @@ Identifier::Py_SimilarityScore(const string &target_filename, const string &ref_
     return true;
 }
 
-bool Identifier::Py_SimilarityScore(const string &openpose_target_filename, const string &whole_body_dataPath) {
-    return Py_SimilarityScore(whole_body_dataPath, ref_filename, openpose_target_filename, openpose_ref_filename);
+bool Identifier::Py_SimilarityScore(const string &output_filename, const string &openpose_target_filename) {
+    this->output_filename = output_filename;
+    return Py_SimilarityScore(output_filename, ref_filename, openpose_target_filename, openpose_ref_filename);
 }
 
 bool Identifier::Py_SimilarityScore() {

@@ -51,6 +51,9 @@ Gui::Gui(TestbedApplication *app)
 
 // Destructor
 Gui::~Gui() {
+    /* No need to store a pointer of widget, the data structure will be automatically
+           freed when the parent window is deleted */
+
     delete pVideoToBvhConverter;
 
     delete pVideoController;
@@ -721,7 +724,7 @@ void Gui::createUtilsPanel() {
         new Label(mUtilsPanel, "Choose BVH file");
         auto open_bvh_button = new Button(mUtilsPanel, "Open File");
         open_bvh_button->set_callback([&]() {
-            mBvhPath = onOpenFileButtonPressed({{"bvh", "BioVision Motion Capture"}}, true);
+            mBvhPath = onOpenFileButtonPressed({{"bvh", "BioVision Motion Capture"}}, false);
         });
 
         // -------------------- Video viewer -------------------- //
@@ -729,7 +732,7 @@ void Gui::createUtilsPanel() {
         new Label(mUtilsPanel, "Choose Target Video");
         auto open_video_button = new Button(mUtilsPanel, "Open File");
         open_video_button->set_callback([&]() {
-            mVideoPath = onOpenFileButtonPressed({{"mp4", "MPEG-4 Video"}}, true);
+            mVideoPath = onOpenFileButtonPressed({{"mp4", "MPEG-4 Video"}}, false);
         });
 
         auto play_video_button = new Button(mUtilsPanel, "Play");
@@ -784,19 +787,13 @@ void Gui::createAnalyzePanel() {
         new Label(mAnalyzePanel, "Choose Openpsoe File");
         auto open_openpose_button = new Button(mAnalyzePanel, "Open File");
         open_openpose_button->set_callback([&]() {
-            mOpenposePath = onOpenFileButtonPressed({{"csv", "Comma-Separated Values"}}, true);
+            mOpenposePath = onOpenFileButtonPressed({{"csv", "Comma-Separated Values"}}, false);
         });
 
-        new Label(mAnalyzePanel, "Choose Whole Body Data File");
-        auto whole_body_data_button = new Button(mAnalyzePanel, "Open File");
-        whole_body_data_button->set_callback([&]() {
-            mWholeBodyDataPath = onOpenFileButtonPressed({{"csv", "Comma-Separated Values"}}, true);
-        });
-
-        auto analyze_button = new Button(mAnalyzePanel, "Analyze");
+        auto analyze_button = new Button(mAnalyzePanel, "Forearm Stroke Analyze");
         analyze_button->set_callback([&]() {
             auto scene = (bvhscene::BvhScene *) this->mApp->mCurrentScene;
-            scene->Analyze(mOpenposePath, mWholeBodyDataPath);
+            scene->ForearmStrokeAnalyze(mOpenposePath);
         });
 
         mAnalyzePanel->set_visible(true);
@@ -811,6 +808,20 @@ void Gui::adjustRotationUtilsAnalyzePanel() {
     mAnalyzePanel->set_position(
             Vector2i(mUtilsPanel->position().x(),
                      mUtilsPanel->position().y() + mUtilsPanel->height() + distanceBetweenWidgets));
+}
+
+bool Gui::isFocus() const {
+    return mScreen->has_focus();
+}
+
+void Gui::createMessageDialog(const std::string &title, const std::string &message, MessageDialog::Type type) {
+    new MessageDialog(mScreen, type, title, message);
+}
+
+void Gui::createMessageDialog(const string &title, const string &message, MessageDialog::Type type,
+                              const std::function<void(int)> &callback) {
+    auto dig = new MessageDialog(mScreen, type, title, message);
+    dig->set_callback(callback);
 }
 
 std::string Gui::onOpenFileButtonPressed(const vector<pair<string, string>> &valid, bool save) {
@@ -909,13 +920,13 @@ void Gui::onChangeBoneTransform_bvhscene(Bone *target) {
 
 void Gui::onCreateSkeleton_bvhscene() {
     auto scene = (bvhscene::BvhScene *) (mApp->getScenes()[0]);
-    scene->GetSkeleton()->bone_transform_changed.add_handler([this](Bone *target_bone) {
+    scene->GetSkeleton()->bone_transform_changed.add_handler([&](Bone *target_bone) {
         onChangeBoneTransform_bvhscene(target_bone);
     });
-}
 
-bool Gui::isFocus() const {
-    return mScreen->has_focus();
+    scene->GetForehandStrokeAnalysizer()->analysize_done.add_handler([&]() {
+        onForearmStrokeAnalyzeDone();
+    });
 }
 
 void Gui::onMotionNext() {
@@ -925,9 +936,9 @@ void Gui::onMotionNext() {
     }
 }
 
-int Gui::createMessageDialog(const string &title, const string &message, MessageDialog::Type type,
-                             const std::function<void(int)>& callback) {
-    auto dig = new MessageDialog(mScreen, type, title, message);
-    dig->set_callback(callback);
-    return 0;
+void Gui::onForearmStrokeAnalyzeDone() {
+    auto scene = (bvhscene::BvhScene *) this->mApp->mCurrentScene;
+    auto suggestion = scene->GetForearmStrokeAnalyzeSuggestions();
+
+    createMessageDialog("Suggest", suggestion, MessageDialog::Type::Information);
 }

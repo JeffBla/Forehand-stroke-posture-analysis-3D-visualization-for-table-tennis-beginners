@@ -34,18 +34,14 @@ namespace analysizer {
 
         Identifier *output_identifier;
 
+        std::string output_filename;
+
         std::vector<std::string> identifier_name_list;
 
         std::map<std::string, bool> identifier_pass_list;
 
         // ------------------------- Methods ----------------------- //
-        void _Analyse(map<string, Identifier *> &identifier_list, const string &openposePath,
-                      const string &whole_body_dataPath);
-
-        string Suggest_str(const string &identifier_name);
-
-        string Suggest_str();
-
+        void _Analyse(map<string, Identifier *> &identifier_list, const string &openposePath);
     public:
         // ------------------------- Events ----------------------- //
         event::Event<> analysize_done;
@@ -60,13 +56,17 @@ namespace analysizer {
         /**
          * Analyze the skeleton with all the identifiers
          */
-        void Analyze(const string &openposePath, const string &whole_body_dataPath);
+        void Analyze(const string &openposePath);
 
         /**
          * Analyze the skeleton with the given identifier
          * @param identifier
          */
-        void Analyze(Identifier *identifier, const string &openposePath, const string &whole_body_dataPath);
+        void Analyze(Identifier *identifier, const string &openposePath);
+
+        string Suggest_str(const string &identifier_name);
+
+        string Suggest_str();
     };
 
 }
