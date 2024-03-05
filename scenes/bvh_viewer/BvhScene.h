@@ -78,7 +78,7 @@ namespace bvhscene {
         BVH *bvh;
 
         // -------------------- Analysizer -------------------- //
-        analysizer::Analysizer *analysizer1;
+        analysizer::Analysizer *forehand_stroke_analysizer;
 
         // -------------------- Physics -------------------- //
         Box *mFloor2;
@@ -122,7 +122,7 @@ namespace bvhscene {
 
         void DestroySkeleton();
 
-        void Analyze(const std::string &openposePath);
+        void Analyze(const std::string &openposePath, const std::string &whole_body_dataPath);
 
         // -------------------- Events -------------------- //
         float notifyRaycastHit(const rp3d::RaycastInfo &raycastInfo) override;

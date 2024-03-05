@@ -125,7 +125,8 @@ skeleton::Skeleton *BvhScene::CreateSkeleton(string &new_bvh) {
     skeleton1 = new skeleton::Skeleton(mPhysicsCommon, mPhysicsWorld, mPhysicsObjects, mMeshFolderPath, bvh);
     skeleton_created.fire();
     // Analysizer
-    analysizer1 = new analysizer::Analysizer(skeleton1, this);
+    forehand_stroke_analysizer = new analysizer::Analysizer(
+            skeleton1, {"forehand_stroke"}, this);
 
     raycastedTarget_bone = skeleton1->FindBone("head");
     raycastedTarget_bone->GetPhysicsObject()->setColor(pickedColor);
@@ -141,8 +142,8 @@ void BvhScene::DestroySkeleton() {
         delete bvh;
         bvh = nullptr;
 
-        delete analysizer1;
-        analysizer1 = nullptr;
+        delete forehand_stroke_analysizer;
+        forehand_stroke_analysizer = nullptr;
 
         raycastedTarget_bone = nullptr;
 
@@ -213,7 +214,7 @@ void BvhScene::MotionNext() {
         skeleton1->NextBvhMotion();
 }
 
-void BvhScene::Analyze(const std::string &openposePath) {
+void BvhScene::Analyze(const std::string &openposePath, const std::string &whole_body_dataPath) {
     if (skeleton1 != nullptr)
-        analysizer1->Analyze(openposePath);
+        forehand_stroke_analysizer->Analyze(openposePath, whole_body_dataPath);
 }
