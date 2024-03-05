@@ -60,14 +60,6 @@ namespace bvhscene {
         /// info
         rp3d::Transform raycastedTarget_bone_Transform;
 
-    public:
-        /// Event for raycasted target
-        Event<Bone *> raycastedTarget_changed;
-
-        /// Event for create skeleton
-        Event<> skeleton_created;
-
-    protected:
         skeleton::Skeleton *skeleton1 = nullptr;
 
         // -------------------- Bvh -------------------- //
@@ -96,6 +88,12 @@ namespace bvhscene {
 
     public:
         // -------------------- Event -------------------- //
+        /// Event for raycasted target
+        Event<Bone *> raycastedTarget_changed;
+
+        /// Event for create skeleton
+        Event<> skeleton_created;
+
         Event<> motion_nexted;
 
         // -------------------- Methods -------------------- //

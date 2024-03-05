@@ -2,11 +2,10 @@
 
 using namespace analysizer;
 
-Analysizer::Analysizer(Skeleton *skeleton, SceneDemo *scene) : Analysizer(skeleton, "whole_body", scene) {}
+Analysizer::Analysizer(Skeleton *skeleton) : Analysizer(skeleton, "whole_body") {}
 
-Analysizer::Analysizer(Skeleton *target_skeleton, const std::string &analysizer_name,
-                       SceneDemo *scene)
-        : target_skeleton(target_skeleton), analysizer_name(analysizer_name), scene(scene) {
+Analysizer::Analysizer(Skeleton *target_skeleton, const std::string &analysizer_name)
+        : target_skeleton(target_skeleton), analysizer_name(analysizer_name) {
     output_identifier = new Identifier(0, "whole_body", {target_skeleton->GetTargetBoneNames()}, target_skeleton);
 
     if (analysizer_name == "forehand_stroke") {

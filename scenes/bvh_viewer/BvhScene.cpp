@@ -125,12 +125,10 @@ skeleton::Skeleton *BvhScene::CreateSkeleton(string &new_bvh) {
     skeleton1 = new skeleton::Skeleton(mPhysicsCommon, mPhysicsWorld, mPhysicsObjects, mMeshFolderPath, bvh);
     skeleton_created.fire();
     // Analysizer
-    forehand_stroke_analysizer = new analysizer::Analysizer(
-            skeleton1, {"forehand_stroke"}, this);
+    forehand_stroke_analysizer = new analysizer::Analysizer(skeleton1, "forehand_stroke");
 
     raycastedTarget_bone = skeleton1->FindBone("head");
-    raycastedTarget_bone->GetPhysicsObject()->setColor(pickedColor);
-    raycastedTarget_bone->GetPhysicsObject()->setSleepingColor(pickedColor);
+    RecordRaycastTarget(raycastedTarget_bone);
     return skeleton1;
 }
 
@@ -179,9 +177,9 @@ void BvhScene::RecordRaycastTarget(Bone *target) {
 
     raycastedTarget_bone_Transform = target->GetPhysicsObject()->getTransform();
     /// Debug
-    cout << raycastedTarget_bone_Transform.getPosition().to_string() << endl;
-    rp3d::Vector3 tmp = AngleTool::QuaternionToEulerAngles(raycastedTarget_bone_Transform.getOrientation());
-    cout << AngleTool::EulerAnglesToDegree(tmp).to_string() << endl;
+//    cout << raycastedTarget_bone_Transform.getPosition().to_string() << endl;
+//    rp3d::Vector3 tmp = AngleTool::QuaternionToEulerAngles(raycastedTarget_bone_Transform.getOrientation());
+//    cout << AngleTool::EulerAnglesToDegree(tmp).to_string() << endl;
 }
 
 bool BvhScene::keyboardEvent(int key, int scancode, int action, int mods) {

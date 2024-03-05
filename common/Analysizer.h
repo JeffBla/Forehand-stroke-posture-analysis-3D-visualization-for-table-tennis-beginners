@@ -7,6 +7,7 @@
 #include "Identifier.h"
 #include "Skeleton.h"
 #include "SceneDemo.h"
+#include "Event.h"
 
 using namespace identifier;
 using namespace skeleton;
@@ -27,8 +28,6 @@ namespace analysizer {
         // ------------------------- Attributes ----------------------- //
         std::string analysizer_name;
 
-        SceneDemo *scene;
-
         Skeleton *target_skeleton;
 
         std::map<std::string, Identifier *> identifiers;
@@ -47,13 +46,14 @@ namespace analysizer {
 
         string Suggest_str();
 
-        void Suggest();
-
     public:
-        Analysizer(Skeleton *skeleton, SceneDemo *scene);
+        // ------------------------- Events ----------------------- //
+        event::Event<> analysize_done;
 
-        Analysizer(Skeleton *target_skeleton, const std::string &analysizer_name,
-                   SceneDemo *scene);
+        // ------------------------- Methods ----------------------- //
+        Analysizer(Skeleton *skeleton);
+
+        Analysizer(Skeleton *target_skeleton, const std::string &analysizer_name);
 
         ~Analysizer();
 
