@@ -197,6 +197,7 @@ set(UTILS_SOURCES
 		utils/AngleTool.h
 		utils/Event.cpp
 		utils/Event.h
+		utils/debug.h
 )
 
 # Create the executable
@@ -218,6 +219,12 @@ endforeach()
 
 # Compile definitions
 target_compile_definitions(testbed PRIVATE ${NANOGUI_EXTRA_DEFS})
+
+# Handel DEBUG and RELEASE mode
+if (CMAKE_BUILD_TYPE MATCHES Debug)
+	target_compile_definitions(testbed PRIVATE -DDEBUG)
+	message(STATUS "Debug mode")
+endif()
 
 # C++17 compiler features
 target_compile_features(testbed PUBLIC cxx_std_17)
