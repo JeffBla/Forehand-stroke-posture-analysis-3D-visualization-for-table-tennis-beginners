@@ -34,7 +34,7 @@ def WaistRotationRead(filename: str):
 
     df_dist["std"] = (df_dist["dist_y"] -
                       df_dist["dist_y"].mean()) / df_dist["dist_y"].std()
-    return df_dist
+    return df_dist["std"].values
 
 
 @dispatch(str, str)
@@ -45,9 +45,9 @@ def WaistRotationPreprocess(target_filename: str, ref_filename: str):
     return WaistRotationPreprocess(df_target, df_ref)
 
 
-@dispatch(pd.DataFrame, pd.DataFrame)
-def WaistRotationPreprocess(df_target: pd.DataFrame, df_ref: pd.DataFrame):
-    num_frame = max(df_target.count().max(), df_ref.count().max())
+@dispatch(np.ndarray, np.ndarray)
+def WaistRotationPreprocess(df_target: np.ndarray, df_ref: np.ndarray):
+    num_frame = max(len(df_target), len(df_ref))
 
     # Resample the time series
     df_target = TimeSeriesResampler(sz=num_frame).fit_transform(df_target)
@@ -150,6 +150,8 @@ def ForehandStrokeAnalysis(openpose_target_filename: str,
 
         # plt.legend()
         # plt.show()
+    # DEBUG
+    print(score)
     if score > 0.5:
 
         return True
@@ -215,7 +217,8 @@ if __name__ == "__main__":
     #     BvhAnalyze("cmake-build-debug/output/whole_body.csv",
     #                "cmake-build-debug/output/me/whole_body.csv", "hip"))
 
-    ForehandStrokeAnalysis("cmake-build-debug/output/openposeTest.csv",
-                           "cmake-build-debug/output/openposeRef.csv",
-                           "cmake-build-debug/output/whole_body.csv",
-                           "cmake-build-debug/output/me/whole_body.csv", "hip")
+    ForehandStrokeAnalysis(
+        "/home/jeffbla/Video/bvh_analysis/me_edit/clip2/target/202402271103.mp4-data/2dJoints_v1.4.csv",
+        "cmake-build-debug/output/openposeRef.csv",
+        "cmake-build-debug/output/forehand_stroke.csv",
+        "cmake-build-debug/output/me/whole_body.csv", "hip")

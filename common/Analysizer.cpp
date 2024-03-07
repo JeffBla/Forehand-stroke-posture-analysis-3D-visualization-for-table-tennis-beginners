@@ -54,9 +54,11 @@ void Analysizer::Analyze(Identifier *identifier, const string &openposePath) {
 }
 
 string Analysizer::Suggest_str(const string &identifier_name) {
-    if (!identifier_pass_list.at(identifier_name))
+    try {
         return identifier_notPass_suggestions.at(analysizer_name).at(identifier_name);
-    return identifier_name + "Passed!";
+    } catch (const out_of_range &e) {
+        return identifier_name + "Passed!";
+    }
 }
 
 string Analysizer::Suggest_str() {

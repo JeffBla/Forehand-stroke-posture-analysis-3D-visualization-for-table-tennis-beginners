@@ -22,7 +22,7 @@ namespace identifier {
         std::string output_filename;
         std::string ref_filename = "output/me/whole_body.csv";
         std::string openpose_target_filename = "output/openposeTest.csv";
-        std::string openpose_ref_filename = "output/openposeRef.csv";
+        std::string openpose_ref_filename = "output/2dJoints_v1.4.csv";
         const std::vector<std::string> target_list;
         std::vector<std::map<std::string, std::map<std::string, float>>> result_list;
         bool isWriteToFile = false;
