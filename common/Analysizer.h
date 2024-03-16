@@ -38,10 +38,11 @@ namespace analysizer {
 
         std::vector<std::string> identifier_name_list;
 
-        std::map<std::string, bool> identifier_pass_list;
+        std::map<std::string, std::vector<float>> identifier_pass_list;
 
         // ------------------------- Methods ----------------------- //
         void _Analyse(map<string, Identifier *> &identifier_list, const string &openposePath);
+
     public:
         // ------------------------- Events ----------------------- //
         event::Event<> analysize_done;

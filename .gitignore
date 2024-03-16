@@ -13,3 +13,7 @@ cmake-build-release
 
 # tmp static
 static
+tmp.csv
+
+# log
+lightning_logs

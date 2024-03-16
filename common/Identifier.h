@@ -20,9 +20,7 @@ namespace identifier {
         int identifier_id;
         std::string identifier_name;
         std::string output_filename;
-        std::string ref_filename = "output/me/whole_body.csv";
         std::string openpose_target_filename = "output/openposeTest.csv";
-        std::string openpose_ref_filename = "output/2dJoints_v1.4.csv";
         const std::vector<std::string> target_list;
         std::vector<std::map<std::string, std::map<std::string, float>>> result_list;
         bool isWriteToFile = false;
@@ -45,12 +43,9 @@ namespace identifier {
 
         void WriteOutput(const std::string &output_filename);
 
-        bool Py_SimilarityScore();
+        vector<float> Py_SimilarityScore();
 
-        bool Py_SimilarityScore(const string &output_filename, const string &openpose_target_filename);
-
-        bool Py_SimilarityScore(const string &target_filename, const string &ref_filename, const string &openpose_target_filename,
-                                const string &openpose_ref_filename);
+        vector<float> Py_SimilarityScore(const string &target_filename, const string &openpose_target_filename);
 
         // ------------------------- Getters & Setter ----------------------- //
         const string &GetIdentifierName() const;
