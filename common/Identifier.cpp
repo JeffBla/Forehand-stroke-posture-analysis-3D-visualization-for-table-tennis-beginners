@@ -79,33 +79,21 @@ void Identifier::WriteOutput() {
     WriteOutput(output_filename);
 }
 
-bool
-Identifier::Py_SimilarityScore(const string &target_filename, const string &ref_filename,
-                               const string &openpose_target_filename,
-                               const string &openpose_ref_filename) {
+vector<float>
+Identifier::Py_SimilarityScore(const string &target_filename, const string &openpose_target_filename) {
+    this->output_filename = target_filename;
     py::module_ PyAnalysizer = py::module_::import("Py_package.PyAnalysizer.Analysize");
     if (identifier_name == "rotation" || identifier_name == "fore_arm") {
-        bool isPass = true;
-        for (auto &target_name: target_list) {
-            py::object result = PyAnalysizer.attr("ForehandStrokeAnalysis")(openpose_target_filename,
-                                                                            openpose_ref_filename,
-                                                                            target_filename, ref_filename,
-                                                                            target_name);
-            // Output pass or not
-            isPass &= result.cast<bool>();
-        }
-        return isPass;
+        py::object result = PyAnalysizer.attr("ForehandStrokeAnalysis")(openpose_target_filename, target_filename);
+        // Output pass or not
+        auto prob_result = result.cast<std::vector<float>>();
+        return prob_result;
     }
 
     std::cout << "No such identifier" << std::endl;
-    return true;
+    return {};
 }
 
-bool Identifier::Py_SimilarityScore(const string &output_filename, const string &openpose_target_filename) {
-    this->output_filename = output_filename;
-    return Py_SimilarityScore(output_filename, ref_filename, openpose_target_filename, openpose_ref_filename);
-}
-
-bool Identifier::Py_SimilarityScore() {
-    return Py_SimilarityScore(output_filename, ref_filename, openpose_target_filename, openpose_ref_filename);
+vector<float> Identifier::Py_SimilarityScore() {
+    return Py_SimilarityScore(output_filename, openpose_target_filename);
 }

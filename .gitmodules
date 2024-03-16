@@ -1,3 +1,6 @@
 [submodule "extern/pybind11"]
 	path = extern/pybind11
 	url = https://github.com/pybind/pybind11.git
+[submodule "Py_package/lstm_posture_suggestion"]
+	path = Py_package/lstm_posture_suggestion
+	url = https://github.com/JeffBla/lstm-posture-suggestion
