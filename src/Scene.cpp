@@ -139,7 +139,7 @@ bool Scene::mouseMotionEvent(double xMouse, double yMouse, int leftButtonState,
 
 // Called when a scrolling event occurs
 bool Scene::scrollingEvent(float /*xAxis*/, float yAxis, float scrollSensitivy) {
-    zoom(yAxis * scrollSensitivy);
+    zoom(-yAxis * scrollSensitivy);
 
     return true;
 }

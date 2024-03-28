@@ -36,11 +36,11 @@ using namespace angleTool;
 BvhScene::BvhScene(const std::string &name, EngineSettings &settings, reactphysics3d::PhysicsCommon &physicsCommon)
         : SceneDemo(name, settings, physicsCommon, true, true) {
     // Compute the radius and the center of the scene
-    openglframework::Vector3 center(0, 10, 0);
+    openglframework::Vector3 center(0, 0, 0);
 
     // Set the center of the scene
     setScenePosition(center, SCENE_RADIUS);
-    setInitZoom(2.1);
+    setInitZoom(0.5);
     resetCameraToViewAll();
 
     mWorldSettings.worldName = name;
@@ -67,7 +67,7 @@ void BvhScene::createPhysicsWorld() {
     // Create the floor
     mFloor2 = new Box(true, FLOOR_2_SIZE, mPhysicsCommon, mPhysicsWorld, mMeshFolderPath);
     mFloor2->setColor(mFloorColorDemo);
-    mFloor2->setTransform(rp3d::Transform(rp3d::Vector3(0, -10, 0), rp3d::Quaternion::identity()));
+    mFloor2->setTransform(rp3d::Transform(rp3d::Vector3(0, -7, 0), rp3d::Quaternion::identity()));
     mFloor2->setSleepingColor(mFloorColorDemo);
     mFloor2->getRigidBody()->setType(rp3d::BodyType::STATIC);
     mPhysicsObjects.push_back(mFloor2);
@@ -79,6 +79,8 @@ void BvhScene::destroyPhysicsWorld() {
         delete mFloor2;
 
         delete skeleton1;
+
+        delete experx_skeleton;
 
         mPhysicsObjects.clear();
 
@@ -150,6 +152,27 @@ void BvhScene::DestroySkeleton() {
     }
 }
 
+skeleton::Skeleton *BvhScene::CreateExpertSkeleton(string &new_bvh) {
+    DestroyExpertSkeleton();
+
+    // Create the skeleton with bvh
+    expert_bvh = new BVH(new_bvh.c_str());
+    experx_skeleton = new skeleton::Skeleton(mPhysicsCommon, mPhysicsWorld, mPhysicsObjects, mMeshFolderPath,
+                                             expert_bvh, rp3d::Vector3(20, 0, 0));
+
+    return experx_skeleton;
+}
+
+void BvhScene::DestroyExpertSkeleton() {
+    if (experx_skeleton != nullptr) {
+        delete experx_skeleton;
+        experx_skeleton = nullptr;
+
+        delete expert_bvh;
+        expert_bvh = nullptr;
+    }
+}
+
 skeleton::Skeleton *BvhScene::GetSkeleton() {
     return skeleton1;
 }
@@ -162,6 +185,11 @@ rp3d::decimal BvhScene::notifyRaycastHit(const rp3d::RaycastInfo &raycastInfo) {
     Bone *target_bone = skeleton1->FindBone(body);
     if (target_bone != nullptr) {
         RecordRaycastTarget(target_bone);
+    } else {
+        target_bone = experx_skeleton->FindBone(body);
+        if (target_bone != nullptr) {
+            RecordRaycastTarget(target_bone);
+        }
     }
 
     return SceneDemo::notifyRaycastHit(raycastInfo);

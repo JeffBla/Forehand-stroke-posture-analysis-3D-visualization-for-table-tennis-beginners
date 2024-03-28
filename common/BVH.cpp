@@ -46,6 +46,8 @@ void BVH::Clear() {
     motion = nullptr;
 
     current_frame = 0;
+
+    init_root_pos = glm::vec3(0, 0, 0);
 }
 
 void BVH::Load(const char *bvh_file_name) {
@@ -268,4 +270,22 @@ void BVH::SetCurrentFrame(int frame) {
         }
         pos *= position_scale;
     }
+}
+
+glm::vec3 BVH::GetInitRootPos() {
+    auto bone_joint = joints[0];
+    for (auto channel: bone_joint->channels) {
+        switch (channel->type) {
+            case X_POSITION:
+                init_root_pos.x = this->GetMotion(0, channel->index);
+                break;
+            case Y_POSITION:
+                init_root_pos.y = this->GetMotion(0, channel->index);
+                break;
+            case Z_POSITION:
+                init_root_pos.z = this->GetMotion(0, channel->index);
+                break;
+        }
+    }
+    return init_root_pos;
 }

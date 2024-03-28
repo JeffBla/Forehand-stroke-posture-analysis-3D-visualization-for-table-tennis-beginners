@@ -741,6 +741,7 @@ void Gui::createUtilsPanel() {
 
             // Create skeleton
             scene->CreateSkeleton(mBvhPath);
+            scene->CreateExpertSkeleton(scene->GetExpertBvhPath());
             int num_frame = scene->GetSkeleton()->GetBvh()->GetNumFrame();
             // Play video
             pVideoController->Load(mVideoPath, num_frame);

@@ -64,6 +64,8 @@ namespace bvh {
         vector<glm::vec3> current_frame_positions;
         vector<glm::vec3> current_frame_angles;
 
+        glm::vec3 init_root_pos;
+
     public:
         BVH();
 
@@ -106,6 +108,8 @@ namespace bvh {
         double GetMotion(int f, int c) const;
 
         void SetMotion(int f, int c, double v);
+
+        glm::vec3 GetInitRootPos();
 
         const vector<ChannelEnum> &GetRotationOrder(int index);
 

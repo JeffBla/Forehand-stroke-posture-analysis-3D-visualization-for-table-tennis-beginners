@@ -47,7 +47,7 @@ using namespace event;
 namespace bvhscene {
 // Constants
     const float SCENE_RADIUS = 45.0f;
-    const openglframework::Vector3 FLOOR_2_SIZE(60, 0.5f, 82);  // Floor dimensions in meters
+    const openglframework::Vector3 FLOOR_2_SIZE(90, 0.5f, 60);  // Floor dimensions in meters
 
     class BvhScene : public SceneDemo {
     protected:
@@ -61,6 +61,7 @@ namespace bvhscene {
         rp3d::Transform raycastedTarget_bone_Transform;
 
         skeleton::Skeleton *skeleton1 = nullptr;
+        skeleton::Skeleton *experx_skeleton = nullptr;
 
         // -------------------- Bvh -------------------- //
         bool isMotionStart;
@@ -68,6 +69,9 @@ namespace bvhscene {
         double accumulatedTime = 0.0;
         double motionInverval = 0.1;
         BVH *bvh;
+
+        BVH *expert_bvh;
+        string expert_bvh_path = "expert.bvh";
 
         // -------------------- Analysizer -------------------- //
         analysizer::Analysizer *forehand_stroke_analysizer;
@@ -120,6 +124,10 @@ namespace bvhscene {
 
         void DestroySkeleton();
 
+        Skeleton *CreateExpertSkeleton(string &new_bvh);
+
+        void DestroyExpertSkeleton();
+
         void ForearmStrokeAnalyze(const std::string &openposePath);
 
         string GetForearmStrokeAnalyzeSuggestions();
@@ -136,6 +144,8 @@ namespace bvhscene {
         Bone *GetRaycastedTarget_bone() const;
 
         analysizer::Analysizer *GetForehandStrokeAnalysizer() const;
+
+        string &GetExpertBvhPath();
     };
 
     inline Bone *BvhScene::GetRaycastedTarget_bone() const {
@@ -145,6 +155,11 @@ namespace bvhscene {
     inline analysizer::Analysizer *BvhScene::GetForehandStrokeAnalysizer() const {
         return forehand_stroke_analysizer;
     }
+
+    inline string &BvhScene::GetExpertBvhPath() {
+        return expert_bvh_path;
+    }
+
 }  // namespace bvhscene
 
 #endif
