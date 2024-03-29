@@ -25,6 +25,18 @@ namespace videoLoader {
         std::vector<std::vector<uchar>> frames;
         nanogui::ImageView *imageView;
         nanogui::Array<int32_t, 2> imgDisplaySize;
+
+        // Use in extend or shorten frames. Sum the reminder of the factor of frames.
+        // So we won't lose frames without considering numbers after floating point.
+        static float factor_reminder_sum;
+
+        // -------------------- Methods -------------------- //
+        void MatchFrame(int target_nFrame, cv::VideoCapture *pVideoCapture);
+
+        void ExtendFrames(float frame_factor, cv::Mat &flat_frame);
+
+        void ShortenFrames(float frame_factor, cv::Mat &flat_frame);
+
     public:
         VideoController() = default;
 
