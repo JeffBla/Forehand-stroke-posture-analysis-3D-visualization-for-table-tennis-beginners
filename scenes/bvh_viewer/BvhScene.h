@@ -71,7 +71,8 @@ namespace bvhscene {
         BVH *bvh;
 
         BVH *expert_bvh;
-        string expert_bvh_path = "expert.bvh";
+        string expert_bvh_path = "static/front_bigman_pose_22_segment.bvh";
+        string expert_video_path = "static/front_bigman_pose_22_segment.mp4";
 
         // -------------------- Analysizer -------------------- //
         analysizer::Analysizer *forehand_stroke_analysizer;
@@ -146,6 +147,8 @@ namespace bvhscene {
         analysizer::Analysizer *GetForehandStrokeAnalysizer() const;
 
         string &GetExpertBvhPath();
+
+        string &GetExpertVideoPath();
     };
 
     inline Bone *BvhScene::GetRaycastedTarget_bone() const {
@@ -159,6 +162,11 @@ namespace bvhscene {
     inline string &BvhScene::GetExpertBvhPath() {
         return expert_bvh_path;
     }
+
+    inline string &BvhScene::GetExpertVideoPath() {
+        return expert_video_path;
+    }
+
 
 }  // namespace bvhscene
 

@@ -147,46 +147,6 @@ set(COMMON_SOURCES
 
 # Scenes source files
 set(SCENES_SOURCES
-    scenes/ballandsocketjointsnet/BallAndSocketJointsNetScene.h
-    scenes/ballandsocketjointsnet/BallAndSocketJointsNetScene.cpp
-    scenes/ballandsocketjointschain/BallAndSocketJointsChainScene.h
-    scenes/ballandsocketjointschain/BallAndSocketJointsChainScene.cpp
-    scenes/hingejointschain/HingeJointsChainScene.h
-    scenes/hingejointschain/HingeJointsChainScene.cpp
-    scenes/cubes/CubesScene.h
-    scenes/cubes/CubesScene.cpp
-    scenes/joints/JointsScene.h
-    scenes/joints/JointsScene.cpp
-    scenes/raycast/RaycastScene.h
-    scenes/raycast/RaycastScene.cpp
-    scenes/collisionshapes/CollisionShapesScene.h
-    scenes/collisionshapes/CollisionShapesScene.cpp
-    scenes/collisiondetection/CollisionDetectionScene.h
-    scenes/collisiondetection/CollisionDetectionScene.cpp
-    scenes/concavemesh/ConcaveMeshScene.h
-    scenes/concavemesh/ConcaveMeshScene.cpp
-    scenes/heightfield/HeightFieldScene.h
-    scenes/heightfield/HeightFieldScene.cpp
-    scenes/cubestack/CubeStackScene.h
-    scenes/cubestack/CubeStackScene.cpp
-    scenes/pile/PileScene.h
-    scenes/pile/PileScene.cpp
-    scenes/boxtower/BoxTowerScene.h
-    scenes/boxtower/BoxTowerScene.cpp
-    scenes/bridge/BridgeScene.h
-    scenes/bridge/BridgeScene.cpp
-    scenes/fixedjoint/FixedJointScene.h
-    scenes/fixedjoint/FixedJointScene.cpp
-    scenes/ballandsocketjoint/BallAndSocketJointScene.h
-    scenes/ballandsocketjoint/BallAndSocketJointScene.cpp
-    scenes/hingejoint/HingeJointScene.h
-    scenes/hingejoint/HingeJointScene.cpp
-    scenes/sliderjoint/SliderJointScene.h
-    scenes/sliderjoint/SliderJointScene.cpp
-    scenes/ragdoll/RagdollScene.h
-    scenes/ragdoll/RagdollScene.cpp
-    scenes/rope/RopeScene.h
-    scenes/rope/RopeScene.cpp
     scenes/bvh_viewer/BvhScene.h
     scenes/bvh_viewer/BvhScene.cpp
 )
@@ -238,3 +198,9 @@ add_custom_target(copy_python_packages ALL
 		COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/Py_package ${CMAKE_CURRENT_BINARY_DIR}/Py_package
 		DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/Py_package)
 add_dependencies(testbed copy_python_packages)
+
+# Copy static files into the build directory
+add_custom_target(copy_static_files ALL
+		COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/static ${CMAKE_CURRENT_BINARY_DIR}/static
+		DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/static)
+add_dependencies(testbed copy_static_files)

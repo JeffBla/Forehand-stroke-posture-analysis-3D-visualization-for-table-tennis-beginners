@@ -57,6 +57,8 @@ Gui::~Gui() {
     delete pVideoToBvhConverter;
 
     delete pVideoController;
+
+    delete pExpertVideoController;
 }
 
 /// Initialize the GUI
@@ -91,6 +93,12 @@ void Gui::init(GLFWwindow *window) {
     mScreen->perform_layout();
 
     mTimeSinceLastProfilingDisplay = glfwGetTime();
+
+#ifndef DEBUG
+    mSimulationPanel->set_visible(false);
+    mSettingsPanel->set_visible(false);
+    mProfilingPanel->set_visible(false);
+#endif
 }
 
 void Gui::drawAll() {
@@ -707,6 +715,7 @@ void Gui::createUtilsPanel() {
     if (mCurrentSceneName == "BVH") {
         pVideoToBvhConverter = new videoToBvhConverter::VideoToBvhConverter();
         pVideoController = new videoLoader::VideoController();
+        pExpertVideoController = new videoLoader::VideoController();
 
         // -------------------- Bvh Image viewer -------------------- //
         // Window
@@ -720,6 +729,17 @@ void Gui::createUtilsPanel() {
         bvhImageViewer->set_visible(false);
         bvhImageViewer->set_enabled(false);
 
+        // -------------------- Expert Bvh Image viewer -------------------- //
+        expertBvhImageWindow = new Window(mScreen, "Expert Bvh Frame");
+        expertBvhImageWindow->set_layout(new GroupLayout());
+        expertBvhImageWindow->set_visible(false);
+        expertBvhImageWindow->set_enabled(false);
+        expertBvhImageWindow->set_position(Vector2i(15, 15));
+        // Viewer
+        expertBvhImageViewer = new ImageView(expertBvhImageWindow);
+        expertBvhImageViewer->set_visible(false);
+        expertBvhImageViewer->set_enabled(false);
+
         // -------------------- File chooser -------------------- //
         new Label(mUtilsPanel, "Choose BVH file");
         auto open_bvh_button = new Button(mUtilsPanel, "Open File");
@@ -729,6 +749,7 @@ void Gui::createUtilsPanel() {
 
         // -------------------- Video viewer -------------------- //
         pVideoController->SetImageView(bvhImageViewer);
+        pExpertVideoController->SetImageView(expertBvhImageViewer);
         new Label(mUtilsPanel, "Choose Target Video");
         auto open_video_button = new Button(mUtilsPanel, "Open File");
         open_video_button->set_callback([&]() {
@@ -745,15 +766,23 @@ void Gui::createUtilsPanel() {
             int num_frame = scene->GetSkeleton()->GetBvh()->GetNumFrame();
             // Play video
             pVideoController->Load(mVideoPath, num_frame);
+            pExpertVideoController->Load(scene->GetExpertVideoPath(), num_frame);
 
             scene->motion_nexted.add_handler([this]() {
                 onMotionNext();
             });
 
+            /// Show bvh image viewer
             bvhImageWindow->set_visible(true);
             bvhImageWindow->set_enabled(true);
             bvhImageViewer->set_visible(true);
             bvhImageViewer->set_enabled(true);
+            /// Show expert bvh image viewer
+            expertBvhImageWindow->set_visible(true);
+            expertBvhImageWindow->set_enabled(true);
+            expertBvhImageViewer->set_visible(true);
+            expertBvhImageViewer->set_enabled(true);
+
             mScreen->perform_layout();
         });
 
@@ -809,6 +838,9 @@ void Gui::adjustRotationUtilsAnalyzePanel() {
     mAnalyzePanel->set_position(
             Vector2i(mUtilsPanel->position().x(),
                      mUtilsPanel->position().y() + mUtilsPanel->height() + distanceBetweenWidgets));
+    // Depend on AnalyzePanel & bvhImageWindow
+    expertBvhImageWindow->set_position(
+            Vector2i(mAnalyzePanel->position().x() - distanceBetweenWidgets, bvhImageWindow->position().y()));
 }
 
 bool Gui::isFocus() const {

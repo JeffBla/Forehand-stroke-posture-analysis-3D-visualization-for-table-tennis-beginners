@@ -125,6 +125,10 @@ class Gui {
         ImageView *bvhImageViewer;
         videoLoader::VideoController *pVideoController;
 
+        Window *expertBvhImageWindow;
+        ImageView *expertBvhImageViewer;
+        videoLoader::VideoController *pExpertVideoController;
+
         // Analyze panel
         Widget *mAnalyzePanel;
         std::string mOpenposePath;
