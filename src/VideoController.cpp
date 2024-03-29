@@ -2,6 +2,8 @@
 
 using namespace videoLoader;
 
+float VideoController::factor_reminder_sum = 0;
+
 VideoController::VideoController(const std::string &videoPath, nanogui::ImageView *imageView)
         : videoPath(videoPath), pVideoCapture(nullptr),
           currentFrameIdx(0), imageView(imageView) {}
@@ -66,15 +68,26 @@ void VideoController::MatchFrame(int target_nFrame, cv::VideoCapture *pVideoCapt
     imageWidth = frame.cols;
     imageHeight = frame.rows;
 
-    imgDisplaySize = {(int32_t) (imageWidth * SCALE), (int32_t) (imageHeight * SCALE)};
+    imgDisplaySize = {(int32_t) (imageWidth * video_scale), (int32_t) (imageHeight * video_scale)};
 
     int init_nFrame = pVideoCapture->get(cv::CAP_PROP_FRAME_COUNT);
-    float frame_factor = target_nFrame / init_nFrame;
+    float frame_factor = target_nFrame / static_cast<float> (init_nFrame);
 
     factor_reminder_sum = 0;
     frames.clear();
+    bool is_read_success;
+    cv::Mat flat;
     while (frames.size() < target_nFrame) {
-        pVideoCapture->read(frame);
+        is_read_success = pVideoCapture->read(frame);
+        if (!is_read_success) {
+            if (frames.empty()) {
+                throw std::runtime_error("VideoController::MatchFrame: Video frame is empty");
+            } else {
+                for (int i = 0; i < target_nFrame - frames.size(); i++)
+                    frames.emplace_back(flat.data, flat.data + flat.total());
+                break;
+            }
+        }
 
         cv::cvtColor(frame, frame, cv::COLOR_BGR2RGB);
         cv::resize(frame, resized_frame, cv::Size(imgDisplaySize.x(), imgDisplaySize.y()), 0, 0,
@@ -82,7 +95,7 @@ void VideoController::MatchFrame(int target_nFrame, cv::VideoCapture *pVideoCapt
 
         // Mat to Texture (vector<uchar>)
         uint total_elements = resized_frame.total() * resized_frame.elemSize();
-        cv::Mat flat = resized_frame.clone().reshape(1, total_elements);
+        flat = resized_frame.clone().reshape(1, total_elements);
 
         if (frame_factor >= 1)
             ExtendFrames(frame_factor, flat);
@@ -94,7 +107,7 @@ void VideoController::MatchFrame(int target_nFrame, cv::VideoCapture *pVideoCapt
 void VideoController::ExtendFrames(float frame_factor, cv::Mat &flat_frame) {
     int require_nFrame = static_cast<int> (frame_factor);
     factor_reminder_sum += frame_factor - require_nFrame;
-    if (factor_reminder_sum >=1){
+    if (factor_reminder_sum >= 1) {
         require_nFrame += 1;
         factor_reminder_sum -= 1;
     }
@@ -105,7 +118,7 @@ void VideoController::ExtendFrames(float frame_factor, cv::Mat &flat_frame) {
 
 void VideoController::ShortenFrames(float frame_factor, cv::Mat &flat_frame) {
     factor_reminder_sum += frame_factor;
-    if(factor_reminder_sum >= 1){
+    if (factor_reminder_sum >= 1) {
         frames.emplace_back(flat_frame.data, flat_frame.data + flat_frame.total());
         factor_reminder_sum -= 1;
     }

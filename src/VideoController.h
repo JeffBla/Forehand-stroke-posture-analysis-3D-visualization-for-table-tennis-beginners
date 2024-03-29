@@ -12,12 +12,14 @@
 #include <nanogui/nanogui.h>
 #include <nanogui/common.h>
 
-#define SCALE 0.4
-
 namespace videoLoader {
 
     class VideoController {
     private:
+        // -------------------- Constants -------------------- //
+        float video_scale = 0.2f;
+
+        // -------------------- Attributes -------------------- //
         std::string videoPath;
         int imageWidth, imageHeight;
         cv::VideoCapture *pVideoCapture;

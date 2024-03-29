@@ -87,7 +87,7 @@ void Gui::init(GLFWwindow *window) {
     createAnalyzePanel();
 
     // Adjust the panels
-    adjustRotationUtilsAnalyzePanel();
+    adjustPanel();
 
     mScreen->set_visible(true);
     mScreen->perform_layout();
@@ -188,7 +188,7 @@ void Gui::createSimulationPanel() {
     mSimulationPanel->set_position(Vector2i(15, 15));
     mSimulationPanel->set_layout(new GroupLayout(10, 5, 10, 20));
     //mSimulationPanel->setId("SimulationPanel");
-    mSimulationPanel->set_fixed_width(220);
+    mSimulationPanel->set_fixed_width(window_fixedWidth);
 
     // Scenes/Physics/Rendering buttons
     new Label(mSimulationPanel, "Controls", "sans-bold");
@@ -236,7 +236,7 @@ void Gui::createSettingsPanel() {
     mSettingsPanel->set_position(Vector2i(15, 180));
     mSettingsPanel->set_layout(new BoxLayout(Orientation::Vertical, Alignment::Middle, 10, 5));
     //mSettingsPanel->setId("SettingsPanel");
-    mSettingsPanel->set_fixed_width(220);
+    mSettingsPanel->set_fixed_width(window_fixedWidth);
 
     // Scenes/Physics/Rendering buttons
     Widget *buttonsPanel = new Widget(mSettingsPanel);
@@ -570,7 +570,7 @@ void Gui::createProfilingPanel() {
     mProfilingPanel->set_position(Vector2i(15, 505));
     mProfilingPanel->set_layout(new BoxLayout(Orientation::Vertical, Alignment::Fill, 10, 5));
     //profilingPanel->setId("SettingsPanel");
-    mProfilingPanel->set_fixed_width(220);
+    mProfilingPanel->set_fixed_width(window_fixedWidth);
 
     // Framerate (FPS)
     mFPSLabel = new Label(mProfilingPanel, std::string("FPS : ") + floatToString(mCachedFPS, 0), "sans-bold");
@@ -595,7 +595,7 @@ void Gui::createProfilingPanel() {
 
 void Gui::createRotationPanel() {
     mRotationPanel = new Window(mScreen, "Rotation");
-    mRotationPanel->set_fixed_width(220);
+    mRotationPanel->set_fixed_width(window_fixedWidth);
     mRotationPanel->set_layout((new BoxLayout(Orientation::Vertical, Alignment::Fill, 10, 5)));
     mRotationPanel->set_position(Vector2i(mScreen->width() - mRotationPanel->fixed_width() - 15, 15));
 
@@ -708,7 +708,7 @@ void Gui::createRotationPanel() {
 
 void Gui::createUtilsPanel() {
     mUtilsPanel = new Window(mScreen, "Utils");
-    mUtilsPanel->set_fixed_width(220);
+    mUtilsPanel->set_fixed_width(window_fixedWidth);
     mUtilsPanel->set_layout((new BoxLayout(Orientation::Vertical, Alignment::Fill, 10, 5)));
     mUtilsPanel->set_position(Vector2i(mScreen->width() - mUtilsPanel->fixed_width() - 15, 15));
 
@@ -784,6 +784,7 @@ void Gui::createUtilsPanel() {
             expertBvhImageViewer->set_enabled(true);
 
             mScreen->perform_layout();
+            adjustPanel();
         });
 
         // -------------------- Video to bvh -------------------- //
@@ -809,7 +810,7 @@ void Gui::createUtilsPanel() {
 
 void Gui::createAnalyzePanel() {
     mAnalyzePanel = new Window(mScreen, "Analyze");
-    mAnalyzePanel->set_fixed_width(220);
+    mAnalyzePanel->set_fixed_width(window_fixedWidth);
     mAnalyzePanel->set_layout((new BoxLayout(Orientation::Vertical, Alignment::Fill, 10, 5)));
     mAnalyzePanel->set_position(Vector2i(mScreen->width() - mAnalyzePanel->fixed_width() - 15, 15));
 
@@ -830,17 +831,43 @@ void Gui::createAnalyzePanel() {
     }
 }
 
-void Gui::adjustRotationUtilsAnalyzePanel() {
-    mRotationPanel->set_position(Vector2i(mScreen->width() - mRotationPanel->fixed_width() - 15, 15));
+void Gui::adjustPanel() {
+    adjustRightPanel();
+    adjustLeftPanel();
+}
+
+void Gui::adjustRightPanel() {
+    mRotationPanel->set_position(mRotationPanelPos);
     mUtilsPanel->set_position(
             Vector2i(mRotationPanel->position().x(),
                      mRotationPanel->position().y() + mRotationPanel->height() + distanceBetweenWidgets));
     mAnalyzePanel->set_position(
             Vector2i(mUtilsPanel->position().x(),
                      mUtilsPanel->position().y() + mUtilsPanel->height() + distanceBetweenWidgets));
-    // Depend on AnalyzePanel & bvhImageWindow
+    bvhImageWindow->set_position(
+            Vector2i(mRotationPanel->position().x() + distanceBetweenWidgets + mRotationPanel->width(),
+                     mRotationPanel->position().y()));
+
+}
+
+void Gui::adjustLeftPanel() {
+#ifdef DEBUG
+    mSimulationPanel->set_position(Vector2i(mScreen->width() - mSimulationPanel->width() - distanceBetweenWidgets, 15));
+    mSettingsPanel->set_position(Vector2i(mSimulationPanel->position().x(),
+                                          mSimulationPanel->position().y() + mSimulationPanel->height() +
+                                          distanceBetweenWidgets));
+    mProfilingPanel->set_position(Vector2i(mSettingsPanel->position().x(),
+                                           mSettingsPanel->position().y() + mSettingsPanel->height() +
+                                           distanceBetweenWidgets));
     expertBvhImageWindow->set_position(
-            Vector2i(mAnalyzePanel->position().x() - distanceBetweenWidgets, bvhImageWindow->position().y()));
+            Vector2i(mSimulationPanel->position().x() - expertBvhImageWindow->width() - distanceBetweenWidgets,
+                     mSimulationPanelPos.y()));
+#else
+    expertBvhImageWindow->set_position(
+            Vector2i(mScreen->width()- expertBvhImageWindow->width() - distanceBetweenWidgets, mSimulationPanelPos.y()));
+#endif
+
+
 }
 
 bool Gui::isFocus() const {
@@ -867,7 +894,7 @@ std::string Gui::onOpenFileButtonPressed(const vector<pair<string, string>> &val
 void Gui::onWindowResizeEvent(int width, int height) {
     mScreen->resize_callback_event(width, height);
 
-    adjustRotationUtilsAnalyzePanel();
+    adjustPanel();
 }
 
 void Gui::onMouseMotionEvent(double x, double y) {
@@ -946,7 +973,7 @@ void Gui::onChangeBoneTransform_bvhscene(Bone *target) {
             angleLabels.push_back(angle_name);
             angleLabels.push_back(angle_deg);
         }
-        adjustRotationUtilsAnalyzePanel();
+
         mScreen->perform_layout();
     }
 }

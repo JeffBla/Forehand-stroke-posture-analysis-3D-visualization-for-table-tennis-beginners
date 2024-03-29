@@ -158,7 +158,7 @@ skeleton::Skeleton *BvhScene::CreateExpertSkeleton(string &new_bvh) {
     // Create the skeleton with bvh
     expert_bvh = new BVH(new_bvh.c_str());
     experx_skeleton = new skeleton::Skeleton(mPhysicsCommon, mPhysicsWorld, mPhysicsObjects, mMeshFolderPath,
-                                             expert_bvh, rp3d::Vector3(20, 0, 0));
+                                             expert_bvh, rp3d::Vector3(10, 0, 0));
 
     return experx_skeleton;
 }
