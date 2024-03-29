@@ -864,7 +864,8 @@ void Gui::adjustLeftPanel() {
                      mSimulationPanelPos.y()));
 #else
     expertBvhImageWindow->set_position(
-            Vector2i(mScreen->width()- expertBvhImageWindow->width() - distanceBetweenWidgets, mSimulationPanelPos.y()));
+            Vector2i(mScreen->width() - expertBvhImageWindow->width() - distanceBetweenWidgets,
+                     mSimulationPanelPos.y()));
 #endif
 
 
@@ -990,10 +991,18 @@ void Gui::onCreateSkeleton_bvhscene() {
 }
 
 void Gui::onMotionNext() {
+    bool isNext = false;
     if (!pVideoController->GetVideoPath().empty()) {
         pVideoController->Next();
-        mScreen->perform_layout();
+        isNext = true;
     }
+    if (!pExpertVideoController->GetVideoPath().empty()) {
+        pExpertVideoController->Next();
+        isNext = true;
+    }
+    if (isNext)
+        mScreen->perform_layout();
+
 }
 
 void Gui::onForearmStrokeAnalyzeDone() {

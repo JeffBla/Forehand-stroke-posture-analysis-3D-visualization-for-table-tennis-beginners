@@ -239,6 +239,8 @@ bool BvhScene::keyboardEvent(int key, int scancode, int action, int mods) {
 void BvhScene::MotionNext() {
     if (skeleton1 != nullptr)
         skeleton1->NextBvhMotion();
+    if (experx_skeleton != nullptr)
+        experx_skeleton->NextBvhMotion();
 }
 
 void BvhScene::ForearmStrokeAnalyze(const std::string &openposePath) {
