@@ -97,13 +97,13 @@ map<string, float> Bone::GetSelfAngle(int frame) {
     for (auto channel: joint->channels) {
         switch (channel->type) {
             case X_ROTATION:
-                angles["self x"] = bvh->GetMotion(frame, channel->index);
+                angles["self x"] = bvh->GetModifiedMotion(frame, channel->index);
                 break;
             case Y_ROTATION:
-                angles["self y"] = bvh->GetMotion(frame, channel->index);
+                angles["self y"] = bvh->GetModifiedMotion(frame, channel->index);
                 break;
             case Z_ROTATION:
-                angles["self z"] = bvh->GetMotion(frame, channel->index);
+                angles["self z"] = bvh->GetModifiedMotion(frame, channel->index);
                 break;
             default:
                 break;

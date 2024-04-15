@@ -19,7 +19,7 @@ Analysizer::Analysizer(Skeleton *target_skeleton, const std::string &analysizer_
 void Analysizer::_Analyse(map<string, Identifier *> &identifier_list, const string &openposePath) {
     mSuggestion = "";
     // Analyze the skeleton
-    for (int curr_frame = 0; curr_frame < target_skeleton->GetBvh()->GetNumFrame(); curr_frame++) {
+    for (int curr_frame = 0; curr_frame < target_skeleton->GetBvh()->GetNumModifiedFrame(); curr_frame++) {
         for_each(identifier_list.begin(), identifier_list.end(), [curr_frame](pair<string, Identifier *> element) {
             element.second->Identify(curr_frame);
         });

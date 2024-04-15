@@ -138,7 +138,7 @@ namespace skeleton {
         void InitBvhMotion();
 
         // -------------------- Getter & Setter -------------------- //
-        const BVH *GetBvh() const;
+        BVH *GetBvh() ;
 
         const std::vector<std::string> &GetTargetBoneNames() const;
     };
@@ -147,7 +147,7 @@ namespace skeleton {
         return target_bone_names;
     }
 
-    inline const BVH *Skeleton::GetBvh() const {
+    inline BVH *Skeleton::GetBvh() {
         return bvh;
     }
 

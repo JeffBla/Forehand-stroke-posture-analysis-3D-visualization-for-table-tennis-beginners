@@ -73,7 +73,7 @@ namespace bvhscene {
 
         BVH *expert_bvh;
         string expert_bvh_path = "static/front_bigman_pose_22_segment.bvh";
-        string expert_video_path = "static/front_bigman_pose_22_segment.mp4";
+        string expert_video_path = "static/2dJoints_v1.4.csv_lastRun3DHiRes.mp4";
 
         // -------------------- Analysizer -------------------- //
         analysizer::Analysizer *forehand_stroke_analysizer;
@@ -122,9 +122,13 @@ namespace bvhscene {
         /// Destroy the physics world
         void destroyPhysicsWorld();
 
+        Skeleton *CreateSkeleton(BVH *new_bvh);
+
         Skeleton *CreateSkeleton(string &new_bvh);
 
         void DestroySkeleton();
+
+        Skeleton *CreateExpertSkeleton(BVH *new_bvh);
 
         Skeleton *CreateExpertSkeleton(string &new_bvh);
 
@@ -143,6 +147,8 @@ namespace bvhscene {
         // -------------------- Getter & Setter -------------------- //
         skeleton::Skeleton *GetSkeleton();
 
+        skeleton::Skeleton *GetExpertSkeleton();
+
         Bone *GetRaycastedTarget_bone() const;
 
         analysizer::Analysizer *GetForehandStrokeAnalysizer() const;
@@ -158,6 +164,10 @@ namespace bvhscene {
 
     inline analysizer::Analysizer *BvhScene::GetForehandStrokeAnalysizer() const {
         return forehand_stroke_analysizer;
+    }
+
+    inline skeleton::Skeleton *BvhScene::GetExpertSkeleton(){
+        return experx_skeleton;
     }
 
     inline string &BvhScene::GetExpertBvhPath() {

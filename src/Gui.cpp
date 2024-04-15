@@ -760,13 +760,20 @@ void Gui::createUtilsPanel() {
         play_video_button->set_callback([&]() {
             auto scene = (bvhscene::BvhScene *) this->mApp->mCurrentScene;
 
-            // Create skeleton
-            scene->CreateSkeleton(mBvhPath);
-            scene->CreateExpertSkeleton(scene->GetExpertBvhPath());
-            int num_frame = scene->GetSkeleton()->GetBvh()->GetNumFrame();
+            // Create bvh
+            auto skeletonBvh = new BVH(mBvhPath.c_str());
+            auto expertSkeletonBvh = new BVH(scene->GetExpertBvhPath().c_str());
+
+            pVideoController->SetTargetBVH(skeletonBvh);
+            pExpertVideoController->SetTargetBVH(expertSkeletonBvh);
+            int num_frame = skeletonBvh->GetNumFrame();
             // Play video
             pVideoController->Load(mVideoPath, num_frame);
             pExpertVideoController->Load(scene->GetExpertVideoPath(), num_frame);
+
+            // Create skeleton
+            scene->CreateSkeleton(skeletonBvh);
+            scene->CreateExpertSkeleton(expertSkeletonBvh);
 
             scene->motion_nexted.add_handler([this]() {
                 onMotionNext();

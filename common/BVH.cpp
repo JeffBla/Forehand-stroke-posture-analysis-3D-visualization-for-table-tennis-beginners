@@ -13,6 +13,7 @@ BVH::BVH() {
 
 BVH::BVH(const char *bvh_file_name) {
     motion = nullptr;
+    modified_motion = nullptr;
     Clear();
 
     Load(bvh_file_name);
@@ -28,8 +29,9 @@ void BVH::Clear() {
         delete channels[i];
     for (i = 0; i < joints.size(); i++)
         delete joints[i];
-    if (motion != nullptr)
-        delete motion;
+
+    delete motion;
+    delete modified_motion;
 
     is_load_success = false;
 
@@ -212,7 +214,8 @@ void BVH::Load(const char *bvh_file_name) {
     interval = atof(token);
 
     num_channel = channels.size();
-    motion = new double[num_frame * num_channel];
+    motion = new vector<double>(num_frame * num_channel);
+    modified_motion = new vector<double>();
 
     for (i = 0; i < num_frame; i++) {
         file.getline(line, BUFFER_LENGTH);
@@ -220,7 +223,7 @@ void BVH::Load(const char *bvh_file_name) {
         for (j = 0; j < num_channel; j++) {
             if (token == nullptr)
                 goto bvh_error;
-            motion[i * num_channel + j] = atof(token);
+            motion->at(i * num_channel + j) = atof(token);
             token = strtok(nullptr, separater);
         }
     }
@@ -249,22 +252,22 @@ void BVH::SetCurrentFrame(int frame) {
         for (auto channel: bone_joint->channels) {
             switch (channel->type) {
                 case X_ROTATION:
-                    angle.x = this->GetMotion(frame, channel->index);
+                    angle.x = this->GetModifiedMotion(frame, channel->index);
                     break;
                 case Y_ROTATION:
-                    angle.y = this->GetMotion(frame, channel->index);
+                    angle.y = this->GetModifiedMotion(frame, channel->index);
                     break;
                 case Z_ROTATION:
-                    angle.z = this->GetMotion(frame, channel->index);
+                    angle.z = this->GetModifiedMotion(frame, channel->index);
                     break;
                 case X_POSITION:
-                    pos.x = this->GetMotion(frame, channel->index);
+                    pos.x = this->GetModifiedMotion(frame, channel->index);
                     break;
                 case Y_POSITION:
-                    pos.y = this->GetMotion(frame, channel->index);
+                    pos.y = this->GetModifiedMotion(frame, channel->index);
                     break;
                 case Z_POSITION:
-                    pos.z = this->GetMotion(frame, channel->index);
+                    pos.z = this->GetModifiedMotion(frame, channel->index);
                     break;
             }
         }
@@ -277,15 +280,26 @@ glm::vec3 BVH::GetInitRootPos() {
     for (auto channel: bone_joint->channels) {
         switch (channel->type) {
             case X_POSITION:
-                init_root_pos.x = this->GetMotion(0, channel->index);
+                init_root_pos.x = this->GetModifiedMotion(0, channel->index);
                 break;
             case Y_POSITION:
-                init_root_pos.y = this->GetMotion(0, channel->index);
+                init_root_pos.y = this->GetModifiedMotion(0, channel->index);
                 break;
             case Z_POSITION:
-                init_root_pos.z = this->GetMotion(0, channel->index);
+                init_root_pos.z = this->GetModifiedMotion(0, channel->index);
                 break;
         }
     }
     return init_root_pos;
+}
+
+void BVH::InsertMotionAtFrame(int nFrame, vector<double>::iterator inserted_motion_begin,
+                              vector<double>::iterator inserted_motion_end) {
+    modified_motion->insert(modified_motion->begin() + nFrame * num_channel, inserted_motion_begin,
+                            inserted_motion_end);
+}
+
+void
+BVH::PushBackMotion(vector<double>::iterator inserted_motion_begin, vector<double>::iterator inserted_motion_end) {
+    modified_motion->insert(modified_motion->end(), inserted_motion_begin, inserted_motion_end);
 }

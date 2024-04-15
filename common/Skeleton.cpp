@@ -173,7 +173,7 @@ Bone *Skeleton::FindBone(const string &target_name) {
 }
 
 void Skeleton::NextBvhMotion() {
-    bvh_frame = (bvh_frame + 1) % bvh->GetNumFrame();
+    bvh_frame = (bvh_frame + 1) % bvh->GetNumModifiedFrame();
     ApplyBvhMotion(bvh_frame);
 }
 

@@ -119,11 +119,10 @@ void BvhScene::reset() {
     isMotionStart = false;
 }
 
-skeleton::Skeleton *BvhScene::CreateSkeleton(string &new_bvh) {
+skeleton::Skeleton *BvhScene::CreateSkeleton(BVH *new_bvh) {
     DestroySkeleton();
 
-    // Create the skeleton with bvh
-    bvh = new BVH(new_bvh.c_str());
+    bvh = new_bvh;
     skeleton1 = new skeleton::Skeleton(mPhysicsCommon, mPhysicsWorld, mPhysicsObjects, mMeshFolderPath, bvh);
     // Analysizer
     forehand_stroke_analysizer = new analysizer::Analysizer(skeleton1, "forehand_stroke");
@@ -134,6 +133,13 @@ skeleton::Skeleton *BvhScene::CreateSkeleton(string &new_bvh) {
     raycastedTarget_oldcolor = raycastedTarget_bone->GetPhysicsObject()->getColor();
     RecordRaycastTarget(raycastedTarget_bone);
     return skeleton1;
+}
+
+skeleton::Skeleton *BvhScene::CreateSkeleton(string &new_bvh) {
+    // Create the skeleton with bvh
+    auto target_bvh = new BVH(new_bvh.c_str());
+
+    return CreateSkeleton(target_bvh);
 }
 
 void BvhScene::DestroySkeleton() {
@@ -151,17 +157,31 @@ void BvhScene::DestroySkeleton() {
 
         motion_nexted.clear();
     }
+
+    if (experx_skeleton != nullptr) {
+        delete experx_skeleton;
+        experx_skeleton = nullptr;
+
+        delete expert_bvh;
+        expert_bvh = nullptr;
+    }
 }
 
-skeleton::Skeleton *BvhScene::CreateExpertSkeleton(string &new_bvh) {
+skeleton::Skeleton *BvhScene::CreateExpertSkeleton(BVH *new_bvh) {
     DestroyExpertSkeleton();
 
-    // Create the skeleton with bvh
-    expert_bvh = new BVH(new_bvh.c_str());
+    expert_bvh = new_bvh;
     experx_skeleton = new skeleton::Skeleton(mPhysicsCommon, mPhysicsWorld, mPhysicsObjects, mMeshFolderPath,
                                              expert_bvh, rp3d::Vector3(10, 0, 0));
 
     return experx_skeleton;
+}
+
+skeleton::Skeleton *BvhScene::CreateExpertSkeleton(string &new_bvh) {
+    // Create the skeleton with bvh
+    auto target_bvh = new BVH(new_bvh.c_str());
+
+    return CreateExpertSkeleton(target_bvh);
 }
 
 void BvhScene::DestroyExpertSkeleton() {
@@ -209,9 +229,10 @@ void BvhScene::RecordRaycastTarget(Bone *target) {
     raycastedTarget_bone_Transform = target->GetPhysicsObject()->getTransform();
 
 #ifdef DEBUG
-    cout << raycastedTarget_bone_Transform.getPosition().to_string() << endl;
+    cout << "The pos of raycastedTarget_bone_Transform: " << raycastedTarget_bone_Transform.getPosition().to_string()
+         << endl;
     rp3d::Vector3 tmp = AngleTool::QuaternionToEulerAngles(raycastedTarget_bone_Transform.getOrientation());
-    cout << AngleTool::EulerAnglesToDegree(tmp).to_string() << endl;
+    cout << "The deg of raycastedTarget_bone_Transform: " << AngleTool::EulerAnglesToDegree(tmp).to_string() << endl;
 #endif
 }
 
