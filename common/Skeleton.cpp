@@ -40,7 +40,7 @@ Skeleton::ConfigNewObject(PhysicsObject *new_object, const rp3d::Vector3 &pos, c
 
     // Set the box color
     new_object->setColor(objectColor);
-    new_object->setSleepingColor(sleepingColor);
+    new_object->setSleepingColor(objectColor);
 
     new_object->getRigidBody()->updateMassPropertiesFromColliders();
     new_object->getRigidBody()->setLinearDamping(linearDamping);
@@ -269,3 +269,17 @@ void Skeleton::ApplyBvhMotion(const int frame) {
     }
 }
 
+void Skeleton::ShowAnalyzeResult(const string &BoneName) {
+    auto bone = FindBone(BoneName);
+    bone->GetPhysicsObject()->setColor(postureWrongColor);
+    bone->GetPhysicsObject()->setSleepingColor(postureWrongColor);
+    analyze_modify_bones.push_back(bone);
+}
+
+void Skeleton::ClearAnalyzeResult() {
+    for (auto &bone: analyze_modify_bones) {
+        bone->GetPhysicsObject()->setColor(objectColor);
+        bone->GetPhysicsObject()->setSleepingColor(objectColor);
+    }
+    analyze_modify_bones.clear();
+}

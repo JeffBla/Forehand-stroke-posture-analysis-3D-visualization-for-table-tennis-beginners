@@ -32,6 +32,8 @@ namespace skeleton {
     private:
         // -------------------- Attributes -------------------- //
 
+        std::vector<Bone *>analyze_modify_bones;
+
         /// Physics
         rp3d::PhysicsCommon &mPhysicsCommon;
         rp3d::PhysicsWorld *mPhysicsWorld;
@@ -53,7 +55,7 @@ namespace skeleton {
     protected:
 
         openglframework::Color objectColor = openglframework::Color(0.0f, 0.68f, 0.99f, 1.0f);
-        openglframework::Color sleepingColor = openglframework::Color(1.0f, 0.0f, 0.0f, 1.0f);
+        openglframework::Color postureWrongColor = openglframework::Color(1.0f, 0.0f, 0.0f, 1.0f);
 
         std::map<const string, Bone *> bones;
 
@@ -125,6 +127,9 @@ namespace skeleton {
 
         Bone *FindBone(const string &target_name);
 
+        void ShowAnalyzeResult(const string &BoneName);
+
+        void ClearAnalyzeResult();
         // -------------------- Motion -------------------- //
         void NextBvhMotion();
 

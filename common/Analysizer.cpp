@@ -17,6 +17,7 @@ Analysizer::Analysizer(Skeleton *target_skeleton, const std::string &analysizer_
 }
 
 void Analysizer::_Analyse(map<string, Identifier *> &identifier_list, const string &openposePath) {
+    mSuggestion = "";
     // Analyze the skeleton
     for (int curr_frame = 0; curr_frame < target_skeleton->GetBvh()->GetNumFrame(); curr_frame++) {
         for_each(identifier_list.begin(), identifier_list.end(), [curr_frame](pair<string, Identifier *> element) {
@@ -32,6 +33,15 @@ void Analysizer::_Analyse(map<string, Identifier *> &identifier_list, const stri
                  identifier_pass_list[element.first] = element.second->Py_SimilarityScore(output_filename,
                                                                                           openposePath);
              });
+
+    // Show the result
+    target_skeleton->ClearAnalyzeResult();
+    for (auto &[identifier_name, pIdentifier]: identifier_list) {
+        ShowAnalysisResult_Skeleton(identifier_name);
+        mSuggestion += Suggest_str(identifier_name);
+    }
+    // Remove the last '\n'
+    mSuggestion.pop_back();
 
     cout << "Analyze done" << endl;
     analysize_done.fire();
@@ -53,40 +63,59 @@ void Analysizer::Analyze(Identifier *identifier, const string &openposePath) {
     _Analyse(identifier_list, openposePath);
 }
 
+void Analysizer::ShowAnalysisResult_Skeleton(const string &identifier_name) {
+    if (analysizer_name == analyzer_name_list[0]) {
+        auto prob_vtr = identifier_pass_list[identifier_name];
+        string bone_name = identifier_target_list.at(analysizer_name).at(identifier_name)[0];
+        if (identifier_name == "rotation") {
+            if (prob_vtr[0] < 0.5) {
+                target_skeleton->ShowAnalyzeResult(bone_name);
+            }
+        }
+        if (identifier_name == "fore_arm") {
+            if (prob_vtr[3] < 0.5) {
+                target_skeleton->ShowAnalyzeResult(bone_name);
+            }
+        }
+    }
+}
+
 string Analysizer::Suggest_str(const string &identifier_name) {
     string suggestion;
-    if (analysizer_name == "forehand_stroke") {
+    if (analysizer_name == analyzer_name_list[0]) {
+        string forehand_stroke_suggestion;
         /// VTR: 0,1,2: rotation, 3,4,5: fore_arm
         auto prob_vtr = identifier_pass_list[identifier_name];
         if (identifier_name == "rotation") {
             if (prob_vtr[0] >= 0.5) {
-                suggestion += "Twist your waist correctly.\n";
+                forehand_stroke_suggestion += "Your hip rotation motion is correct.\n";
             } else {
                 if (prob_vtr[1] >= 0.5) {
-                    suggestion += "Twist your waist more gently.\n";
+                    forehand_stroke_suggestion += "Rotate your waist less.\n";
                 } else if (prob_vtr[2] >= 0.5) {
-                    suggestion += "Twist your waist more aggressively.\n";
+                    forehand_stroke_suggestion += "Rotate your waist more.\n";
                 } else {
-                    suggestion += "Twist your waist totally wrong.\n";
+                    forehand_stroke_suggestion += "Your hip rotation motion is wrong.\nPlease see our expert motion and try to mimic it.\n";
                 }
             }
         }
         if (identifier_name == "fore_arm") {
             if (prob_vtr[3] >= 0.5) {
-                suggestion += "Wave your arm correctly.\n";
+                forehand_stroke_suggestion += "Your swing motion is correct.\n";
             } else {
                 if (prob_vtr[4] >= 0.5) {
-                    suggestion += "Wave your arm more gently.\n";
+                    forehand_stroke_suggestion += "Wave your arm less.\n";
                 } else if (prob_vtr[5] >= 0.5) {
-                    suggestion += "Wave your arm more aggressively.\n";
+                    forehand_stroke_suggestion += "Wave your arm more.\n";
                 } else {
-                    suggestion += "Wave your arm totally wrong.\n";
+                    forehand_stroke_suggestion += "Your swing motion is wrong.\nPlease see our expert motion and try to mimic it.\n";
                 }
             }
         }
+
+        suggestion += forehand_stroke_suggestion;
     }
-    // Remove the last '\n'
-    suggestion.pop_back();
+
     return suggestion;
 }
 

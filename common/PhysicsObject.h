@@ -71,6 +71,9 @@ class PhysicsObject : public openglframework::Mesh {
         /// Set the color of the box
         void setColor(const openglframework::Color& color);
 
+        /// Get the color of the box
+        openglframework::Color getColor() const;
+
         /// Set the sleeping color of the box
         void setSleepingColor(const openglframework::Color& color);
 
@@ -90,6 +93,10 @@ class PhysicsObject : public openglframework::Mesh {
 // Set the color of the box
 inline void PhysicsObject::setColor(const openglframework::Color& color) {
     mColor = color;
+}
+
+inline openglframework::Color PhysicsObject::getColor() const {
+    return mColor;
 }
 
 // Set the sleeping color of the box

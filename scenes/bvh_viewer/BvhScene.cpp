@@ -131,6 +131,7 @@ skeleton::Skeleton *BvhScene::CreateSkeleton(string &new_bvh) {
     skeleton_created.fire();
 
     raycastedTarget_bone = skeleton1->FindBone("head");
+    raycastedTarget_oldcolor = raycastedTarget_bone->GetPhysicsObject()->getColor();
     RecordRaycastTarget(raycastedTarget_bone);
     return skeleton1;
 }
@@ -196,19 +197,22 @@ rp3d::decimal BvhScene::notifyRaycastHit(const rp3d::RaycastInfo &raycastInfo) {
 }
 
 void BvhScene::RecordRaycastTarget(Bone *target) {
-    raycastedTarget_bone->GetPhysicsObject()->setColor(BvhScene::mObjectColorDemo);
-    raycastedTarget_bone->GetPhysicsObject()->setSleepingColor(BvhScene::mSleepingColorDemo);
+    raycastedTarget_bone->GetPhysicsObject()->setColor(raycastedTarget_oldcolor);
+    raycastedTarget_bone->GetPhysicsObject()->setSleepingColor(raycastedTarget_oldcolor);
     raycastedTarget_bone = target;
+    raycastedTarget_oldcolor = raycastedTarget_bone->GetPhysicsObject()->getColor();
     raycastedTarget_bone->GetPhysicsObject()->setColor(pickedColor);
     raycastedTarget_bone->GetPhysicsObject()->setSleepingColor(pickedColor);
     // Event occur!!!
     raycastedTarget_changed.fire(target);
 
     raycastedTarget_bone_Transform = target->GetPhysicsObject()->getTransform();
-    /// Debug
-//    cout << raycastedTarget_bone_Transform.getPosition().to_string() << endl;
-//    rp3d::Vector3 tmp = AngleTool::QuaternionToEulerAngles(raycastedTarget_bone_Transform.getOrientation());
-//    cout << AngleTool::EulerAnglesToDegree(tmp).to_string() << endl;
+
+#ifdef DEBUG
+    cout << raycastedTarget_bone_Transform.getPosition().to_string() << endl;
+    rp3d::Vector3 tmp = AngleTool::QuaternionToEulerAngles(raycastedTarget_bone_Transform.getOrientation());
+    cout << AngleTool::EulerAnglesToDegree(tmp).to_string() << endl;
+#endif
 }
 
 bool BvhScene::keyboardEvent(int key, int scancode, int action, int mods) {
@@ -249,7 +253,7 @@ void BvhScene::ForearmStrokeAnalyze(const std::string &openposePath) {
 
 string BvhScene::GetForearmStrokeAnalyzeSuggestions() {
     if (forehand_stroke_analysizer != nullptr) {
-        return forehand_stroke_analysizer->Suggest_str();
+        return forehand_stroke_analysizer->GetSuggestion();
     }
     return "No skeleton to analyze.";
 }

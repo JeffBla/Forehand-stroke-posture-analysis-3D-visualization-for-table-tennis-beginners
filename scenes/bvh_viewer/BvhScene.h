@@ -56,6 +56,7 @@ namespace bvhscene {
          */
         /// target
         Bone *raycastedTarget_bone;
+        openglframework::Color raycastedTarget_oldcolor;
 
         /// info
         rp3d::Transform raycastedTarget_bone_Transform;
