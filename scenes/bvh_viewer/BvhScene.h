@@ -47,7 +47,7 @@ using namespace event;
 namespace bvhscene {
 // Constants
     const float SCENE_RADIUS = 45.0f;
-    const openglframework::Vector3 FLOOR_2_SIZE(60, 0.5f, 82);  // Floor dimensions in meters
+    const openglframework::Vector3 FLOOR_2_SIZE(90, 0.5f, 60);  // Floor dimensions in meters
 
     class BvhScene : public SceneDemo {
     protected:
@@ -56,11 +56,13 @@ namespace bvhscene {
          */
         /// target
         Bone *raycastedTarget_bone;
+        openglframework::Color raycastedTarget_oldcolor;
 
         /// info
         rp3d::Transform raycastedTarget_bone_Transform;
 
         skeleton::Skeleton *skeleton1 = nullptr;
+        skeleton::Skeleton *experx_skeleton = nullptr;
 
         // -------------------- Bvh -------------------- //
         bool isMotionStart;
@@ -68,6 +70,10 @@ namespace bvhscene {
         double accumulatedTime = 0.0;
         double motionInverval = 0.1;
         BVH *bvh;
+
+        BVH *expert_bvh;
+        string expert_bvh_path = "static/front_bigman_pose_22_segment.bvh";
+        string expert_video_path = "static/2dJoints_v1.4.csv_lastRun3DHiRes.mp4";
 
         // -------------------- Analysizer -------------------- //
         analysizer::Analysizer *forehand_stroke_analysizer;
@@ -116,9 +122,17 @@ namespace bvhscene {
         /// Destroy the physics world
         void destroyPhysicsWorld();
 
+        Skeleton *CreateSkeleton(BVH *new_bvh);
+
         Skeleton *CreateSkeleton(string &new_bvh);
 
         void DestroySkeleton();
+
+        Skeleton *CreateExpertSkeleton(BVH *new_bvh);
+
+        Skeleton *CreateExpertSkeleton(string &new_bvh);
+
+        void DestroyExpertSkeleton();
 
         void ForearmStrokeAnalyze(const std::string &openposePath);
 
@@ -133,9 +147,15 @@ namespace bvhscene {
         // -------------------- Getter & Setter -------------------- //
         skeleton::Skeleton *GetSkeleton();
 
+        skeleton::Skeleton *GetExpertSkeleton();
+
         Bone *GetRaycastedTarget_bone() const;
 
         analysizer::Analysizer *GetForehandStrokeAnalysizer() const;
+
+        string &GetExpertBvhPath();
+
+        string &GetExpertVideoPath();
     };
 
     inline Bone *BvhScene::GetRaycastedTarget_bone() const {
@@ -145,6 +165,20 @@ namespace bvhscene {
     inline analysizer::Analysizer *BvhScene::GetForehandStrokeAnalysizer() const {
         return forehand_stroke_analysizer;
     }
+
+    inline skeleton::Skeleton *BvhScene::GetExpertSkeleton(){
+        return experx_skeleton;
+    }
+
+    inline string &BvhScene::GetExpertBvhPath() {
+        return expert_bvh_path;
+    }
+
+    inline string &BvhScene::GetExpertVideoPath() {
+        return expert_video_path;
+    }
+
+
 }  // namespace bvhscene
 
 #endif

@@ -57,6 +57,8 @@ Gui::~Gui() {
     delete pVideoToBvhConverter;
 
     delete pVideoController;
+
+    delete pExpertVideoController;
 }
 
 /// Initialize the GUI
@@ -85,12 +87,18 @@ void Gui::init(GLFWwindow *window) {
     createAnalyzePanel();
 
     // Adjust the panels
-    adjustRotationUtilsAnalyzePanel();
+    adjustPanel();
 
     mScreen->set_visible(true);
     mScreen->perform_layout();
 
     mTimeSinceLastProfilingDisplay = glfwGetTime();
+
+#ifndef DEBUG
+    mSimulationPanel->set_visible(false);
+    mSettingsPanel->set_visible(false);
+    mProfilingPanel->set_visible(false);
+#endif
 }
 
 void Gui::drawAll() {
@@ -180,7 +188,7 @@ void Gui::createSimulationPanel() {
     mSimulationPanel->set_position(Vector2i(15, 15));
     mSimulationPanel->set_layout(new GroupLayout(10, 5, 10, 20));
     //mSimulationPanel->setId("SimulationPanel");
-    mSimulationPanel->set_fixed_width(220);
+    mSimulationPanel->set_fixed_width(window_fixedWidth);
 
     // Scenes/Physics/Rendering buttons
     new Label(mSimulationPanel, "Controls", "sans-bold");
@@ -228,7 +236,7 @@ void Gui::createSettingsPanel() {
     mSettingsPanel->set_position(Vector2i(15, 180));
     mSettingsPanel->set_layout(new BoxLayout(Orientation::Vertical, Alignment::Middle, 10, 5));
     //mSettingsPanel->setId("SettingsPanel");
-    mSettingsPanel->set_fixed_width(220);
+    mSettingsPanel->set_fixed_width(window_fixedWidth);
 
     // Scenes/Physics/Rendering buttons
     Widget *buttonsPanel = new Widget(mSettingsPanel);
@@ -562,7 +570,7 @@ void Gui::createProfilingPanel() {
     mProfilingPanel->set_position(Vector2i(15, 505));
     mProfilingPanel->set_layout(new BoxLayout(Orientation::Vertical, Alignment::Fill, 10, 5));
     //profilingPanel->setId("SettingsPanel");
-    mProfilingPanel->set_fixed_width(220);
+    mProfilingPanel->set_fixed_width(window_fixedWidth);
 
     // Framerate (FPS)
     mFPSLabel = new Label(mProfilingPanel, std::string("FPS : ") + floatToString(mCachedFPS, 0), "sans-bold");
@@ -587,7 +595,7 @@ void Gui::createProfilingPanel() {
 
 void Gui::createRotationPanel() {
     mRotationPanel = new Window(mScreen, "Rotation");
-    mRotationPanel->set_fixed_width(220);
+    mRotationPanel->set_fixed_width(window_fixedWidth);
     mRotationPanel->set_layout((new BoxLayout(Orientation::Vertical, Alignment::Fill, 10, 5)));
     mRotationPanel->set_position(Vector2i(mScreen->width() - mRotationPanel->fixed_width() - 15, 15));
 
@@ -700,13 +708,14 @@ void Gui::createRotationPanel() {
 
 void Gui::createUtilsPanel() {
     mUtilsPanel = new Window(mScreen, "Utils");
-    mUtilsPanel->set_fixed_width(220);
+    mUtilsPanel->set_fixed_width(window_fixedWidth);
     mUtilsPanel->set_layout((new BoxLayout(Orientation::Vertical, Alignment::Fill, 10, 5)));
     mUtilsPanel->set_position(Vector2i(mScreen->width() - mUtilsPanel->fixed_width() - 15, 15));
 
     if (mCurrentSceneName == "BVH") {
         pVideoToBvhConverter = new videoToBvhConverter::VideoToBvhConverter();
         pVideoController = new videoLoader::VideoController();
+        pExpertVideoController = new videoLoader::VideoController();
 
         // -------------------- Bvh Image viewer -------------------- //
         // Window
@@ -720,6 +729,17 @@ void Gui::createUtilsPanel() {
         bvhImageViewer->set_visible(false);
         bvhImageViewer->set_enabled(false);
 
+        // -------------------- Expert Bvh Image viewer -------------------- //
+        expertBvhImageWindow = new Window(mScreen, "Expert Bvh Frame");
+        expertBvhImageWindow->set_layout(new GroupLayout());
+        expertBvhImageWindow->set_visible(false);
+        expertBvhImageWindow->set_enabled(false);
+        expertBvhImageWindow->set_position(Vector2i(15, 15));
+        // Viewer
+        expertBvhImageViewer = new ImageView(expertBvhImageWindow);
+        expertBvhImageViewer->set_visible(false);
+        expertBvhImageViewer->set_enabled(false);
+
         // -------------------- File chooser -------------------- //
         new Label(mUtilsPanel, "Choose BVH file");
         auto open_bvh_button = new Button(mUtilsPanel, "Open File");
@@ -729,6 +749,7 @@ void Gui::createUtilsPanel() {
 
         // -------------------- Video viewer -------------------- //
         pVideoController->SetImageView(bvhImageViewer);
+        pExpertVideoController->SetImageView(expertBvhImageViewer);
         new Label(mUtilsPanel, "Choose Target Video");
         auto open_video_button = new Button(mUtilsPanel, "Open File");
         open_video_button->set_callback([&]() {
@@ -739,21 +760,38 @@ void Gui::createUtilsPanel() {
         play_video_button->set_callback([&]() {
             auto scene = (bvhscene::BvhScene *) this->mApp->mCurrentScene;
 
-            // Create skeleton
-            scene->CreateSkeleton(mBvhPath);
-            int num_frame = scene->GetSkeleton()->GetBvh()->GetNumFrame();
+            // Create bvh
+            auto skeletonBvh = new BVH(mBvhPath.c_str());
+            auto expertSkeletonBvh = new BVH(scene->GetExpertBvhPath().c_str());
+
+            pVideoController->SetTargetBVH(skeletonBvh);
+            pExpertVideoController->SetTargetBVH(expertSkeletonBvh);
+            int num_frame = skeletonBvh->GetNumFrame();
             // Play video
             pVideoController->Load(mVideoPath, num_frame);
+            pExpertVideoController->Load(scene->GetExpertVideoPath(), num_frame);
+
+            // Create skeleton
+            scene->CreateSkeleton(skeletonBvh);
+            scene->CreateExpertSkeleton(expertSkeletonBvh);
 
             scene->motion_nexted.add_handler([this]() {
                 onMotionNext();
             });
 
+            /// Show bvh image viewer
             bvhImageWindow->set_visible(true);
             bvhImageWindow->set_enabled(true);
             bvhImageViewer->set_visible(true);
             bvhImageViewer->set_enabled(true);
+            /// Show expert bvh image viewer
+            expertBvhImageWindow->set_visible(true);
+            expertBvhImageWindow->set_enabled(true);
+            expertBvhImageViewer->set_visible(true);
+            expertBvhImageViewer->set_enabled(true);
+
             mScreen->perform_layout();
+            adjustPanel();
         });
 
         // -------------------- Video to bvh -------------------- //
@@ -779,7 +817,7 @@ void Gui::createUtilsPanel() {
 
 void Gui::createAnalyzePanel() {
     mAnalyzePanel = new Window(mScreen, "Analyze");
-    mAnalyzePanel->set_fixed_width(220);
+    mAnalyzePanel->set_fixed_width(window_fixedWidth);
     mAnalyzePanel->set_layout((new BoxLayout(Orientation::Vertical, Alignment::Fill, 10, 5)));
     mAnalyzePanel->set_position(Vector2i(mScreen->width() - mAnalyzePanel->fixed_width() - 15, 15));
 
@@ -800,14 +838,44 @@ void Gui::createAnalyzePanel() {
     }
 }
 
-void Gui::adjustRotationUtilsAnalyzePanel() {
-    mRotationPanel->set_position(Vector2i(mScreen->width() - mRotationPanel->fixed_width() - 15, 15));
+void Gui::adjustPanel() {
+    adjustRightPanel();
+    adjustLeftPanel();
+}
+
+void Gui::adjustRightPanel() {
+    mRotationPanel->set_position(mRotationPanelPos);
     mUtilsPanel->set_position(
             Vector2i(mRotationPanel->position().x(),
                      mRotationPanel->position().y() + mRotationPanel->height() + distanceBetweenWidgets));
     mAnalyzePanel->set_position(
             Vector2i(mUtilsPanel->position().x(),
                      mUtilsPanel->position().y() + mUtilsPanel->height() + distanceBetweenWidgets));
+    bvhImageWindow->set_position(
+            Vector2i(mRotationPanel->position().x() + distanceBetweenWidgets + mRotationPanel->width(),
+                     mRotationPanel->position().y()));
+
+}
+
+void Gui::adjustLeftPanel() {
+#ifdef DEBUG
+    mSimulationPanel->set_position(Vector2i(mScreen->width() - mSimulationPanel->width() - distanceBetweenWidgets, 15));
+    mSettingsPanel->set_position(Vector2i(mSimulationPanel->position().x(),
+                                          mSimulationPanel->position().y() + mSimulationPanel->height() +
+                                          distanceBetweenWidgets));
+    mProfilingPanel->set_position(Vector2i(mSettingsPanel->position().x(),
+                                           mSettingsPanel->position().y() + mSettingsPanel->height() +
+                                           distanceBetweenWidgets));
+    expertBvhImageWindow->set_position(
+            Vector2i(mSimulationPanel->position().x() - expertBvhImageWindow->width() - distanceBetweenWidgets,
+                     mSimulationPanelPos.y()));
+#else
+    expertBvhImageWindow->set_position(
+            Vector2i(mScreen->width() - expertBvhImageWindow->width() - distanceBetweenWidgets,
+                     mSimulationPanelPos.y()));
+#endif
+
+
 }
 
 bool Gui::isFocus() const {
@@ -815,12 +883,12 @@ bool Gui::isFocus() const {
 }
 
 void Gui::createMessageDialog(const std::string &title, const std::string &message, MessageDialog::Type type) {
-    new MessageDialog(mScreen, type, title, message);
+    new MessageDialog(mScreen, type, title, message, 18);
 }
 
 void Gui::createMessageDialog(const string &title, const string &message, MessageDialog::Type type,
                               const std::function<void(int)> &callback) {
-    auto dig = new MessageDialog(mScreen, type, title, message);
+    auto dig = new MessageDialog(mScreen, type, title, message, 12);
     dig->set_callback(callback);
 }
 
@@ -834,7 +902,7 @@ std::string Gui::onOpenFileButtonPressed(const vector<pair<string, string>> &val
 void Gui::onWindowResizeEvent(int width, int height) {
     mScreen->resize_callback_event(width, height);
 
-    adjustRotationUtilsAnalyzePanel();
+    adjustPanel();
 }
 
 void Gui::onMouseMotionEvent(double x, double y) {
@@ -913,7 +981,7 @@ void Gui::onChangeBoneTransform_bvhscene(Bone *target) {
             angleLabels.push_back(angle_name);
             angleLabels.push_back(angle_deg);
         }
-        adjustRotationUtilsAnalyzePanel();
+
         mScreen->perform_layout();
     }
 }
@@ -930,10 +998,18 @@ void Gui::onCreateSkeleton_bvhscene() {
 }
 
 void Gui::onMotionNext() {
+    bool isNext = false;
     if (!pVideoController->GetVideoPath().empty()) {
         pVideoController->Next();
-        mScreen->perform_layout();
+        isNext = true;
     }
+    if (!pExpertVideoController->GetVideoPath().empty()) {
+        pExpertVideoController->Next();
+        isNext = true;
+    }
+    if (isNext)
+        mScreen->perform_layout();
+
 }
 
 void Gui::onForearmStrokeAnalyzeDone() {

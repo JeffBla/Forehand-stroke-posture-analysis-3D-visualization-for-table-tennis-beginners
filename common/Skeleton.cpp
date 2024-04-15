@@ -40,7 +40,7 @@ Skeleton::ConfigNewObject(PhysicsObject *new_object, const rp3d::Vector3 &pos, c
 
     // Set the box color
     new_object->setColor(objectColor);
-    new_object->setSleepingColor(sleepingColor);
+    new_object->setSleepingColor(objectColor);
 
     new_object->getRigidBody()->updateMassPropertiesFromColliders();
     new_object->getRigidBody()->setLinearDamping(linearDamping);
@@ -74,12 +74,11 @@ Sphere *Skeleton::CreateBonePhysics(const rp3d::Vector3 &pos, const rp3d::Quater
 }
 
 Skeleton::Skeleton(rp3d::PhysicsCommon &mPhysicsCommon, rp3d::PhysicsWorld *mPhysicsWorld,
-                   list<PhysicsObject *> &mPhysicsObjects, std::string &mMeshFolderPath, BVH *bvh)
+                   list<PhysicsObject *> &mPhysicsObjects, string &mMeshFolderPath, BVH *bvh, const rp3d::Vector3 &pos)
         : mPhysicsCommon(mPhysicsCommon), mPhysicsWorld(mPhysicsWorld), mPhysicsObjects(mPhysicsObjects),
-          mMeshFolderPath(mMeshFolderPath), bvh(bvh) {
+          mMeshFolderPath(mMeshFolderPath), bvh(bvh), mSkeletonPosition(pos) {
     {
-        ragdollPosition.setAllValues(0, 0, 0);
-        defaultPosition.setAllValues(0, 0, 0);
+        rp3d::Vector3 ragdollPosition{0, 0, 0};
 
         bones.clear();
 
@@ -97,7 +96,7 @@ Skeleton::Skeleton(rp3d::PhysicsCommon &mPhysicsCommon, rp3d::PhysicsWorld *mPhy
                     length = 0.1;
                 }
                 length *= SCALE;
-                bone = CreateBone(joint->name, bones[joint->parents.back()->name], defaultPosition,
+                bone = CreateBone(joint->name, bones[joint->parents.back()->name], mSkeletonPosition,
                                   rp3d::Quaternion::identity(), {0.15, length, 0.15}, 9,
                                   "cone_offset.obj", rp3d::Quaternion::identity(), joint);
                 bones[joint->name] = bone;
@@ -107,6 +106,12 @@ Skeleton::Skeleton(rp3d::PhysicsCommon &mPhysicsCommon, rp3d::PhysicsWorld *mPhy
 
     InitBvhMotion();
     bvh->SetPositionScale(SCALE);
+}
+
+Skeleton::Skeleton(rp3d::PhysicsCommon &mPhysicsCommon, rp3d::PhysicsWorld *mPhysicsWorld,
+                   list<PhysicsObject *> &mPhysicsObjects, std::string &mMeshFolderPath, BVH *bvh) :
+        Skeleton(mPhysicsCommon, mPhysicsWorld, mPhysicsObjects, mMeshFolderPath, bvh, default_pos) {
+
 }
 
 Skeleton::~Skeleton() {
@@ -168,7 +173,7 @@ Bone *Skeleton::FindBone(const string &target_name) {
 }
 
 void Skeleton::NextBvhMotion() {
-    bvh_frame = (bvh_frame + 1) % bvh->GetNumFrame();
+    bvh_frame = (bvh_frame + 1) % bvh->GetNumModifiedFrame();
     ApplyBvhMotion(bvh_frame);
 }
 
@@ -192,9 +197,13 @@ void Skeleton::ApplyBvhMotion(const int frame) {
 
         for (size_t parentIdx = 0; parentIdx < parents.size(); parentIdx++) {
             auto parent_joint = parents[parentIdx];
-            const auto &pos = positions[parent_joint->index];
+            glm::vec<3, float> pos(0.0f, 0.0f, 0.0f);
+            if (parent_joint->name != "hip") // I don't want to move by hip's position
+                pos = positions[parent_joint->index];
+            else
+                pos = glm::vec3(mSkeletonPosition.x, mSkeletonPosition.y, mSkeletonPosition.z);
             const auto &angle = angles[parent_joint->index];
-            // Move to eachn parent's position
+            // Move to each parent's position
             translations[id] = glm::translate(translations[id], pos);
 
             // Motion rotation
@@ -226,7 +235,8 @@ void Skeleton::ApplyBvhMotion(const int frame) {
 
         // Move to current joint's position
         if (joint_name == "hip")
-            translations[id] = glm::translate(translations[id], pos);
+            translations[id] = glm::translate(translations[id],
+                                              glm::vec3{mSkeletonPosition.x, mSkeletonPosition.y, mSkeletonPosition.z});
 
         // rotate current joint object to turn to child
         pos = glm::normalize(pos);
@@ -259,3 +269,17 @@ void Skeleton::ApplyBvhMotion(const int frame) {
     }
 }
 
+void Skeleton::ShowAnalyzeResult(const string &BoneName) {
+    auto bone = FindBone(BoneName);
+    bone->GetPhysicsObject()->setColor(postureWrongColor);
+    bone->GetPhysicsObject()->setSleepingColor(postureWrongColor);
+    analyze_modify_bones.push_back(bone);
+}
+
+void Skeleton::ClearAnalyzeResult() {
+    for (auto &bone: analyze_modify_bones) {
+        bone->GetPhysicsObject()->setColor(objectColor);
+        bone->GetPhysicsObject()->setSleepingColor(objectColor);
+    }
+    analyze_modify_bones.clear();
+}

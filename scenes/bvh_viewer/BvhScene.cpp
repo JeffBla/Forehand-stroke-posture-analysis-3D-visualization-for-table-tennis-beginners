@@ -36,11 +36,11 @@ using namespace angleTool;
 BvhScene::BvhScene(const std::string &name, EngineSettings &settings, reactphysics3d::PhysicsCommon &physicsCommon)
         : SceneDemo(name, settings, physicsCommon, true, true) {
     // Compute the radius and the center of the scene
-    openglframework::Vector3 center(0, 10, 0);
+    openglframework::Vector3 center(0, 0, 0);
 
     // Set the center of the scene
     setScenePosition(center, SCENE_RADIUS);
-    setInitZoom(2.1);
+    setInitZoom(0.5);
     resetCameraToViewAll();
 
     mWorldSettings.worldName = name;
@@ -67,7 +67,7 @@ void BvhScene::createPhysicsWorld() {
     // Create the floor
     mFloor2 = new Box(true, FLOOR_2_SIZE, mPhysicsCommon, mPhysicsWorld, mMeshFolderPath);
     mFloor2->setColor(mFloorColorDemo);
-    mFloor2->setTransform(rp3d::Transform(rp3d::Vector3(0, -10, 0), rp3d::Quaternion::identity()));
+    mFloor2->setTransform(rp3d::Transform(rp3d::Vector3(0, -7, 0), rp3d::Quaternion::identity()));
     mFloor2->setSleepingColor(mFloorColorDemo);
     mFloor2->getRigidBody()->setType(rp3d::BodyType::STATIC);
     mPhysicsObjects.push_back(mFloor2);
@@ -79,6 +79,8 @@ void BvhScene::destroyPhysicsWorld() {
         delete mFloor2;
 
         delete skeleton1;
+
+        delete experx_skeleton;
 
         mPhysicsObjects.clear();
 
@@ -117,11 +119,10 @@ void BvhScene::reset() {
     isMotionStart = false;
 }
 
-skeleton::Skeleton *BvhScene::CreateSkeleton(string &new_bvh) {
+skeleton::Skeleton *BvhScene::CreateSkeleton(BVH *new_bvh) {
     DestroySkeleton();
 
-    // Create the skeleton with bvh
-    bvh = new BVH(new_bvh.c_str());
+    bvh = new_bvh;
     skeleton1 = new skeleton::Skeleton(mPhysicsCommon, mPhysicsWorld, mPhysicsObjects, mMeshFolderPath, bvh);
     // Analysizer
     forehand_stroke_analysizer = new analysizer::Analysizer(skeleton1, "forehand_stroke");
@@ -129,8 +130,16 @@ skeleton::Skeleton *BvhScene::CreateSkeleton(string &new_bvh) {
     skeleton_created.fire();
 
     raycastedTarget_bone = skeleton1->FindBone("head");
+    raycastedTarget_oldcolor = raycastedTarget_bone->GetPhysicsObject()->getColor();
     RecordRaycastTarget(raycastedTarget_bone);
     return skeleton1;
+}
+
+skeleton::Skeleton *BvhScene::CreateSkeleton(string &new_bvh) {
+    // Create the skeleton with bvh
+    auto target_bvh = new BVH(new_bvh.c_str());
+
+    return CreateSkeleton(target_bvh);
 }
 
 void BvhScene::DestroySkeleton() {
@@ -148,6 +157,41 @@ void BvhScene::DestroySkeleton() {
 
         motion_nexted.clear();
     }
+
+    if (experx_skeleton != nullptr) {
+        delete experx_skeleton;
+        experx_skeleton = nullptr;
+
+        delete expert_bvh;
+        expert_bvh = nullptr;
+    }
+}
+
+skeleton::Skeleton *BvhScene::CreateExpertSkeleton(BVH *new_bvh) {
+    DestroyExpertSkeleton();
+
+    expert_bvh = new_bvh;
+    experx_skeleton = new skeleton::Skeleton(mPhysicsCommon, mPhysicsWorld, mPhysicsObjects, mMeshFolderPath,
+                                             expert_bvh, rp3d::Vector3(10, 0, 0));
+
+    return experx_skeleton;
+}
+
+skeleton::Skeleton *BvhScene::CreateExpertSkeleton(string &new_bvh) {
+    // Create the skeleton with bvh
+    auto target_bvh = new BVH(new_bvh.c_str());
+
+    return CreateExpertSkeleton(target_bvh);
+}
+
+void BvhScene::DestroyExpertSkeleton() {
+    if (experx_skeleton != nullptr) {
+        delete experx_skeleton;
+        experx_skeleton = nullptr;
+
+        delete expert_bvh;
+        expert_bvh = nullptr;
+    }
 }
 
 skeleton::Skeleton *BvhScene::GetSkeleton() {
@@ -162,25 +206,34 @@ rp3d::decimal BvhScene::notifyRaycastHit(const rp3d::RaycastInfo &raycastInfo) {
     Bone *target_bone = skeleton1->FindBone(body);
     if (target_bone != nullptr) {
         RecordRaycastTarget(target_bone);
+    } else {
+        target_bone = experx_skeleton->FindBone(body);
+        if (target_bone != nullptr) {
+            RecordRaycastTarget(target_bone);
+        }
     }
 
     return SceneDemo::notifyRaycastHit(raycastInfo);
 }
 
 void BvhScene::RecordRaycastTarget(Bone *target) {
-    raycastedTarget_bone->GetPhysicsObject()->setColor(BvhScene::mObjectColorDemo);
-    raycastedTarget_bone->GetPhysicsObject()->setSleepingColor(BvhScene::mSleepingColorDemo);
+    raycastedTarget_bone->GetPhysicsObject()->setColor(raycastedTarget_oldcolor);
+    raycastedTarget_bone->GetPhysicsObject()->setSleepingColor(raycastedTarget_oldcolor);
     raycastedTarget_bone = target;
+    raycastedTarget_oldcolor = raycastedTarget_bone->GetPhysicsObject()->getColor();
     raycastedTarget_bone->GetPhysicsObject()->setColor(pickedColor);
     raycastedTarget_bone->GetPhysicsObject()->setSleepingColor(pickedColor);
     // Event occur!!!
     raycastedTarget_changed.fire(target);
 
     raycastedTarget_bone_Transform = target->GetPhysicsObject()->getTransform();
-    /// Debug
-//    cout << raycastedTarget_bone_Transform.getPosition().to_string() << endl;
-//    rp3d::Vector3 tmp = AngleTool::QuaternionToEulerAngles(raycastedTarget_bone_Transform.getOrientation());
-//    cout << AngleTool::EulerAnglesToDegree(tmp).to_string() << endl;
+
+#ifdef DEBUG
+    cout << "The pos of raycastedTarget_bone_Transform: " << raycastedTarget_bone_Transform.getPosition().to_string()
+         << endl;
+    rp3d::Vector3 tmp = AngleTool::QuaternionToEulerAngles(raycastedTarget_bone_Transform.getOrientation());
+    cout << "The deg of raycastedTarget_bone_Transform: " << AngleTool::EulerAnglesToDegree(tmp).to_string() << endl;
+#endif
 }
 
 bool BvhScene::keyboardEvent(int key, int scancode, int action, int mods) {
@@ -211,6 +264,8 @@ bool BvhScene::keyboardEvent(int key, int scancode, int action, int mods) {
 void BvhScene::MotionNext() {
     if (skeleton1 != nullptr)
         skeleton1->NextBvhMotion();
+    if (experx_skeleton != nullptr)
+        experx_skeleton->NextBvhMotion();
 }
 
 void BvhScene::ForearmStrokeAnalyze(const std::string &openposePath) {
@@ -219,7 +274,7 @@ void BvhScene::ForearmStrokeAnalyze(const std::string &openposePath) {
 
 string BvhScene::GetForearmStrokeAnalyzeSuggestions() {
     if (forehand_stroke_analysizer != nullptr) {
-        return forehand_stroke_analysizer->Suggest_str();
+        return forehand_stroke_analysizer->GetSuggestion();
     }
     return "No skeleton to analyze.";
 }

@@ -55,6 +55,7 @@ class Gui {
 
         // -------------------- Constants -------------------- //
         int distanceBetweenWidgets = 10;
+        int window_fixedWidth = 220;
 
         // -------------------- Attributes -------------------- //
 
@@ -70,14 +71,17 @@ class Gui {
 
         // Simulation panel
         Widget* mSimulationPanel;
+        Vector2i mSimulationPanelPos{15,15};
 
         // Settings Panel
         Widget* mSettingsPanel;
+        Vector2i mSettingsPanelPos{15,180};
         Widget* mPhysicsPanel;
         Widget* mRenderingPanel;
 
         // Profiling panel
         Widget* mProfilingPanel;
+        Vector2i mProfilingPanelPos{15,505};
         Label* mFPSLabel;
         Label* mFrameTimeLabel;
         Label* mTotalPhysicsTimeLabel;
@@ -100,6 +104,7 @@ class Gui {
 
         // Rotation panel
         Widget *mRotationPanel;
+        Vector2i mRotationPanelPos{15, 15};
         TextBox *mRotateTextBox_x;
         Slider *mRotateSlider_x;
 
@@ -115,19 +120,25 @@ class Gui {
 
         // Utils panel
         Widget *mUtilsPanel;
+        Vector2i mUtilsPanelPos{15, 180};
         std::string mBvhPath;
         std::string mVideoPath;
         TextBox *videoPath_textbox;
         TextBox *bvhPath_textbox;
 
-        // -------------------- Image Viewer -------------------- //
+        // Analyze panel
+        Widget *mAnalyzePanel;
+        Vector2i mAnalyzePanelPos{15, 505};
+        std::string mOpenposePath;
+
+        // Image Viewer
         Window *bvhImageWindow;
         ImageView *bvhImageViewer;
         videoLoader::VideoController *pVideoController;
 
-        // Analyze panel
-        Widget *mAnalyzePanel;
-        std::string mOpenposePath;
+        Window *expertBvhImageWindow;
+        ImageView *expertBvhImageViewer;
+        videoLoader::VideoController *pExpertVideoController;
 
         /// True if the GUI is displayed
         bool mIsDisplayed;
@@ -172,7 +183,9 @@ class Gui {
 
         static void resetScroll();
 
-        void adjustRotationUtilsAnalyzePanel();
+        void adjustRightPanel();
+
+        void adjustLeftPanel();
     public :
 
         // -------------------- Methods -------------------- //
@@ -194,6 +207,8 @@ class Gui {
         void draw();
 
         void drawTearDown();
+
+        void adjustPanel();
 
         bool isFocus() const;
 

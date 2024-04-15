@@ -6,7 +6,7 @@ Identifier::Identifier(int id, const std::string &identifier_name, const std::ve
                        Skeleton *target_skeleton)
         : identifier_id(id), identifier_name(identifier_name), target_list(target_list),
           target_skeleton(target_skeleton) {
-    result_list.resize(target_skeleton->GetBvh()->GetNumFrame());
+    result_list.resize(target_skeleton->GetBvh()->GetNumModifiedFrame());
 }
 
 Identifier::~Identifier() {
@@ -14,7 +14,7 @@ Identifier::~Identifier() {
 }
 
 void Identifier::Identify(int frame) {
-    result_list.resize(target_skeleton->GetBvh()->GetNumFrame());
+    result_list.resize(target_skeleton->GetBvh()->GetNumModifiedFrame());
 
     for (const auto &target_name: target_list) {
         auto target_bone = target_skeleton->FindBone(target_name);

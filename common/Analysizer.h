@@ -16,8 +16,10 @@ namespace analysizer {
     class Analysizer {
     private:
         // ------------------------- Constants ----------------------- //
+        const std::vector<std::string> analyzer_name_list = {"forehand_stroke"};
+
         const std::map<std::string, std::map<std::string, std::vector<std::string>>> identifier_target_list = {
-                {"forehand_stroke", {{"rotation", {"hip"}}, {"fore_arm", {"rForeArm"}}}},
+                {analyzer_name_list[0], {{"rotation", {"hip"}}, {"fore_arm", {"rForeArm"}}}},
         };
 
         const std::map<std::string, std::map<std::string, std::string>> identifier_notPass_suggestions = {
@@ -39,6 +41,8 @@ namespace analysizer {
         std::vector<std::string> identifier_name_list;
 
         std::map<std::string, std::vector<float>> identifier_pass_list;
+
+        std::string mSuggestion;
 
         // ------------------------- Methods ----------------------- //
         void _Analyse(map<string, Identifier *> &identifier_list, const string &openposePath);
@@ -68,7 +72,16 @@ namespace analysizer {
         string Suggest_str(const string &identifier_name);
 
         string Suggest_str();
+
+        void ShowAnalysisResult_Skeleton(const string &identifier_name);
+
+        // ------------------------- Getters & Setters ----------------------- //
+        std::string GetSuggestion();
     };
+
+    inline std::string Analysizer::GetSuggestion() {
+        return mSuggestion;
+    }
 
 }
 

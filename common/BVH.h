@@ -58,11 +58,14 @@ namespace bvh {
 
         int num_frame;
         double interval;
-        double *motion;
+        vector<double> *motion;
+        vector<double> *modified_motion;
         float position_scale = 0.1f;
         int current_frame;
         vector<glm::vec3> current_frame_positions;
         vector<glm::vec3> current_frame_angles;
+
+        glm::vec3 init_root_pos;
 
     public:
         BVH();
@@ -77,6 +80,11 @@ namespace bvh {
 
         void SetCurrentFrame(int frame);
 
+        void InsertMotionAtFrame(int nFrame, vector<double>::iterator inserted_motion_begin,
+                                 vector<double>::iterator inserted_motion_end);
+
+        void
+        PushBackMotion(vector<double>::iterator inserted_motion_begin, vector<double>::iterator inserted_motion_end);
         // -------------------- Setter & Getter -------------------- //
 
         bool IsLoadSuccess() const;
@@ -101,11 +109,21 @@ namespace bvh {
 
         int GetNumFrame() const;
 
+        int GetNumModifiedFrame() const;
+
         double GetInterval() const;
+
+        vector<double> *GetMotions() const;
 
         double GetMotion(int f, int c) const;
 
         void SetMotion(int f, int c, double v);
+
+        vector<double> *GetModifiedMotions();
+
+        double GetModifiedMotion(int f, int c) const;
+
+        glm::vec3 GetInitRootPos();
 
         const vector<ChannelEnum> &GetRotationOrder(int index);
 
@@ -113,7 +131,7 @@ namespace bvh {
 
         const vector<glm::vec3> &GetCurrentFrameAngles();
 
-        float GetPositionScale() const ;
+        float GetPositionScale() const;
 
         void SetPositionScale(float positionScale);
     };
@@ -146,11 +164,21 @@ namespace bvh {
 
     inline int BVH::GetNumFrame() const { return num_frame; }
 
+    inline int BVH::GetNumModifiedFrame() const { return modified_motion->size() / num_channel; }
+
     inline double BVH::GetInterval() const { return interval; }
 
-    inline double BVH::GetMotion(int f, int c) const { return motion[f * num_channel + c]; }
+    inline vector<double> *BVH::GetMotions() const { return motion; }
 
-    inline void BVH::SetMotion(int f, int c, double v) { motion[f * num_channel + c] = v; }
+    inline double BVH::GetMotion(int f, int c) const { return motion->at(f * num_channel + c); }
+
+    inline void BVH::SetMotion(int f, int c, double v) { motion->at(f * num_channel + c) = v; }
+
+    inline vector<double> *BVH::GetModifiedMotions() { return modified_motion; }
+
+    inline double BVH::GetModifiedMotion(int f, int c) const {
+        return modified_motion->at(f * num_channel + c);
+    }
 
     inline const vector<ChannelEnum> &BVH::GetRotationOrder(int index) {
         return rotationOrder[index];
@@ -160,7 +188,7 @@ namespace bvh {
         return current_frame_positions;
     }
 
-    inline const vector<glm::vec3> &BVH::GetCurrentFrameAngles(){
+    inline const vector<glm::vec3> &BVH::GetCurrentFrameAngles() {
         return current_frame_angles;
     }
 
