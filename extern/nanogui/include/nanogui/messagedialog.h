@@ -31,8 +31,7 @@ public:
     };
 
     MessageDialog(Widget *parent, Type type, const std::string &title = "Untitled",
-                  const std::string &message = "Message",
-                  const std::string &button_text = "OK",
+                  const std::string &message = "Message", int message_font_size = 16, const std::string &button_text = "OK",
                   const std::string &alt_button_text = "Cancel", bool alt_button = false);
 
     Label *message_label() { return m_message_label; }

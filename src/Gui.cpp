@@ -876,12 +876,12 @@ bool Gui::isFocus() const {
 }
 
 void Gui::createMessageDialog(const std::string &title, const std::string &message, MessageDialog::Type type) {
-    new MessageDialog(mScreen, type, title, message);
+    new MessageDialog(mScreen, type, title, message, 18);
 }
 
 void Gui::createMessageDialog(const string &title, const string &message, MessageDialog::Type type,
                               const std::function<void(int)> &callback) {
-    auto dig = new MessageDialog(mScreen, type, title, message);
+    auto dig = new MessageDialog(mScreen, type, title, message, 12);
     dig->set_callback(callback);
 }
 
