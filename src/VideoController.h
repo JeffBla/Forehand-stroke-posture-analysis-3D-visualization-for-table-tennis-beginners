@@ -19,7 +19,7 @@ namespace videoLoader {
     class VideoController {
     private:
         // -------------------- Constants -------------------- //
-        float video_scale = 0.2f;
+        float video_scale = 0.4f;
 
         // -------------------- Attributes -------------------- //
         std::string videoPath;

@@ -115,7 +115,7 @@ void TestbedApplication::start() {
     glClear(GL_COLOR_BUFFER_BIT);
 
     // Logger
-    rp3d::PhysicsCommon::setLogger(&mLogger);
+//    rp3d::PhysicsCommon::setLogger(&mLogger);
 
     // Create all the scenes
     createScenes();
@@ -220,7 +220,7 @@ void TestbedApplication::createScenes() {
 
     // Bvh scene
     std::string sceneName = "BVH";
-    mLogger.addFileDestination(sceneName, logLevel, rp3d::DefaultLogger::Format::HTML);
+//    mLogger.addFileDestination(sceneName, logLevel, rp3d::DefaultLogger::Format::HTML);
     BvhScene *bvhScene = new BvhScene(sceneName, mDefaultEngineSettings, mPhysicsCommon);
     mScenes.push_back(bvhScene);
 

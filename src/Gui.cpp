@@ -843,7 +843,7 @@ void Gui::adjustPanel() {
     adjustLeftPanel();
 }
 
-void Gui::adjustRightPanel() {
+void Gui::adjustLeftPanel() {
     mRotationPanel->set_position(mRotationPanelPos);
     mUtilsPanel->set_position(
             Vector2i(mRotationPanel->position().x(),
@@ -857,7 +857,7 @@ void Gui::adjustRightPanel() {
 
 }
 
-void Gui::adjustLeftPanel() {
+void Gui::adjustRightPanel() {
 #ifdef DEBUG
     mSimulationPanel->set_position(Vector2i(mScreen->width() - mSimulationPanel->width() - distanceBetweenWidgets, 15));
     mSettingsPanel->set_position(Vector2i(mSimulationPanel->position().x(),
@@ -1016,5 +1016,10 @@ void Gui::onForearmStrokeAnalyzeDone() {
     auto scene = (bvhscene::BvhScene *) this->mApp->mCurrentScene;
     auto suggestion = scene->GetForearmStrokeAnalyzeSuggestions();
 
+#ifdef DEBUG
+    std::cout << "Target Openpose Path: " << mOpenposePath << std::endl;
+    std::cout << "Forearm Suggestion: " << suggestion << std::endl;
+#else
     createMessageDialog("Suggest", suggestion, MessageDialog::Type::Information);
+#endif
 }
