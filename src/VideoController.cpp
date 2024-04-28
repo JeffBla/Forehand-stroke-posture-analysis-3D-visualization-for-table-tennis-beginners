@@ -76,7 +76,6 @@ void VideoController::MatchFrame(int target_nFrame, cv::VideoCapture *pVideoCapt
     int num_frame_passed = 0;
 
     factor_reminder_sum = 0;
-    frames.clear();
     bool is_read_success;
     cv::Mat flat;
     while (frames.size() < target_nFrame) {
