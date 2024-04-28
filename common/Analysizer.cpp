@@ -23,6 +23,7 @@ void Analysizer::_Analyse(map<string, Identifier *> &identifier_list, const stri
         for_each(identifier_list.begin(), identifier_list.end(), [curr_frame](pair<string, Identifier *> element) {
             element.second->Identify(curr_frame);
         });
+        output_identifier->Identify(curr_frame);
         target_skeleton->NextBvhMotion();
     }
     // Write the output & analyze
@@ -50,6 +51,8 @@ void Analysizer::_Analyse(map<string, Identifier *> &identifier_list, const stri
 
 Analysizer::~Analysizer() {
     identifiers.clear();
+
+    delete output_identifier;
 }
 
 void Analysizer::Analyze(const string &openposePath) {
