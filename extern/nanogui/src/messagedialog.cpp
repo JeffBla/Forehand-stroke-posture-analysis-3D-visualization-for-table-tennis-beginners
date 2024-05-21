@@ -22,7 +22,8 @@ NAMESPACE_BEGIN(nanogui)
             : Window(parent, title) {
         set_layout(new BoxLayout(Orientation::Vertical,
                                  Alignment::Middle, 10, 10));
-        set_modal(true);
+        // set whether the focus can move or not: false -> can. true -> can't
+        set_modal(false);
 
         Widget *panel1 = new Widget(this);
         panel1->set_layout(new BoxLayout(Orientation::Horizontal,
@@ -60,7 +61,7 @@ NAMESPACE_BEGIN(nanogui)
             dispose();
         });
         center();
-        request_focus();
+//        request_focus();
     }
 
 NAMESPACE_END(nanogui)
