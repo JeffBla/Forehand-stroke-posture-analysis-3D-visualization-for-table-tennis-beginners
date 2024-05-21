@@ -74,9 +74,10 @@ Sphere *Skeleton::CreateBonePhysics(const rp3d::Vector3 &pos, const rp3d::Quater
 }
 
 Skeleton::Skeleton(rp3d::PhysicsCommon &mPhysicsCommon, rp3d::PhysicsWorld *mPhysicsWorld,
-                   list<PhysicsObject *> &mPhysicsObjects, string &mMeshFolderPath, BVH *bvh, const rp3d::Vector3 &pos)
+                   list<PhysicsObject *> &mPhysicsObjects, string &mMeshFolderPath, BVH *bvh,
+                   const rp3d::Vector3 &pos, const rp3d::Vector3 &rotation)
         : mPhysicsCommon(mPhysicsCommon), mPhysicsWorld(mPhysicsWorld), mPhysicsObjects(mPhysicsObjects),
-          mMeshFolderPath(mMeshFolderPath), bvh(bvh), mSkeletonPosition(pos) {
+          mMeshFolderPath(mMeshFolderPath), bvh(bvh), mSkeletonPosition(pos), mSkeletonRotation(rotation) {
     {
         rp3d::Vector3 ragdollPosition{0, 0, 0};
 
@@ -110,7 +111,7 @@ Skeleton::Skeleton(rp3d::PhysicsCommon &mPhysicsCommon, rp3d::PhysicsWorld *mPhy
 
 Skeleton::Skeleton(rp3d::PhysicsCommon &mPhysicsCommon, rp3d::PhysicsWorld *mPhysicsWorld,
                    list<PhysicsObject *> &mPhysicsObjects, std::string &mMeshFolderPath, BVH *bvh) :
-        Skeleton(mPhysicsCommon, mPhysicsWorld, mPhysicsObjects, mMeshFolderPath, bvh, default_pos) {
+        Skeleton(mPhysicsCommon, mPhysicsWorld, mPhysicsObjects, mMeshFolderPath, bvh, default_pos, default_rotation) {
 
 }
 
@@ -177,6 +178,10 @@ void Skeleton::NextBvhMotion() {
     ApplyBvhMotion(bvh_frame);
 }
 
+void Skeleton::ApplyCurrBvhMotion(){
+    ApplyBvhMotion(bvh_frame);
+}
+
 void Skeleton::InitBvhMotion() {
     bvh_frame = 0;
     ApplyBvhMotion(bvh_frame);
@@ -198,11 +203,16 @@ void Skeleton::ApplyBvhMotion(const int frame) {
         for (size_t parentIdx = 0; parentIdx < parents.size(); parentIdx++) {
             auto parent_joint = parents[parentIdx];
             glm::vec<3, float> pos(0.0f, 0.0f, 0.0f);
-            if (parent_joint->name != "hip") // I don't want to move by hip's position
+            glm::vec<3, float> angle = angles[parent_joint->index];
+            auto skeleton_rotation = AngleTool::EulerAnglesToDegree(mSkeletonRotation);
+            if (parent_joint->name != "hip") { // I don't want to move by hip's position
                 pos = positions[parent_joint->index];
-            else
+                // angle do nothing
+            } else {
                 pos = glm::vec3(mSkeletonPosition.x, mSkeletonPosition.y, mSkeletonPosition.z);
-            const auto &angle = angles[parent_joint->index];
+                angle = glm::vec3( skeleton_rotation.x + angle.x, skeleton_rotation.y + angle.y,
+                                   skeleton_rotation.z + angle.z);
+            }
             // Move to each parent's position
             translations[id] = glm::translate(translations[id], pos);
 

@@ -123,7 +123,11 @@ skeleton::Skeleton *BvhScene::CreateSkeleton(BVH *new_bvh) {
     DestroySkeleton();
 
     bvh = new_bvh;
-    skeleton1 = new skeleton::Skeleton(mPhysicsCommon, mPhysicsWorld, mPhysicsObjects, mMeshFolderPath, bvh);
+    if (is_skeleton_front_view)
+        skeleton1 = new skeleton::Skeleton(mPhysicsCommon, mPhysicsWorld, mPhysicsObjects, mMeshFolderPath, bvh,
+                                           rp3d::Vector3(0, 0, 0), rp3d::Vector3(0, rp3d::PI_RP3D / 2, rp3d::PI_RP3D / 10));
+    else
+        skeleton1 = new skeleton::Skeleton(mPhysicsCommon, mPhysicsWorld, mPhysicsObjects, mMeshFolderPath, bvh);
     // Analysizer
     forehand_stroke_analysizer = new analysizer::Analysizer(skeleton1, "forehand_stroke");
 
@@ -172,7 +176,7 @@ skeleton::Skeleton *BvhScene::CreateExpertSkeleton(BVH *new_bvh) {
 
     expert_bvh = new_bvh;
     experx_skeleton = new skeleton::Skeleton(mPhysicsCommon, mPhysicsWorld, mPhysicsObjects, mMeshFolderPath,
-                                             expert_bvh, rp3d::Vector3(10, 0, 0));
+                                             expert_bvh, rp3d::Vector3(10, 0, 0), rp3d::Vector3(0, 0, 0));
 
     return experx_skeleton;
 }
@@ -262,8 +266,9 @@ bool BvhScene::keyboardEvent(int key, int scancode, int action, int mods) {
 }
 
 void BvhScene::MotionNext() {
-    if (skeleton1 != nullptr)
+    if (skeleton1 != nullptr) {
         skeleton1->NextBvhMotion();
+    }
     if (experx_skeleton != nullptr)
         experx_skeleton->NextBvhMotion();
 }

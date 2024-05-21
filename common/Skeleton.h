@@ -40,7 +40,9 @@ namespace skeleton {
         string &mMeshFolderPath;
         std::list<PhysicsObject *> &mPhysicsObjects;
         const rp3d::Vector3 default_pos{0, 0, 0};
+        const rp3d::Vector3 default_rotation{0, 0, 0};
         rp3d::Vector3 mSkeletonPosition;
+        rp3d::Vector3 mSkeletonRotation;
 
         float mHip_radius = 0.2f;
         const float linearDamping = 0.02f;
@@ -96,7 +98,8 @@ namespace skeleton {
                  list<PhysicsObject *> &mPhysicsObjects, std::string &mMeshFolderPath, BVH *bvh);
 
         Skeleton(rp3d::PhysicsCommon &mPhysicsCommon, rp3d::PhysicsWorld *mPhysicsWorld,
-                 list<PhysicsObject *> &mPhysicsObjects, string &mMeshFolderPath, BVH *bvh, const rp3d::Vector3 &pos);
+                 list<PhysicsObject *> &mPhysicsObjects, string &mMeshFolderPath, BVH *bvh,
+                 const rp3d::Vector3 &pos, const rp3d::Vector3 &rotation);
 
         /// Destructor
         ~Skeleton();
@@ -133,6 +136,8 @@ namespace skeleton {
         // -------------------- Motion -------------------- //
         void NextBvhMotion();
 
+        void ApplyCurrBvhMotion();
+
         void ApplyBvhMotion(const int frame);
 
         void InitBvhMotion();
@@ -141,6 +146,12 @@ namespace skeleton {
         BVH *GetBvh() ;
 
         const std::vector<std::string> &GetTargetBoneNames() const;
+
+        rp3d::Vector3 &GetSkeletonPosition();
+
+        rp3d::Vector3 &GetSkeletonRotation();
+
+        void SetSkeletonRotation(const rp3d::Vector3 &rotation);
     };
 
     inline const std::vector<std::string> &Skeleton::GetTargetBoneNames() const {
@@ -149,6 +160,18 @@ namespace skeleton {
 
     inline BVH *Skeleton::GetBvh() {
         return bvh;
+    }
+
+    inline rp3d::Vector3 &Skeleton::GetSkeletonPosition(){
+        return mSkeletonPosition;
+    }
+
+    inline rp3d::Vector3 &Skeleton::GetSkeletonRotation(){
+        return mSkeletonRotation;
+    }
+
+    inline void Skeleton::SetSkeletonRotation(const rp3d::Vector3 &rotation){
+        mSkeletonRotation = rotation;
     }
 
 }  // namespace skeleton

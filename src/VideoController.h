@@ -76,7 +76,9 @@ namespace videoLoader {
 
         void SetTargetBVH(bvh::BVH *targetBVH);
 
-        bvh::BVH *GetTargetBVH() const;
+        void SetVideoScale(float video_scale);
+
+        float GetVideoScale();
     };
 
     inline void VideoController::SetVideoPath(const std::string &path) {
@@ -93,6 +95,14 @@ namespace videoLoader {
 
     inline void VideoController::SetTargetBVH(bvh::BVH *targetBVH) {
         this->targetBVH = targetBVH;
+    }
+
+    inline void VideoController::SetVideoScale(float video_scale) {
+        this->video_scale = video_scale;
+    }
+
+    inline float VideoController::GetVideoScale() {
+        return video_scale;
     }
 }
 #endif //TESTBED_VIDEOCONTROLLER_H

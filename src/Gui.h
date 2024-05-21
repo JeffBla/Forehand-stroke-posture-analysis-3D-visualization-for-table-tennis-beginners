@@ -123,8 +123,10 @@ class Gui {
         Vector2i mUtilsPanelPos{15, 180};
         std::string mBvhPath;
         std::string mVideoPath;
-        TextBox *videoPath_textbox;
-        TextBox *bvhPath_textbox;
+        std::string videoPath_video2bvh;
+
+        Slider *mVideoScalerSlider;
+        TextBox *mVideoScalerTextBox;
 
         // Analyze panel
         Widget *mAnalyzePanel;

@@ -630,9 +630,8 @@ void Gui::createRotationPanel() {
                 auto mRotateSlider_y_angle = AngleTool::DegreeToEulerAngles(this->mRotateSlider_y->value());
                 auto mRotateSlider_z_angle = AngleTool::DegreeToEulerAngles(this->mRotateSlider_z->value());
                 bvhscene::BvhScene *scene = ((bvhscene::BvhScene *) this->mApp->mCurrentScene);
-                scene->GetSkeleton()->SetJointRotation(scene->GetRaycastedTarget_bone(), euler_angle,
-                                                       mRotateSlider_y_angle,
-                                                       mRotateSlider_z_angle);
+                scene->GetSkeleton()->SetSkeletonRotation({euler_angle, mRotateSlider_y_angle, mRotateSlider_z_angle});
+                scene->GetSkeleton()->ApplyCurrBvhMotion();
                 char text[6];
                 snprintf(text, 6, "%.5f", value);
                 this->mRotateTextBox_x->set_value(text);
@@ -657,9 +656,8 @@ void Gui::createRotationPanel() {
                 auto mRotateSlider_x_angle = AngleTool::DegreeToEulerAngles(this->mRotateSlider_x->value());
                 auto mRotateSlider_z_angle = AngleTool::DegreeToEulerAngles(this->mRotateSlider_z->value());
                 bvhscene::BvhScene *scene = ((bvhscene::BvhScene *) this->mApp->mCurrentScene);
-                scene->GetSkeleton()->SetJointRotation(scene->GetRaycastedTarget_bone(), mRotateSlider_x_angle,
-                                                       euler_angle,
-                                                       mRotateSlider_z_angle);
+                scene->GetSkeleton()->SetSkeletonRotation({mRotateSlider_x_angle, euler_angle, mRotateSlider_z_angle});
+                scene->GetSkeleton()->ApplyCurrBvhMotion();
                 char text[6];
                 snprintf(text, 6, "%.5f", value);
                 this->mRotateTextBox_y->set_value(text);
@@ -684,9 +682,8 @@ void Gui::createRotationPanel() {
                 auto mRotateSlider_x_angle = AngleTool::DegreeToEulerAngles(this->mRotateSlider_x->value());
                 auto mRotateSlider_y_angle = AngleTool::DegreeToEulerAngles(this->mRotateSlider_y->value());
                 bvhscene::BvhScene *scene = ((bvhscene::BvhScene *) this->mApp->mCurrentScene);
-                scene->GetSkeleton()->SetJointRotation(scene->GetRaycastedTarget_bone(), mRotateSlider_x_angle,
-                                                       mRotateSlider_y_angle,
-                                                       euler_angle);
+                scene->GetSkeleton()->SetSkeletonRotation({mRotateSlider_x_angle, mRotateSlider_y_angle, euler_angle});
+                scene->GetSkeleton()->ApplyCurrBvhMotion();
                 char text[6];
                 snprintf(text, 6, "%.5f", value);
                 this->mRotateTextBox_z->set_value(text);
@@ -716,6 +713,33 @@ void Gui::createUtilsPanel() {
         pVideoToBvhConverter = new videoToBvhConverter::VideoToBvhConverter();
         pVideoController = new videoLoader::VideoController();
         pExpertVideoController = new videoLoader::VideoController();
+
+#ifdef DEBUG
+        // -------------------- Bvh video rescaler -------------------- //
+        new Label(mUtilsPanel, "Video Window Rescaler", "sans-bold");
+        mVideoScalerSlider = new Slider(mUtilsPanel);
+        mVideoScalerSlider->set_value(pVideoController->GetVideoScale());
+        mVideoScalerSlider->set_range(std::pair(0.05, 1));
+        mVideoScalerSlider->set_fixed_width(200);
+
+        mVideoScalerTextBox = new TextBox(mUtilsPanel);
+        mVideoScalerTextBox->set_fixed_size(Vector2i(60, 25));
+        char text[6];
+        snprintf(text, 6, "%.5f", pVideoController->GetVideoScale());
+        mVideoScalerTextBox->set_value(text);
+        mVideoScalerSlider->set_callback([this](float value) {
+            pVideoController->SetVideoScale(value);
+
+            char text[6];
+            snprintf(text, 6, "%.5f", value);
+            this->mVideoScalerTextBox->set_value(text);
+        });
+        mVideoScalerSlider->set_final_callback([&](float value) {
+            std::cout << "Final slider value: " << value << std::endl;
+        });
+        mVideoScalerTextBox->set_font_size(20);
+        mVideoScalerTextBox->set_alignment(TextBox::Alignment::Right);
+#endif
 
         // -------------------- Bvh Image viewer -------------------- //
         // Window
@@ -754,6 +778,12 @@ void Gui::createUtilsPanel() {
         auto open_video_button = new Button(mUtilsPanel, "Open File");
         open_video_button->set_callback([&]() {
             mVideoPath = onOpenFileButtonPressed({{"mp4", "MPEG-4 Video"}}, false);
+        });
+
+        new CheckBox(mUtilsPanel, "Is The Input Front View?", [&](bool val) {
+            auto scene = (bvhscene::BvhScene *) this->mApp->mCurrentScene;
+
+            scene->SetSkeletonFrontView(val);
         });
 
         auto play_video_button = new Button(mUtilsPanel, "Play");
@@ -797,18 +827,16 @@ void Gui::createUtilsPanel() {
         // -------------------- Video to bvh -------------------- //
         new Label(mUtilsPanel, "Video to bvh", "sans-bold");
         new Label(mUtilsPanel, "Video File Path: ");
-        videoPath_textbox = new TextBox(mUtilsPanel, "");
-        videoPath_textbox->set_alignment(TextBox::Alignment::Left);
-        videoPath_textbox->set_editable(true);
-
-        new Label(mUtilsPanel, "BVH File Path: ");
-        bvhPath_textbox = new TextBox(mUtilsPanel, "");
-        bvhPath_textbox->set_alignment(TextBox::Alignment::Left);
-        bvhPath_textbox->set_editable(true);
+        auto open_video_button_video2bvh = new Button(mUtilsPanel, "Open File");
+        open_video_button_video2bvh->set_callback([&]() {
+            videoPath_video2bvh = onOpenFileButtonPressed({{"mp4", "MPEG-4 Video"}}, false);
+        });
 
         auto video_to_bvh_button = new Button(mUtilsPanel, "Convert");
         video_to_bvh_button->set_callback([&]() {
-            pVideoToBvhConverter->Convert(videoPath_textbox->value(), bvhPath_textbox->value());
+            string bvhPath = videoPath_video2bvh;
+            bvhPath.append(".bvh");
+            pVideoToBvhConverter->Convert(videoPath_video2bvh, bvhPath);
         });
 
         mUtilsPanel->set_visible(true);
@@ -947,25 +975,25 @@ void Gui::onChangeBoneTransform_bvhscene(Bone *target) {
     // Only change the info if the target is raycasted target
     if (raycastedBone == target) {
         /// Update Slider info
-        auto degrees = AngleTool::QuaternionToEulerAngles(
-                raycastedBone->GetPhysicsObject()->getTransform().getOrientation());
-        auto offset_degrees = AngleTool::QuaternionToEulerAngles(raycastedBone->GetOriginQuaternion());
-        degrees = AngleTool::EulerAnglesToDegree(degrees);
-        offset_degrees = AngleTool::EulerAnglesToDegree(offset_degrees);
-        auto result_deg = degrees - offset_degrees;
-        mRotateSlider_x->set_value(result_deg.x);
-        mRotateSlider_y->set_value(result_deg.y);
-        mRotateSlider_z->set_value(result_deg.z);
-
-        char text[6];
-        snprintf(text, 6, "%.5f", result_deg.x);
-        mRotateTextBox_x->set_value(text);
-
-        snprintf(text, 6, "%.5f", result_deg.y);
-        mRotateTextBox_y->set_value(text);
-
-        snprintf(text, 6, "%.5f", result_deg.z);
-        mRotateTextBox_z->set_value(text);
+//        auto degrees = AngleTool::QuaternionToEulerAngles(
+//                raycastedBone->GetPhysicsObject()->getTransform().getOrientation());
+//        auto offset_degrees = AngleTool::QuaternionToEulerAngles(raycastedBone->GetOriginQuaternion());
+//        degrees = AngleTool::EulerAnglesToDegree(degrees);
+//        offset_degrees = AngleTool::EulerAnglesToDegree(offset_degrees);
+//        auto result_deg = degrees - offset_degrees;
+//        mRotateSlider_x->set_value(result_deg.x);
+//        mRotateSlider_y->set_value(result_deg.y);
+//        mRotateSlider_z->set_value(result_deg.z);
+//
+//        char text[6];
+//        snprintf(text, 6, "%.5f", result_deg.x);
+//        mRotateTextBox_x->set_value(text);
+//
+//        snprintf(text, 6, "%.5f", result_deg.y);
+//        mRotateTextBox_y->set_value(text);
+//
+//        snprintf(text, 6, "%.5f", result_deg.z);
+//        mRotateTextBox_z->set_value(text);
 
         /// Update the angle related ot raycasted target
         auto angles = target->GetAngleInfo();
@@ -995,6 +1023,23 @@ void Gui::onCreateSkeleton_bvhscene() {
     scene->GetForehandStrokeAnalysizer()->analysize_done.add_handler([&]() {
         onForearmStrokeAnalyzeDone();
     });
+
+    /// Update Slider info for hip rotation
+    auto degrees = scene->GetSkeleton()->GetSkeletonRotation();
+    degrees = AngleTool::EulerAnglesToDegree(degrees);
+    mRotateSlider_x->set_value(degrees.x);
+    mRotateSlider_y->set_value(degrees.y);
+    mRotateSlider_z->set_value(degrees.z);
+
+    char text[6];
+    snprintf(text, 6, "%.5f", degrees.x);
+    mRotateTextBox_x->set_value(text);
+
+    snprintf(text, 6, "%.5f", degrees.y);
+    mRotateTextBox_y->set_value(text);
+
+    snprintf(text, 6, "%.5f", degrees.z);
+    mRotateTextBox_z->set_value(text);
 }
 
 void Gui::onMotionNext() {

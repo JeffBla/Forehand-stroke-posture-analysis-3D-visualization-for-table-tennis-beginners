@@ -63,6 +63,7 @@ namespace bvhscene {
 
         skeleton::Skeleton *skeleton1 = nullptr;
         skeleton::Skeleton *experx_skeleton = nullptr;
+        bool is_skeleton_front_view = false;
 
         // -------------------- Bvh -------------------- //
         bool isMotionStart;
@@ -156,6 +157,10 @@ namespace bvhscene {
         string &GetExpertBvhPath();
 
         string &GetExpertVideoPath();
+
+        bool IsSkeletonFrontView() const;
+
+        void SetSkeletonFrontView(bool is_front_view);
     };
 
     inline Bone *BvhScene::GetRaycastedTarget_bone() const {
@@ -178,6 +183,13 @@ namespace bvhscene {
         return expert_video_path;
     }
 
+    inline bool BvhScene::IsSkeletonFrontView() const {
+        return is_skeleton_front_view;
+    }
+
+    inline void BvhScene::SetSkeletonFrontView(bool is_front_view) {
+        is_skeleton_front_view = is_front_view;
+    }
 
 }  // namespace bvhscene
 
