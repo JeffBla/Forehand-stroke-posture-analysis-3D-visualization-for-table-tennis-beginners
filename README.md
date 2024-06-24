@@ -4,16 +4,14 @@ It's my undergraduate project aim to help beginners learn table tennis by provid
 With one camera, like a cellphone, users can visualize their 3D skeleton with motion in 3D space, and compare it with the one from an expert we provided. Moreover, considering that beginners need some concrete advice, we train an LSTM to classify user's motion and the software gives suggestions according to the result.
 
 <p align="center">
-    <img src="./static/pictures/Forehand stroke posture analysis ＆  3D visualization for table tennis beginners poster.png" alt="3D Visualization - the upper is a beginner with 3D skeleton, and the lower is an expert with 3D skeleton." width="25%" height="25%" />
+    <img src="./static/pictures/Forehand stroke posture analysis ＆  3D visualization for table tennis beginners poster.png" alt="3D Visualization - the upper is a beginner with 3D skeleton, and the lower is an expert with 3D skeleton." />
 </p>
 
 ## Features
 
 - 3D Visualization
 
-    <p align="center">
     <img src="./static/pictures/3D-visualization.png" alt="3D Visualization - the upper is a beginner with 3D skeleton, and the lower is an expert with 3D skeleton." />
-    </p>
 
   - **Side-by-Side Comparison**: Display the expert’s and the beginner’s motions simultaneously, allowing users to compare their postures.
 
@@ -21,9 +19,7 @@ With one camera, like a cellphone, users can visualize their 3D skeleton with mo
 
   - LSTM classifies the motion and the software gives suggestions by the result.
 
-    <p align="center">
-    <img src="./static/pictures/LSTM-classify-result.png" alt="LSTM Posture Analysis - LSTM classifies the motion and the software gives suggestions by the result." width="50%" height="50%" />
-    </p>
+    <img src="./static/pictures/LSTM-classify-result.png" alt="LSTM Posture Analysis - LSTM classifies the motion and the software gives suggestions by the result." />
 
 ## Demo
 
@@ -39,23 +35,15 @@ With one camera, like a cellphone, users can visualize their 3D skeleton with mo
 
 #### Training dataset
 
-<p align="center">
-    <img src="./static/pictures/training-data.png" alt="training dataset" width="60%" height="60%" />
-</p>
+<img src="./static/pictures/training-data.png" alt="training dataset" width="60%" height="60%" />
 
-<p align="center">
-    <img src="./static/pictures/training-data-swinging.png" alt="swinging distribution in training dataset" width="30%" height="30%" /> <img src="./static/pictures/training-data-rotation.png" alt="rotation distribution in training dataset" width="30%" height="30%" />
-</p>
+<img src="./static/pictures/training-data-swinging.png" alt="swinging distribution in training dataset" width="30%" height="30%" /> <img src="./static/pictures/training-data-rotation.png" alt="rotation distribution in training dataset" width="30%" height="30%" />
 
 #### Testing dataset
 
-<p align="center">
-    <img src="./static/pictures/testing-data.png" alt="testing dataset" width="60%" height="60%" />
-</p>
+<img src="./static/pictures/testing-data.png" alt="testing dataset" width="60%" height="60%" />
 
-<p align="center">
-    <img src="./static/pictures/testing-data-swinging.png" alt="swinging distribution in testing dataset" width="30%" height="30%" /> <img src="./static/pictures/testing-data-rotation.png" alt="rotation distribution in testing dataset" width="30%" height="30%" />
-</p>
+<img src="./static/pictures/testing-data-swinging.png" alt="swinging distribution in testing dataset" width="30%" height="30%" /> <img src="./static/pictures/testing-data-rotation.png" alt="rotation distribution in testing dataset" width="30%" height="30%" />
 
 #### Result
 
