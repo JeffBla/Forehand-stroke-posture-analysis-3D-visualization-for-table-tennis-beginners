@@ -4,7 +4,7 @@ It's my undergraduate project aim to help beginners learn table tennis by provid
 With one camera, like a cellphone, users can visualize their 3D skeleton with motion in 3D space, and compare it with the one from an expert we provided. Moreover, considering that beginners need some concrete advice, we train an LSTM to classify user's motion and the software gives suggestions according to the result.
 
 <p align="center">
-    <img src="./static/pictures/Forehand stroke posture analysis ＆  3D visualization for table tennis beginners poster.png" alt="3D Visualization - the upper is a beginner with 3D skeleton, and the lower is an expert with 3D skeleton." />
+    <img src="./static/pictures/Forehand stroke posture analysis ＆  3D visualization for table tennis beginners poster.png" alt="3D Visualization - the upper is a beginner with 3D skeleton, and the lower is an expert with 3D skeleton." width="50%" height="50%" />
 </p>
 
 ## Features
