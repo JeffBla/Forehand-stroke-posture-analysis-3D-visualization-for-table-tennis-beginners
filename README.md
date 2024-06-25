@@ -1,6 +1,6 @@
 # Forehand stroke posture analysis ＆ 3D visualization for table tennis beginners
 
-It's my undergraduate project aim to help beginners learn table tennis by providing them 3D skeleton motion & improvement suggestions.
+It's my undergraduate project aims to help beginners learn table tennis by providing them 3D skeleton motion & improvement suggestions.
 With one camera, like a cellphone, users can visualize their 3D skeleton with motion in 3D space, and compare it with the one from an expert we provided. Moreover, considering that beginners need some concrete advice, we train an LSTM to classify user's motion and the software gives suggestions according to the result.
 
 <p align="center">
@@ -22,6 +22,14 @@ With one camera, like a cellphone, users can visualize their 3D skeleton with mo
     <img src="./static/pictures/LSTM-classify-result.png" alt="LSTM Posture Analysis - LSTM classifies the motion and the software gives suggestions by the result." />
 
 ## Demo
+
+![](./static/pictures/finaldemo-bigandsmall-wrong.mp4)
+
+![](https://youtu.be/aiRTnW4jOg0?si=T2hMTYKZND0eIQ9l)
+
+### Interface
+
+![Software Interface](./static/pictures/interface.png)
 
 ## Motivation
 
@@ -45,7 +53,9 @@ With one camera, like a cellphone, users can visualize their 3D skeleton with mo
 
 <img src="./static/pictures/testing-data-swinging.png" alt="swinging distribution in testing dataset" width="30%" height="30%" /> <img src="./static/pictures/testing-data-rotation.png" alt="rotation distribution in testing dataset" width="30%" height="30%" />
 
-#### Result
+### Result
+
+<img src="./static/pictures/LSTM-result.png">
 
 ## Dependencies
 
