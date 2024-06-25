@@ -24,7 +24,7 @@ With one camera, like a cellphone, users can visualize their 3D skeleton with mo
 ## Demo
 
 <img src="./static/pictures/skeleton-motion.gif" alt="skeleton-motion-demo" />
-</br></br>
+</br>
 
 [Full Demo video link](<[./static/pictures/finaldemo-bigandsmall-wrong.mp4](https://youtu.be/aiRTnW4jOg0?si=T2hMTYKZND0eIQ9l)>)
 
@@ -56,7 +56,7 @@ With one camera, like a cellphone, users can visualize their 3D skeleton with mo
 
 ### Result
 
-<img src="./static/pictures/LSTM-result.png" width="20%" height="20%" />
+<img src="./static/pictures/LSTM-result.png" width="50%" height="50%" />
 
 ## Dependencies
 
