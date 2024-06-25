@@ -23,9 +23,10 @@ With one camera, like a cellphone, users can visualize their 3D skeleton with mo
 
 ## Demo
 
-![](./static/pictures/finaldemo-bigandsmall-wrong.mp4)
+<img src="./static/pictures/skeleton-motion.gif" alt="skeleton-motion-demo" />
+</br></br>
 
-![](https://youtu.be/aiRTnW4jOg0?si=T2hMTYKZND0eIQ9l)
+[Full Demo video link](<[./static/pictures/finaldemo-bigandsmall-wrong.mp4](https://youtu.be/aiRTnW4jOg0?si=T2hMTYKZND0eIQ9l)>)
 
 ### Interface
 
@@ -55,7 +56,7 @@ With one camera, like a cellphone, users can visualize their 3D skeleton with mo
 
 ### Result
 
-<img src="./static/pictures/LSTM-result.png">
+<img src="./static/pictures/LSTM-result.png" width="20%" height="20%" />
 
 ## Dependencies
 
@@ -78,7 +79,10 @@ With one camera, like a cellphone, users can visualize their 3D skeleton with mo
 
 ## Future work
 
-- [ ] Bvh motion retarget. Attach bvh motion to model for more comprehensive visualization.
+- [ ] Bvh motion retarget. Attach bvh motion to model for more comprehensive visualization.\
+       We'd already worked on the feature. Here is the example.
+
+<img src="./static/pictures/human_motion_blender.gif" alt="Human motion in blender" width="35%" height="35%" />
 
 ## References
 
