@@ -98,6 +98,8 @@ namespace bone {
         void SetLocalAngle(rp3d::Vector3 &angle);
 
         BoneType GetBoneType() const;
+
+        rp3d::Quaternion getOrientation();
     };
 
     inline void Bone::AppendChild(Bone *child) {

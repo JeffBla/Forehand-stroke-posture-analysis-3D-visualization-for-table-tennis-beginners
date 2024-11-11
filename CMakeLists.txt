@@ -133,7 +133,7 @@ set(COMMON_SOURCES
     common/PerlinNoise.cpp
     common/AABB.h
     common/AABB.cpp
-        common/Skeleton.cpp
+		common/Skeleton/Skeleton.cpp
 		common/BVH.cpp
         common/Bone.cpp
         common/Bone.h
@@ -143,6 +143,22 @@ set(COMMON_SOURCES
 		common/Identifier.h
 		common/VideoToBvhConverter.cpp
 		common/VideoToBvhConverter.h
+		common/Skeleton/MotionController.cpp
+		common/Skeleton/MotionController.h
+		common/Skeleton/BVHAnimator.cpp
+		common/Skeleton/BVHAnimator.h
+		common/Skeleton/FrameTransform.cpp
+		common/Skeleton/FrameTransform.h
+		common/Skeleton/TransformApplicator.cpp
+		common/Skeleton/TransformApplicator.h
+		common/Skeleton/SkeletonPhysics.cpp
+		common/Skeleton/SkeletonPhysics.h
+		common/Skeleton/PostureAnalyzer.cpp
+		common/Skeleton/PostureAnalyzer.h
+		common/Skeleton/JointTransformManager.cpp
+		common/Skeleton/JointTransformManager.h
+		common/Skeleton/Transform.cpp
+		common/Skeleton/Transform.h
 )
 
 # Scenes source files
@@ -158,6 +174,12 @@ set(UTILS_SOURCES
 		utils/Event.cpp
 		utils/Event.h
 		utils/debug.h
+		common/Skeleton/BVHAnimator.cpp
+		common/Skeleton/BVHAnimator.h
+		common/Skeleton/BoneHierarchy.cpp
+		common/Skeleton/BoneHierarchy.h
+		common/Skeleton/BoneFactory.cpp
+		common/Skeleton/BoneFactory.h
 )
 
 # Create the executable

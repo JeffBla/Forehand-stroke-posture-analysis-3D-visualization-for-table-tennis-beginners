@@ -8,7 +8,7 @@
 #include <pybind11/embed.h>
 #include <pybind11/stl.h>
 
-#include "Skeleton.h"
+#include "Skeleton/Skeleton.h"
 
 using namespace skeleton;
 namespace py = pybind11;

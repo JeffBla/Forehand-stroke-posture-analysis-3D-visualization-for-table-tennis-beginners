@@ -5,7 +5,7 @@
 #include <vector>
 
 #include "Identifier.h"
-#include "Skeleton.h"
+#include "Skeleton/Skeleton.h"
 #include "SceneDemo.h"
 #include "Event.h"
 

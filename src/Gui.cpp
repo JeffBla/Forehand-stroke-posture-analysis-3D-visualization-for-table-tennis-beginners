@@ -947,8 +947,10 @@ void Gui::onChangeBoneTransform_bvhscene(Bone *target) {
     // Only change the info if the target is raycasted target
     if (raycastedBone == target) {
         /// Update Slider info
+//        auto degrees = AngleTool::QuaternionToEulerAngles(
+//                raycastedBone->GetPhysicsObject()->getTransform().getOrientation());
         auto degrees = AngleTool::QuaternionToEulerAngles(
-                raycastedBone->GetPhysicsObject()->getTransform().getOrientation());
+                raycastedBone->getOrientation());
         auto offset_degrees = AngleTool::QuaternionToEulerAngles(raycastedBone->GetOriginQuaternion());
         degrees = AngleTool::EulerAnglesToDegree(degrees);
         offset_degrees = AngleTool::EulerAnglesToDegree(offset_degrees);

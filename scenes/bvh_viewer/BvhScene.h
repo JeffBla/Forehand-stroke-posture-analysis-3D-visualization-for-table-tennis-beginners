@@ -35,7 +35,7 @@
 #include "SceneDemo.h"
 #include "Sphere.h"
 #include "openglframework.h"
-#include "Skeleton.h"
+#include "Skeleton/Skeleton.h"
 #include "Event.h"
 #include "Analysizer.h"
 #include "VideoToBvhConverter.h"
